@@ -7,17 +7,17 @@ def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 def A_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
-def B_down(e):
+def S_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_b
-def B_up(e):
+def S_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_b
-def C_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_c
-def C_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_c
 def D_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_c
 def D_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_c
+def W_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
+def W_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_d
 
 class Move:
@@ -99,8 +99,8 @@ class character:
         self.attack = Attack(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {},
-            self.move: {},
+            self.idle: {A_down : self.move, A_up : self.move, S_down:self.move, S_up:self.move, D_down:self.move, D_up:self.move, W_down:self.move, W_up:self.move},
+            self.move: {A_up:self.idle, S_up:self.idle, D_up:self.idle, W_up: self.idle},
             self.attack: {}
         })
 
