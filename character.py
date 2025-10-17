@@ -28,25 +28,39 @@ class Move:
     def enter(self, e):
         self.frame_time = get_time()
         if A_down(e):
-            self.character.dir = -1
-            self.character.face_dir = -1
+            self.character.key_state['A'] = True
         if D_down(e):
-            self.character.dir = 1
-            self.character.face_dir = 1
+            self.character.key_state['D'] = True
         if W_down(e):
-            self.character.updown_dir = 1
-            self.character.face_updown_dir_dir = 1
+            self.character.key_state['W'] = True
         if S_down(e):
-            self.character.updown_dir = -1
-            self.character.face_updown_dir = -1
+            self.character.key_state['S'] = True
         if A_up(e):
-            self.character.dir = 0
+            self.character.key_state['A'] = False
         if D_up(e):
-            self.character.dir = 0
+            self.character.key_state['D'] = False
         if W_up(e):
-            self.character.updown_dir = 0
+            self.character.key_state['W'] = False
         if S_up(e):
-            self.character.updown_dir = 0
+            self.character.key_state['S'] = False
+
+        self.character.dir = 0
+        self.character.updown_dir = 0
+
+        if self.character.key_state['A']:
+            self.character.dir = -1
+        if self.character.key_state['D']:
+            self.character.dir = 1
+        if self.character.key_state['W']:
+            self.character.updown_dir = 1
+        if self.character.key_state['S']:
+            self.character.updown_dir = -1
+
+        if self.character.dir != 0:
+            self.character.face_dir = self.character.dir
+        if self.character.updown_dir != 0:
+            self.character.face_updown_dir = self.character.updown_dir
+
         pass
     def exit(self, e):
         pass
@@ -60,16 +74,16 @@ class Move:
         pass
     def draw(self):
         if self.character.dir == 1 and self.character.updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame * 18, 95, 18, 19, self.character.x, self.character.y,
+            self.character.image.clip_draw(self.character.frame * 18, 19, 18, 19, self.character.x, self.character.y,
                                            54, 57)
         if self.character.dir == -1 and self.character.updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 95, 18, 19, 0, 'h', self.character.x,
+            self.character.image.clip_composite_draw(self.character.frame * 18, 19, 18, 19, 0, 'h', self.character.x,
                                                      self.character.y, 54, 57)
         if self.character.dir == 1 and self.character.updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame * 18, 114, 18, 19, self.character.x, self.character.y,
+            self.character.image.clip_draw(self.character.frame * 18, 0, 18, 19, self.character.x, self.character.y,
                                            54, 57)
         if self.character.dir == -1 and self.character.updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 114, 18, 19, 0, 'h', self.character.x,
+            self.character.image.clip_composite_draw(self.character.frame * 18, 0, 18, 19, 0, 'h', self.character.x,
                                                      self.character.y, 54, 57)
         pass
 
@@ -94,9 +108,9 @@ class Idle:
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, 'h',self.character.x, self.character.y, 54, 57)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame*18, 76, 18, 19, self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_draw(self.character.frame*18, 38, 18, 19, self.character.x, self.character.y, 54, 57)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 76, 18, 19, 0, 'h',self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_composite_draw(self.character.frame*18, 38, 18, 19, 0, 'h',self.character.x, self.character.y, 54, 57)
         pass
 
 class Attack:
@@ -128,6 +142,8 @@ class character:
         self.STR = 20
         self.critical = 0.05
         self.critical_damage = 1.5
+
+        self.key_state = {'A':False, 'D':False, 'W':False, 'S':False}
 
         self.idle = Idle(self)
         self.move = Move(self)
