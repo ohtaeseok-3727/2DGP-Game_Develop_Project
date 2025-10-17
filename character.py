@@ -46,6 +46,18 @@ class Move:
         self.character.frame = (self.character.frame + 1) % 8
         pass
     def draw(self):
+        if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
+            self.character.image.clip_draw(self.character.frame * 18, 95, 18, 19, self.character.x, self.character.y,
+                                           54, 57)
+        if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
+            self.character.image.clip_composite_draw(self.character.frame * 18, 95, 18, 19, 0, '', self.character.x,
+                                                     self.character.y, 54, 57)
+        if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
+            self.character.image.clip_draw(self.character.frame * 18, 114, 18, 19, self.character.x, self.character.y,
+                                           54, 57)
+        if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
+            self.character.image.clip_composite_draw(self.character.frame * 18, 114, 18, 19, 0, '', self.character.x,
+                                                     self.character.y, 54, 57)
         pass
 
 class Idle:
