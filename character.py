@@ -40,7 +40,7 @@ class Move:
             self.character.updown_dir = -1
             self.character.face_updown_dir = -1
         pass
-    def exit(self):
+    def exit(self, e):
         pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
@@ -77,7 +77,7 @@ class Idle:
         self.character.face_updown_dir = -1
         self.frame_time = get_time()
         pass
-    def exit(self):
+    def exit(self, e):
         pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
@@ -100,7 +100,7 @@ class Attack:
         self.character = character
     def enter(self, e):
         pass
-    def exit(self):
+    def exit(self, e):
         pass
     def do(self):
         pass
