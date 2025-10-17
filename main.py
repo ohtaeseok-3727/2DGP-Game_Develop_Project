@@ -12,7 +12,7 @@ def handle_events():
             running = False
 
 def reset_world():
-    global world_map
+    global world
     global character
 
     world = []
@@ -21,3 +21,8 @@ def reset_world():
     character = character()
     world.append(character)
     world.append(world_map)
+
+def update_world():
+    for obj in world:
+        obj.update()
+    pass
