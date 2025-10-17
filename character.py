@@ -7,18 +7,6 @@ class Move:
     def __init__(self, character):
         self.character = character
     def enter(self, e):
-        pass
-    def exit(self):
-        pass
-    def do(self):
-        pass
-    def draw(self):
-        pass
-
-class Idle:
-    def __init__(self, character):
-        self.character = character
-    def enter(self, e):
         self.character.dir = 1
         self.character.face_dir = 1
         self.character.updown_dir = -1
@@ -26,7 +14,28 @@ class Idle:
     def exit(self):
         pass
     def do(self):
-        self.character.frame = (self.character.frame + 1) % 6
+        self.character.frame = (self.character.frame + 1) % 8
+        pass
+    def draw(self):
+        pass
+
+class Idle:
+    def __init__(self, character):
+        self.character = character
+        self.fps = 10
+        self.frame_time = 0
+    def enter(self, e):
+        self.character.dir = 1
+        self.character.face_dir = 1
+        self.character.updown_dir = -1
+        self.frame_time = get_time()
+        pass
+    def exit(self):
+        pass
+    def do(self):
+        if get_time() - self.frame_time > 1.0 / self.fps:
+            self.character.frame = (self.character.frame + 1) % 6
+            self.frame_time = get_time()
         pass
     def draw(self):
         if self.character.dir == 1 and self.character.updown_dir == -1:
