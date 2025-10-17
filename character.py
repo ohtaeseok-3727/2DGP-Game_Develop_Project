@@ -20,6 +20,14 @@ def W_down(e):
 def W_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_w
 
+def key_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN
+def key_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP
+
+def stop(e):
+    return e[0] == 'STOP'
+
 class Move:
     def __init__(self, character):
         self.character = character
@@ -83,7 +91,7 @@ class Move:
 
         if self.character.dir == 0 and self.character.updown_dir == 0:
             self.character.state_machine.handle_state_event(('STOP', 0))
-            
+
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
@@ -168,8 +176,8 @@ class character:
         self.attack = Attack(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {A_down : self.move, A_up : self.move, S_down:self.move, S_up:self.move, D_down:self.move, D_up:self.move, W_down:self.move, W_up:self.move},
-            self.move: {A_up:self.idle, S_up:self.idle, D_up:self.idle, W_up: self.idle, A_down : self.move, S_down:self.move, D_down:self.move, W_down:self.move},
+            self.idle: {key_down: self.move},
+            self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
             self.attack: {}
         })
 
