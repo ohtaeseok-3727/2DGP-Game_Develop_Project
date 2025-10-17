@@ -12,7 +12,6 @@ def handle_events():
             running = False
         else:
             character.handle_event(event)
-
 def reset_world():
     global world
     global character

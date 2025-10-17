@@ -28,32 +28,32 @@ class Move:
     def enter(self, e):
         self.frame_time = get_time()
         if A_down(e):
-            self.character.key_state['A'] = True
+            self.character.key_state['a'] = True
         if D_down(e):
-            self.character.key_state['D'] = True
+            self.character.key_state['d'] = True
         if W_down(e):
-            self.character.key_state['W'] = True
+            self.character.key_state['w'] = True
         if S_down(e):
-            self.character.key_state['S'] = True
+            self.character.key_state['s'] = True
         if A_up(e):
-            self.character.key_state['A'] = False
+            self.character.key_state['a'] = False
         if D_up(e):
-            self.character.key_state['D'] = False
+            self.character.key_state['d'] = False
         if W_up(e):
-            self.character.key_state['W'] = False
+            self.character.key_state['w'] = False
         if S_up(e):
-            self.character.key_state['S'] = False
+            self.character.key_state['s'] = False
 
         self.character.dir = 0
         self.character.updown_dir = 0
 
-        if self.character.key_state['A']:
+        if self.character.key_state['a']:
             self.character.dir = -1
-        if self.character.key_state['D']:
+        if self.character.key_state['d']:
             self.character.dir = 1
-        if self.character.key_state['W']:
+        if self.character.key_state['w']:
             self.character.updown_dir = 1
-        if self.character.key_state['S']:
+        if self.character.key_state['s']:
             self.character.updown_dir = -1
 
         if self.character.dir != 0:
@@ -94,6 +94,8 @@ class Idle:
         self.frame_time = 0
     def enter(self, e):
         self.frame_time = get_time()
+        self.character.dir = 0
+        self.character.updown_dir = 0
         pass
     def exit(self, e):
         pass
@@ -143,7 +145,7 @@ class character:
         self.critical = 0.05
         self.critical_damage = 1.5
 
-        self.key_state = {'A':False, 'D':False, 'W':False, 'S':False}
+        self.key_state = {'a':False, 's':False, 'd':False, 'w':False}
 
         self.idle = Idle(self)
         self.move = Move(self)
