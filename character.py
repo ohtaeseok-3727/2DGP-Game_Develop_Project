@@ -39,6 +39,14 @@ class Move:
         if S_down(e):
             self.character.updown_dir = -1
             self.character.face_updown_dir = -1
+        if A_up(e):
+            self.character.dir = 0
+        if D_up(e):
+            self.character.dir = 0
+        if W_up(e):
+            self.character.updown_dir = 0
+        if S_up(e):
+            self.character.updown_dir = 0
         pass
     def exit(self, e):
         pass
