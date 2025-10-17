@@ -27,29 +27,48 @@ class Move:
         self.frame_time = 0
     def enter(self, e):
         self.frame_time = get_time()
-        if A_down(e):
-            self.character.dir = -1
-        if D_down(e):
-            self.character.dir = 1
-        if W_down(e):
-            self.character.updown_dir = 1
-        if S_down(e):
-            self.character.updown_dir = -1
-        if A_up(e):
-            self.character.dir = 0
-        if D_up(e):
-            self.character.dir = 0
-        if W_up(e):
-            self.character.updown_dir = 0
-        if S_up(e):
-            self.character.updown_dir = 0
+        self.update_direction(e)
+        pass
 
+    def update_direction(self, e):
+        if A_down(e):
+            self.character.left_pressed = True
+        elif A_up(e):
+            self.character.left_pressed = False
+
+        if D_down(e):
+            self.character.right_pressed = True
+        elif D_up(e):
+            self.character.right_pressed = False
+
+        if W_down(e):
+            self.character.up_pressed = True
+        elif W_up(e):
+            self.character.up_pressed = False
+
+        if S_down(e):
+            self.character.down_pressed = True
+        elif S_up(e):
+            self.character.down_pressed = False
+
+        # 현재 눌린 키 상태에 따라 dir 계산
+        self.character.dir = 0
+        if self.character.right_pressed:
+            self.character.dir += 1
+        if self.character.left_pressed:
+            self.character.dir -= 1
+
+        self.character.updown_dir = 0
+        if self.character.up_pressed:
+            self.character.updown_dir += 1
+        if self.character.down_pressed:
+            self.character.updown_dir -= 1
+
+        # face_dir 업데이트
         if self.character.dir != 0:
             self.character.face_dir = self.character.dir
         if self.character.updown_dir != 0:
             self.character.face_updown_dir = self.character.updown_dir
-
-        pass
     def exit(self, e):
         pass
     def do(self):
