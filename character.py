@@ -23,10 +23,10 @@ def W_up(e):
 class Move:
     def __init__(self, character):
         self.character = character
+        self.fps = 15
+        self.frame_time = 0
     def enter(self, e):
-        self.character.dir = 1
-        self.character.face_dir = 1
-        self.character.updown_dir = -1
+        self.frame_time = get_time()
         pass
     def exit(self):
         pass
