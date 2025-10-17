@@ -43,7 +43,12 @@ class Move:
     def exit(self):
         pass
     def do(self):
-        self.character.frame = (self.character.frame + 1) % 8
+        if get_time() - self.frame_time > 1.0 / self.fps:
+            self.character.frame = (self.character.frame + 1) % 8
+            self.frame_time = get_time()
+
+        self.character.x += self.character.dir * 5
+        self.character.y += self.character.updown_dir * 5
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
