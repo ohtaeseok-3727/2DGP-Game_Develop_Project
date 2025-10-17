@@ -27,6 +27,16 @@ class Move:
         self.frame_time = 0
     def enter(self, e):
         self.frame_time = get_time()
+        if A_down(e):
+            self.character.dir = -1
+            self.character.face_dir = -1
+        if D_down(e):
+            self.character.dir = 1
+            self.character.face_dir = 1
+        if W_down(e):
+            self.character.updown_dir = 1
+        if S_down(e):
+            self.character.updown_dir = -1
         pass
     def exit(self):
         pass
