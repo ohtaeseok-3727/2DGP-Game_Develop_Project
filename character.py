@@ -30,13 +30,13 @@ class Idle:
         pass
     def draw(self):
         if self.character.dir == 1 and self.character.updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y)
+            self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y, 54, 57)
         if self.character.dir == -1 and self.character.updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, '',self.character.x, self.character.y)
+            self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, '',self.character.x, self.character.y, 54, 57)
         if self.character.dir == 1 and self.character.updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame*18, 76, 18, 19, self.character.x, self.character.y)
+            self.character.image.clip_draw(self.character.frame*18, 76, 18, 19, self.character.x, self.character.y, 54, 57)
         if self.character.dir == -1 and self.character.updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 76, 18, 19, 0, '',self.character.x, self.character.y)
+            self.character.image.clip_composite_draw(self.character.frame*18, 76, 18, 19, 0, '',self.character.x, self.character.y, 54, 57)
         pass
 
 class Attack:
