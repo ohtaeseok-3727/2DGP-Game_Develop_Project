@@ -35,7 +35,7 @@ def render_world():
 
 running = True
 
-open_canvas()
+open_canvas(1366, 768)
 reset_world()
 while running:
     handle_events()
