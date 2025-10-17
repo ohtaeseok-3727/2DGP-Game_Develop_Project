@@ -12,6 +12,6 @@ class WorldMap:
         pass
     def draw(self):
         for x in range(0, WorldMap.width+1, WorldMap.cell):
-            draw_line(x, 0, x, WorldMap.cell)
+            draw_line(x, 0, x, WorldMap.height)
         for y in range(0, WorldMap.height+1, WorldMap.cell):
             draw_line(0, y, WorldMap.width, y)

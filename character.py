@@ -12,7 +12,7 @@ class Move:
         pass
     def do(self):
         pass
-    def draw(self, e):
+    def draw(self):
         pass
 
 class Idle:
@@ -24,7 +24,7 @@ class Idle:
         pass
     def do(self):
         pass
-    def draw(self, e):
+    def draw(self):
         pass
 
 class Attack:
@@ -36,7 +36,7 @@ class Attack:
         pass
     def do(self):
         pass
-    def draw(self, e):
+    def draw(self):
         pass
 
 
