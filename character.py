@@ -2,7 +2,7 @@ from pico2d import load_image, get_time
 from worldmap import *
 from sdl2 import *
 
-class move:
+class Move:
     def __init__(self, character):
         self.character = character
     def enter(self, e):
@@ -13,6 +13,31 @@ class move:
         pass
     def draw(self, e):
         pass
+
+class Idle:
+    def __init__(self, character):
+        self.character = character
+    def enter(self, e):
+        pass
+    def exit(self):
+        pass
+    def do(self):
+        pass
+    def draw(self, e):
+        pass
+
+class Attack:
+    def __init__(self, character):
+        self.character = character
+    def enter(self, e):
+        pass
+    def exit(self):
+        pass
+    def do(self):
+        pass
+    def draw(self, e):
+        pass
+
 
 class character:
     def __init__(self):
