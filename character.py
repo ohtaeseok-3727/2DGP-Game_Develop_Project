@@ -35,8 +35,10 @@ class Move:
             self.character.face_dir = 1
         if W_down(e):
             self.character.updown_dir = 1
+            self.character.face_updown_dir_dir = 1
         if S_down(e):
             self.character.updown_dir = -1
+            self.character.face_updown_dir = -1
         pass
     def exit(self):
         pass
@@ -52,9 +54,10 @@ class Idle:
         self.fps = 10
         self.frame_time = 0
     def enter(self, e):
-        self.character.dir = 1
+        self.character.dir = 0
         self.character.face_dir = 1
-        self.character.updown_dir = -1
+        self.character.updown_dir =0
+        self.character.face_updown_dir = -1
         self.frame_time = get_time()
         pass
     def exit(self):
@@ -65,13 +68,13 @@ class Idle:
             self.frame_time = get_time()
         pass
     def draw(self):
-        if self.character.dir == 1 and self.character.updown_dir == -1:
+        if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y, 54, 57)
-        if self.character.dir == -1 and self.character.updown_dir == -1:
+        if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, '',self.character.x, self.character.y, 54, 57)
-        if self.character.dir == 1 and self.character.updown_dir == 1:
+        if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame*18, 76, 18, 19, self.character.x, self.character.y, 54, 57)
-        if self.character.dir == -1 and self.character.updown_dir == -1:
+        if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame*18, 76, 18, 19, 0, '',self.character.x, self.character.y, 54, 57)
         pass
 
@@ -95,6 +98,7 @@ class character:
         self.y = WorldMap.height/2
         self.frame = 0
         self.updown_dir = 0 # 1: up, -1: down
+        self.face_updown_dir = 0 # 1: up, -1: down
         self.face_dir = 0 # 1: right, -1: left
         self.dir = 0 # 1: right, -1: left
         self.max_dash = 2
