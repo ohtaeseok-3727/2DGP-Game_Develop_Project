@@ -1,6 +1,7 @@
 from pico2d import load_image, get_time
 from worldmap import *
 from sdl2 import *
+from state_machine import StateMachine
 
 class Move:
     def __init__(self, character):
@@ -58,6 +59,12 @@ class character:
         self.idle = Idle(self)
         self.move = Move(self)
         self.attack = Attack(self)
+
+        self.state_machine = StateMachine(self.idle, {
+            self.idle: {},
+            self.move: {},
+            self.attack: {}
+        })
 
     def update(self):
         self.state_machine.update()
