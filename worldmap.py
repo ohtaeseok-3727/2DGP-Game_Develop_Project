@@ -7,4 +7,8 @@ class WorldMap:
         self.cell = cell
         self.cols = self.width // self.cell
         self.rows = self.height // self.cell
-    def
+    def draw(self):
+        for x in range(0, self.width+1, self.cell):
+            draw_line(x, 0, x, self.cell)
+        for y in range(0, self.height+1, self.cell):
+            draw_line(0, y, self.cell, y)
