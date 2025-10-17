@@ -28,21 +28,25 @@ class Move:
     def enter(self, e):
         self.frame_time = get_time()
         if A_down(e):
-            self.character.dir = -1
+            self.character.left_pressed = True
         if D_down(e):
-            self.character.dir = 1
+            self.character.right_pressed = True
         if W_down(e):
-            self.character.updown_dir = 1
+            self.character.up_pressed = True
         if S_down(e):
-            self.character.updown_dir = -1
+            self.character.down_pressed = True
+
+        # 키 업: 해당 방향 비활성화
         if A_up(e):
-            self.character.dir = 0
+            self.character.left_pressed = False
         if D_up(e):
-            self.character.dir = 0
+            self.character.right_pressed = False
         if W_up(e):
-            self.character.updown_dir = 0
+            self.character.up_pressed = False
         if S_up(e):
-            self.character.updown_dir = 0
+            self.character.down_pressed = False
+
+        self.calculate_direction()
 
         if self.character.dir != 0:
             self.character.face_dir = self.character.dir
@@ -52,6 +56,10 @@ class Move:
         pass
     def exit(self, e):
         pass
+
+    def calculate_direction(self):
+        
+
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
             self.character.frame = (self.character.frame + 1) % 8
@@ -119,13 +127,22 @@ class Attack:
 class character:
     def __init__(self):
         self.image = load_image('resource/character/character_sprites_vertical_merged.png')
+
         self.x = WorldMap.width/2
         self.y = WorldMap.height/2
+
         self.frame = 0
+
         self.updown_dir = 0 # 1: up, -1: down
         self.face_updown_dir = -1 # 1: up, -1: down
         self.face_dir = -1 # 1: right, -1: left
         self.dir = 0 # 1: right, -1: left
+
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.down_pressed = False
+
         self.max_dash = 2
         self.can_dash = self.max_dash
         self.weapon_type = 'katana' # 카타나 또는 대검
@@ -139,7 +156,7 @@ class character:
 
         self.state_machine = StateMachine(self.idle, {
             self.idle: {A_down : self.move, A_up : self.move, S_down:self.move, S_up:self.move, D_down:self.move, D_up:self.move, W_down:self.move, W_up:self.move},
-            self.move: {A_up:self.idle, S_up:self.idle, D_up:self.idle, W_up: self.idle},
+            self.move: {A_up:self.idle, S_up:self.idle, D_up:self.idle, W_up: self.idle, A_down : self.move, S_down:self.move, D_down:self.move, W_down:self.move},
             self.attack: {}
         })
 
