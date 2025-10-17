@@ -133,6 +133,11 @@ class character:
         self.critical = 0.05
         self.critical_damage = 1.5
 
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.down_pressed = False
+
         self.idle = Idle(self)
         self.move = Move(self)
         self.attack = Attack(self)
