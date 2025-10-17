@@ -19,8 +19,8 @@ def reset_world():
 
     world_map = WorldMap()
     character = character()
-    world.append(character)
     world.append(world_map)
+    world.append(character)
 
 def update_world():
     for obj in world:
