@@ -28,6 +28,13 @@ def key_up(e):
 def stop(e):
     return e[0] == 'STOP'
 
+class weapon:
+    def __init__(self):
+        pass
+    def draw(self):
+        pass
+
+
 class Move:
     def __init__(self, character):
         self.character = character
