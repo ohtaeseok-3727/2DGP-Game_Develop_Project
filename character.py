@@ -69,6 +69,8 @@ class Move:
             self.character.face_dir = self.character.dir
         if self.character.updown_dir != 0:
             self.character.face_updown_dir = self.character.updown_dir
+
+
     def exit(self, e):
         pass
     def do(self):
@@ -78,6 +80,10 @@ class Move:
 
         self.character.x += self.character.dir * 5
         self.character.y += self.character.updown_dir * 5
+
+        if self.character.dir == 0 and self.character.updown_dir == 0:
+            self.character.state_machine.handle_state_event(('STOP', 0))
+            
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
