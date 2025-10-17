@@ -50,7 +50,7 @@ class character:
         self.dir = 0
         self.max_dash = 2
         self.can_dash = self.max_dash
-        self.weapon_type = katana # 카타나 또는 대검
+        self.weapon_type = 'katana' # 카타나 또는 대검
         self.STR = 20
         self.critical = 0.05
         self.critical_damage = 1.5
