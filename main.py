@@ -26,3 +26,11 @@ def update_world():
     for obj in world:
         obj.update()
     pass
+
+def render_world():
+    clear_canvas()
+    for obj in world:
+        obj.draw()
+    update_canvas()
+
+running = True
