@@ -108,12 +108,6 @@ class Move:
         if self.character.down_pressed:
             self.character.updown_dir -= 1
 
-        # face_dir 업데이트
-        if self.character.dir != 0:
-            self.character.face_dir = self.character.dir
-        if self.character.updown_dir != 0:
-            self.character.face_updown_dir = self.character.updown_dir
-
 
     def exit(self, e):
         pass
