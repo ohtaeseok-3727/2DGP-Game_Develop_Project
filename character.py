@@ -29,7 +29,28 @@ def stop(e):
     return e[0] == 'STOP'
 
 class weapon:
-    def __init__(self):
+    #기본 카타나
+    default_katana = {'name': '기본 카타나', 'damage': 0, 'attack_width' :40, 'attack_height': 88, 'speed': 1.0}
+    #무라마사(평타 강화)
+    katana_muramasa = {'name': '무라마사', 'damage': 0, 'attack_width' :66, 'attack_height': 133, 'speed': 1.2}
+    #호우(원거리 평타)
+    katana_hou = {'name': '호우', 'damage': 0, 'width' :79, 'attack_height': 79, 'attack_speed': 1.0}
+    #기본 대검
+    default_greatsword = {'name': '기본 대검', 'damage': 0, 'attack1_width' :70, 'attack1_height': 66, 'attack2_width' :75, 'attack2_height': 74, 'speed': 0.8}
+    #쯔바이핸더(평타 강화)
+    greatsword_zweihander = {'name': '쯔바이핸더', 'damage': 0, 'attack1_width' :90, 'attack1_height': 82, 'attack2_width' :100, 'attack2_height': 98, 'speed': 1.0}
+    #브레이커(특수 기술 생성)
+    greatsword_breaker = {'name': '브레이커', 'damage': 0, 'attack1_width' :74, 'attack1_height': 111, 'attack2_width' :120, 'attack2_height': 116, 'speed': 0.9}
+
+    def __init__(self, character):
+        self.x = character.x
+        self.y = character.y
+        pass
+    def enter(self, e):
+        pass
+    def exit(self, e):
+        pass
+    def do(self):
         pass
     def draw(self):
         pass
@@ -169,6 +190,7 @@ class character:
         self.max_dash = 2
         self.can_dash = self.max_dash
         self.weapon_type = 'katana' # 카타나 또는 대검
+        self.weapon_rank = 0 # 0: 기본 1: 원거리 참격 2: 근접 참격 강화
         self.STR = 20
         self.critical = 0.05
         self.critical_damage = 1.5
