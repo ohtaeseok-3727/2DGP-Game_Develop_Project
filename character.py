@@ -58,6 +58,11 @@ class weapon:
         self.greatsword_breaker_image = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
         pass
     def update(self):
+        x = ctypes.c_int(0)
+        y = ctypes.c_int(0)
+        SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
+        mx = x.value
+        my = WorldMap.height - y.value
         
     def do(self):
         pass
