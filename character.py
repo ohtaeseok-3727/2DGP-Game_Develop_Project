@@ -210,6 +210,7 @@ class character:
         self.idle = Idle(self)
         self.move = Move(self)
         self.attack = Attack(self)
+        self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
             self.idle: {key_down: self.move},
@@ -219,8 +220,10 @@ class character:
 
     def update(self):
         self.state_machine.update()
+        self.weapon.update()
 
     def draw(self):
         self.state_machine.draw()
+        self.weapon.draw()
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
