@@ -42,20 +42,21 @@ class weapon:
     #브레이커(특수 기술 생성)
     greatsword_breaker = {'name': '브레이커', 'damage': 0, 'attack1_width' :74, 'attack1_height': 111, 'attack2_width' :120, 'attack2_height': 116, 'speed': 0.9}
 
-    default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
-    katana_hou = load_image('resource/weapon/katana/katana_Default.png')
-    katana_muramasa = load_image('resource/weapon/katana/katana_Default.png')
-    default_greatsword_image = load_image('resource/weapon/greatsword/Greatsword_Default.png')
-    greatsword_zweihander = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
-    greatsword_breaker = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
     def __init__(self, character):
         self.x = character.x
         self.y = character.y
+
+        self.default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
+        self.katana_hou = load_image('resource/weapon/katana/katana_Default.png')
+        self.katana_muramasa = load_image('resource/weapon/katana/katana_Default.png')
+        self.default_greatsword_image = load_image('resource/weapon/greatsword/Greatsword_Default.png')
+        self.greatsword_zweihander = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
+        self.greatsword_breaker = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
         pass
     def do(self):
         pass
     def draw(self):
-        weapon.katana_default_image.clip_draw(0,0,14,40,self.x,self.y)
+        self.katana_default_image.clip_draw(0,0,14,40,self.x,self.y)
         pass
 
 
