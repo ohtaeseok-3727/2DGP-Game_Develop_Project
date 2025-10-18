@@ -78,7 +78,10 @@ class weapon:
     def do(self):
         pass
     def draw(self):
-        self.default_katana_image.clip_draw(0,0,14,40,self.x,self.y, 28, 80)
+        self.default_katana_image.clip_composite_draw(0, 0, 14, 40,
+                                                      self.angle, ''
+                                                      self.waist_x, self.waist_y,
+                                                      28, 80)
         pass
 
 
