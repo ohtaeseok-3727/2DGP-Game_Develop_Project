@@ -51,8 +51,10 @@ class weapon:
         self.y = character.y
 
         self.angle = 0
-        self.waist_x = 0
-        self.waist_y = 0
+        # 캐릭터 중심에서 손까지의 거리
+        self.hand_distance = 12
+        # 손에서 카타나 중심까지의 거리 (카타나 길이의 절반 정도)
+        self.katana_offset = 20
 
         self.default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
         self.katana_hou_image = load_image('resource/weapon/katana/katana_Default.png')
@@ -63,61 +65,10 @@ class weapon:
         pass
 
     def update(self):
-        x = ctypes.c_int(0)
-        y = ctypes.c_int(0)
-        SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
-        mx = x.value
-        my = WorldMap.height - y.value
 
-        # 캐릭터 중심을 회전축으로 설정
-        dx = mx - self.character.x
-        dy = my - self.character.y
-        self.angle = math.atan2(dy, dx)
 
     def draw(self):
-        # 카타나의 기본 오프셋 (캐릭터 중심으로부터 y축으로 -20)
-        base_offset_y = -20
-        # 손의 위치 (회전 중심점)
-        hand_radius = 10
-        # 카타나가 손에서 떨어진 거리 (손잡이에서 카타나 중심까지)
-        katana_offset = 20
 
-        if self.character.face_dir == 1:  # 우측을 바라볼 때
-            # 손의 위치 계산
-            hand_x = self.character.x + hand_radius * math.cos(self.angle)
-            hand_y = self.character.y + base_offset_y + hand_radius * math.sin(self.angle)
-
-            # 카타나는 마우스 방향과 같은 각도로 회전 (손잡이가 마우스를 향함)
-            katana_angle = self.angle
-
-            # 카타나 중심을 손에서 카타나 방향으로 offset만큼 이동
-            weapon_x = hand_x + katana_offset * math.cos(katana_angle)
-            weapon_y = hand_y + katana_offset * math.sin(katana_angle)
-
-            self.default_katana_image.clip_composite_draw(
-                0, 0, 40, 14,
-                katana_angle, 'h',
-                weapon_x, weapon_y,
-                80, 28
-            )
-        else:  # 좌측을 바라볼 때
-            # 손의 위치 계산
-            hand_x = self.character.x - hand_radius * math.cos(self.angle)
-            hand_y = self.character.y + base_offset_y + hand_radius * math.sin(self.angle)
-
-            # 카타나는 Y축 대칭 각도로 회전
-            katana_angle = math.pi - self.angle
-
-            # 카타나 중심을 손에서 카타나 방향으로 offset만큼 이동
-            weapon_x = hand_x - katana_offset * math.cos(self.angle)
-            weapon_y = hand_y + katana_offset * math.sin(self.angle)
-
-            self.default_katana_image.clip_composite_draw(
-                0, 0, 40, 14,
-                katana_angle, '',
-                weapon_x, weapon_y,
-                80, 28
-            )
 
 
 class Move:
