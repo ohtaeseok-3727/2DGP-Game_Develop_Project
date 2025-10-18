@@ -55,6 +55,7 @@ class weapon:
     def do(self):
         pass
     def draw(self):
+        weapon.katana_default_image.clip_draw(0,0,14,40,self.x,self.y)
         pass
 
 
