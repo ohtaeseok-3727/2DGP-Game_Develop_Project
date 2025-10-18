@@ -31,7 +31,7 @@ def stop(e):
 class weapon:
     #기본 카타나
     default_katana = {'name': '기본 카타나', 'damage': 0, 'attack_width' :40, 'attack_height': 88, 'speed': 1.0}
-    #무라마사(평타 강화)
+    #무라마사(평타 강화 : 2회 연속 공격)
     katana_muramasa = {'name': '무라마사', 'damage': 0, 'attack_width' :66, 'attack_height': 133, 'speed': 1.2}
     #호우(원거리 평타)
     katana_hou = {'name': '호우', 'damage': 0, 'width' :79, 'attack_height': 79, 'attack_speed': 1.0}
@@ -42,13 +42,15 @@ class weapon:
     #브레이커(특수 기술 생성)
     greatsword_breaker = {'name': '브레이커', 'damage': 0, 'attack1_width' :74, 'attack1_height': 111, 'attack2_width' :120, 'attack2_height': 116, 'speed': 0.9}
 
+    default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
+    katana_hou = load_image('resource/weapon/katana/katana_Default.png')
+    katana_muramasa = load_image('resource/weapon/katana/katana_Default.png')
+    default_greatsword_image = load_image('resource/weapon/greatsword/Greatsword_Default.png')
+    greatsword_zweihander = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
+    greatsword_breaker = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
     def __init__(self, character):
         self.x = character.x
         self.y = character.y
-        pass
-    def enter(self, e):
-        pass
-    def exit(self, e):
         pass
     def do(self):
         pass
