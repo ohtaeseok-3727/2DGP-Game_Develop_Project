@@ -53,6 +53,9 @@ class weapon:
         self.greatsword_zweihander = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
         self.greatsword_breaker = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
         pass
+    def update(self, character):
+        self.x = character.x
+        self.y = character.y
     def do(self):
         pass
     def draw(self):
