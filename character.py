@@ -4,7 +4,7 @@ from sdl2 import *
 from state_machine import StateMachine
 import math
 import ctypes
-for sdl2.mouse import SDL_GetMouseState
+from sdl2.mouse import SDL_GetMouseState
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -79,7 +79,7 @@ class weapon:
         pass
     def draw(self):
         self.default_katana_image.clip_composite_draw(0, 0, 14, 40,
-                                                      self.angle, ''
+                                                      self.angle, '',
                                                       self.waist_x, self.waist_y,
                                                       28, 80)
         pass
