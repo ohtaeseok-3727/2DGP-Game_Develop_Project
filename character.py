@@ -1,4 +1,4 @@
-from pico2d import load_image, get_time
+from pico2d import *
 from worldmap import *
 from sdl2 import *
 from state_machine import StateMachine
@@ -48,19 +48,19 @@ class weapon:
         self.y = character.y
 
         self.default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
-        self.katana_hou = load_image('resource/weapon/katana/katana_Default.png')
-        self.katana_muramasa = load_image('resource/weapon/katana/katana_Default.png')
+        self.katana_hou_image = load_image('resource/weapon/katana/katana_Default.png')
+        self.katana_muramasa_imgae = load_image('resource/weapon/katana/katana_Default.png')
         self.default_greatsword_image = load_image('resource/weapon/greatsword/Greatsword_Default.png')
-        self.greatsword_zweihander = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
-        self.greatsword_breaker = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
+        self.greatsword_zweihander_image = load_image('resource/weapon/greatsword/Greatsword_Zweihander.png')
+        self.greatsword_breaker_image = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
         pass
-    def update(self, character):
-        self.x = character.x
-        self.y = character.y
+    def update(self):
+        self.x = self.character.x
+        self.y = self.character.y
     def do(self):
         pass
     def draw(self):
-        self.default_katana_image.clip_draw(0,0,14,40,self.x,self.y)
+        self.default_katana_image.clip_draw(0,0,14,40,self.x,self.y, 28, 80)
         pass
 
 
@@ -127,7 +127,10 @@ class Move:
 
         if self.character.dir == 0 and self.character.updown_dir == 0:
             self.character.state_machine.handle_state_event(('STOP', 0))
+        pass
 
+    def handle_event(self, e):
+        
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
