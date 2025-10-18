@@ -78,8 +78,14 @@ class weapon:
     def do(self):
         pass
     def draw(self):
+        if character.face_dir == 1:
+            self.default_katana_image.clip_composite_draw(0, 0, 40, 14,
+                                                self.angle, '',
+                                                self.waist_x, self.waist_y,
+                                                80, 28)
+        else:
         self.default_katana_image.clip_composite_draw(0, 0, 40, 14,
-                                                      self.angle, '',
+                                                      self.angle, 'h',
                                                       self.waist_x, self.waist_y,
                                                       80, 28)
         pass
