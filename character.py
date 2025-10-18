@@ -80,16 +80,16 @@ class weapon:
     def draw(self):
         offset_distance = 20
         offset_x = self.waist_x + offset_distance * math.sin(self.angle)
-        offset_y = self.waist_y - offset_distance * math.cos(self.angle)
+        offset_y = self.waist_y - offset_distance * math.cos(self.angle)+10
         if self.character.face_dir == 1:
             self.default_katana_image.clip_composite_draw(0, 0, 40, 14,
-                                                self.angle, '',
-                                                self.waist_x, self.waist_y,
+                                                self.angle, 'h',
+                                                offset_x, offset_y,
                                                 80, 28)
         else:
             self.default_katana_image.clip_composite_draw(0, 0, 40, 14,
-                                                      self.angle, 'h',
-                                                      self.waist_x, self.waist_y,
+                                                      self.angle, '',
+                                                      offset_x, offset_y,
                                                       80, 28)
         pass
 
