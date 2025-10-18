@@ -74,14 +74,14 @@ class weapon:
 
         dx = mx - self.waist_x
         dy = my - self.waist_y
-        self.angle = math.atan2(dy, dx) - math.pi/2
+        self.angle = math.atan2(dy, dx)
     def do(self):
         pass
     def draw(self):
-        self.default_katana_image.clip_composite_draw(0, 0, 14, 40,
+        self.default_katana_image.clip_composite_draw(0, 0, 40, 14,
                                                       self.angle, '',
                                                       self.waist_x, self.waist_y,
-                                                      28, 80)
+                                                      80, 28)
         pass
 
 
