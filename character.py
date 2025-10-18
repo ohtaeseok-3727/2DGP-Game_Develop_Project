@@ -43,6 +43,7 @@ class weapon:
     greatsword_breaker = {'name': '브레이커', 'damage': 0, 'attack1_width' :74, 'attack1_height': 111, 'attack2_width' :120, 'attack2_height': 116, 'speed': 0.9}
 
     def __init__(self, character):
+        self.character = character
         self.x = character.x
         self.y = character.y
 
@@ -59,7 +60,7 @@ class weapon:
     def do(self):
         pass
     def draw(self):
-        self.katana_default_image.clip_draw(0,0,14,40,self.x,self.y)
+        self.default_katana_image.clip_draw(0,0,14,40,self.x,self.y)
         pass
 
 
