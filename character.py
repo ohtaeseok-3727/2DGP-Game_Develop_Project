@@ -63,6 +63,10 @@ class weapon:
         SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
         mx = x.value
         my = WorldMap.height - y.value
+
+        # 무기 위치를 캐릭터의 허리 부근으로 설정(캐릭터의 중심보다 살짝 아래)
+        waist_x = self.character.x
+        waost_y = self.character.y - 10
         
     def do(self):
         pass
