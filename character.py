@@ -50,6 +50,10 @@ class weapon:
         self.x = character.x
         self.y = character.y
 
+        self.angle = 0
+        self.waist_x = 0
+        self.waist_y = 0
+
         self.default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
         self.katana_hou_image = load_image('resource/weapon/katana/katana_Default.png')
         self.katana_muramasa_imgae = load_image('resource/weapon/katana/katana_Default.png')
@@ -65,12 +69,12 @@ class weapon:
         my = WorldMap.height - y.value
 
         # 무기 위치를 캐릭터의 허리 부근으로 설정(캐릭터의 중심보다 살짝 아래)
-        waist_x = self.character.x
-        waost_y = self.character.y - 10
+        self.waist_x = self.character.x
+        self.waost_y = self.character.y - 10
 
-        dx = waist_x - x
-        dy = waost_y - y
-        angle = math.atan2(angle)
+        dx = mx - self.waist_x
+        dy = my - self.waist_y
+        self.angle = math.atan2(dy, dx)
     def do(self):
         pass
     def draw(self):
