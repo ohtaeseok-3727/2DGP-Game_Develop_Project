@@ -219,6 +219,23 @@ class character:
         })
 
     def update(self):
+        mx, my = 0, 0
+        try:
+            import ctypes
+            from sdl2.mouse import SDL_GetMouseState
+            x = ctypes.c_int(0)
+            y = ctypes.c_int(0)
+            SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
+            mx = x.value
+            my = WorldMap.height - y.value
+
+            dx, dy = mx - self.x, my - self.y
+            self.face_dir = 1 if dx >= 0 else -1
+            self.face_updown_dir = 1 if dy >= 0 else -1
+        except Exception as e:
+            pass
+        except:
+            pass
         self.state_machine.update()
         self.weapon.update()
 
@@ -226,10 +243,5 @@ class character:
         self.state_machine.draw()
         self.weapon.draw()
     def handle_event(self, event):
-        from pico2d import SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP
-        if event.type in (SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP):
-            mx, my = event.x, WorldMap.height-event.y
-            dx, dy = mx-self.x, my-self.y
-            self.face_dir = 1 if dx >= 0 else -1
-            self.face_updown_dir = 1 if dy >= 0 else -1
+
         self.state_machine.handle_state_event(('INPUT', event))
