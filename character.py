@@ -65,11 +65,44 @@ class weapon:
         pass
 
     def update(self):
+        x = ctypes.c_int(0)
+        y = ctypes.c_int(0)
+        SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
+        mx = x.value
+        my = WorldMap.height - y.value
 
+        dx = mx - self.character.x
+        dy = my - self.character.y
+        
+        mouse_angle = math.atan2(dy, dx)
+
+        if dx >= 0:
+            katana_angle = mouse_angle - math.pi / 2
+        else:
+            katana_angle = mouse_angle + math.pi / 2
+
+        self.x = self.character.x + math.cos(katana_angle) * self.katana_offset
+        self.y = self.character.y + math.sin(katana_angle) * self.katana_offset
+
+        self.angle = mouse_angle
 
     def draw(self):
+        draw_angle = math.degrees(self.angle) + 90 + 180
 
-
+        if self.character.face_dir == 1:
+            self.default_katana_image.clip_composite_draw(
+                0, 0, 14, 40,
+                math.radians(draw_angle), 'h',
+                self.x, self.y,
+                28, 80
+            )
+        else:
+            self.default_katana_image.clip_composite_draw(
+                0, 0, 14, 40,
+                math.radians(draw_angle), '',
+                self.x, self.y,
+                28, 80
+            )
 
 class Move:
     def __init__(self, character):
