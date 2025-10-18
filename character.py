@@ -73,7 +73,7 @@ class weapon:
 
         dx = mx - self.character.x
         dy = my - self.character.y
-        
+
         mouse_angle = math.atan2(dy, dx)
 
         if dx >= 0:
@@ -159,7 +159,8 @@ class Move:
         self.character.x += self.character.dir * 5
         self.character.y += self.character.updown_dir * 5
 
-        if self.character.dir == 0 and self.character.updown_dir == 0:
+        if (not self.character.left_pressed and not self.character.right_pressed and
+                not self.character.up_pressed and not self.character.down_pressed):
             self.character.state_machine.handle_state_event(('STOP', 0))
         pass
     def draw(self):
