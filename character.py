@@ -2,6 +2,9 @@ from pico2d import *
 from worldmap import *
 from sdl2 import *
 from state_machine import StateMachine
+import math
+import ctypes
+for sdl2.mouse import SDL_GetMouseState
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -215,8 +218,6 @@ class character:
     def update(self):
         mx, my = 0, 0
         try:
-            import ctypes
-            from sdl2.mouse import SDL_GetMouseState
             x = ctypes.c_int(0)
             y = ctypes.c_int(0)
             SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
