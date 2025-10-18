@@ -128,10 +128,6 @@ class Move:
         if self.character.dir == 0 and self.character.updown_dir == 0:
             self.character.state_machine.handle_state_event(('STOP', 0))
         pass
-
-    def handle_event(self, e):
-        
-        pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame * 18, 19, 18, 19, self.character.x, self.character.y,
@@ -230,4 +226,10 @@ class character:
         self.state_machine.draw()
         self.weapon.draw()
     def handle_event(self, event):
+        from pico2d import SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP
+        if event.type in (SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP):
+            mx, my = event.x, WorldMap.height-event.y
+            dx, dy = mx-self.x, my-self.y
+            self.face_dir = 1 if dx >= 0 else -1
+            self.face_updown_dir = 1 if dy >= 0 else -1
         self.state_machine.handle_state_event(('INPUT', event))
