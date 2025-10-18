@@ -70,11 +70,11 @@ class weapon:
 
         # 무기 위치를 캐릭터의 허리 부근으로 설정(캐릭터의 중심보다 살짝 아래)
         self.waist_x = self.character.x
-        self.waost_y = self.character.y - 10
+        self.waist_y = self.character.y - 20
 
         dx = mx - self.waist_x
         dy = my - self.waist_y
-        self.angle = math.atan2(dy, dx)
+        self.angle = math.atan2(dy, dx) - math.pi/2
     def do(self):
         pass
     def draw(self):
