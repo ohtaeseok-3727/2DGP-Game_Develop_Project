@@ -212,7 +212,7 @@ class Idle:
         pass
 
 class Attack:
-    motion = None;
+    motion = None
     def __init__(self, character):
         self.character = character
         self.attack_frame = 0
@@ -220,33 +220,37 @@ class Attack:
         self.attack_time = 0
         self.max_attack_count = 0
         self.attack_count = 0
+        self.attack_frame_width = 0
+        self.attack_frame_height = 0
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = 'resource/weapon/katana/katana_default_sprite_sheet.png'
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
-            Attack.motion = 'resource/weapon/katana/katana_hou_sprite_sheet.png'
-    def enter(self, e):
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
-            self.attack_frame = 6
+            self.attack_frame = 8
             self.attack_speed = 10
             self.max_attack_count = 1
-            #기본 참격 모션
-            pass
+            self.attack_frame_width = 60
+            self.attack_frame_height = 133
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
+            Attack.motion = 'resource/weapon/katana/katana_hou_sprite_sheet.png'
             self.attack_frame = 11
             self.attack_speed = 8
             self.max_attack_count = 1
-            #원거리 참격 모션
-            pass
+            self.attack_frame_width = 79
+            self.attack_frame_height = 79
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             self.max_attack_count = 2
             #근접 참격 강화 모션
-            pass
+    def enter(self, e):
+        self.attack_time = get_time()
         pass
     def exit(self, e):
         pass
     def do(self):
         pass
     def draw(self):
+        Attack.motion.clip_composite_draw(self.attack_frame*self.attack_frame_width, 0,
+                                          self.attack_frame_width, self.attack_frame_height,
+                                          0, '',
+                                          self.character.x, self.character.y)
         pass
 
 
@@ -307,5 +311,4 @@ class character:
         self.state_machine.draw()
         self.weapon.draw()
     def handle_event(self, event):
-
         self.state_machine.handle_state_event(('INPUT', event))
