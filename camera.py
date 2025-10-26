@@ -1,4 +1,5 @@
 from pico2d import *
+from worldmap import *
 
 class Camera:
     def __init__(self, target):
@@ -11,8 +12,13 @@ class Camera:
     def update(self):
         self.x = self.target.x - self.screen_width // 2
         self.y = self.target.y - self.screen_height // 2
+
+        self.x = max(0, min(self.x, WorldMap.width - self.screen_width))
+        self.y = max(0, min(self.y, WorldMap.height - self.screen_height))
         pass
     def set_for_draw(self):
+        glPushMatrix()
+        glTranslatef(-self.x, -self.y, 0)
         pass
     def unset_for_draw(self):
         pass
