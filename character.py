@@ -57,9 +57,9 @@ class weapon:
 
         self.angle = 0
         # 캐릭터 중심에서 손까지의 거리
-        self.hand_distance = 12
+        self.hand_distance = 4
         # 손에서 카타나 중심까지의 거리 (카타나 길이의 절반 정도)
-        self.katana_offset = 20
+        self.katana_offset = 5
 
         self.default_katana_image = load_image('resource/weapon/katana/katana_Default.png')
         self.katana_hou_image = load_image('resource/weapon/katana/katana_Default.png')
