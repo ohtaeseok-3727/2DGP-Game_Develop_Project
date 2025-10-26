@@ -1,6 +1,7 @@
 from pico2d import *
 from character import character
 from worldmap import WorldMap
+from camera import Camera
 
 def handle_events():
     global running
@@ -26,12 +27,15 @@ def reset_world():
 def update_world():
     for obj in world:
         obj.update()
+    camera.update()
     pass
 
 def render_world():
     clear_canvas()
+    camera.set_for_draw()
     for obj in world:
         obj.draw()
+    camera.unset_for_draw()
     update_canvas()
 
 running = True

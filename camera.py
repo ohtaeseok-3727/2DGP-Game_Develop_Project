@@ -21,4 +21,5 @@ class Camera:
         glTranslatef(-self.x, -self.y, 0)
         pass
     def unset_for_draw(self):
+        glPopMatrix()
         pass
