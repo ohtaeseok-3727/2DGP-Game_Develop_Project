@@ -24,14 +24,14 @@ class Attack:
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
-            self.attack_speed = 10
+            self.attack_speed = 20
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_hou_sprite_sheet.png')
             self.attack_frame = 11
-            self.attack_speed = 8
+            self.attack_speed = 16
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
@@ -98,7 +98,15 @@ class Attack:
     def draw(self, camera=None):
         if not self.active:
             return
-        sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
+
+        offset_x = math.cos(self.attack_angle) * 15
+        offset_y = math.sin(self.attack_angle) * 15
+
+        draw_x = self.character.x + offset_x
+        draw_y = self.character.y + offset_y
+
+
+        sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
         draw_angle = self.attack_angle - math.pi / 2
 
         Attack.motion.clip_composite_draw(
