@@ -16,11 +16,13 @@ def handle_events():
 def reset_world():
     global world
     global character
+    global camera
 
     world = []
 
     world_map = WorldMap()
     character = character()
+    camera = Camera(character)
     world.append(world_map)
     world.append(character)
 
