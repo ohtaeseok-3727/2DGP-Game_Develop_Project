@@ -21,10 +21,10 @@ def reset_world():
     world = []
 
     world_map = WorldMap()
-    character = character()
-    camera = Camera(character)
+    char = character()
+    camera = Camera(char)
     world.append(world_map)
-    world.append(character)
+    world.append(char)
 
 def update_world():
     for obj in world:
