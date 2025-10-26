@@ -178,7 +178,8 @@ class Move:
             self.character.image.clip_composite_draw(self.character.frame * 18, 19,
                                                      18, 19,
                                                      0, 'h',
-                                                     sx, sy)
+                                                     sx, sy,
+                                                     18, 19)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame * 18, 0,
                                            18, 19,
@@ -187,7 +188,8 @@ class Move:
             self.character.image.clip_composite_draw(self.character.frame * 18, 0,
                                                      18, 19,
                                                      0, 'h',
-                                                     sx, sy)
+                                                     sx, sy,
+                                                     18, 19)
         pass
 
 class Idle:
@@ -212,21 +214,23 @@ class Idle:
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame*18, 57,
                                            18, 19,
-                                           self.character.x, self.character.y)
+                                           sx, sy)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame*18, 57,
                                                      18, 19,
                                                      0, 'h',
-                                                     sx, sy)
+                                                     sx, sy,
+                                                     18, 19)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame*18, 38,
                                            18, 19,
-                                           self.character.x, self.character.y)
+                                           sx, sy)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
             self.character.image.clip_composite_draw(self.character.frame*18, 38,
                                                      18, 19,
                                                      0, 'h',
-                                                     sx, sy)
+                                                     sx, sy,
+                                                     18, 19)
         pass
 
 class Attack:
