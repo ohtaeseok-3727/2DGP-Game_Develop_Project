@@ -1,4 +1,4 @@
-from pico2d import *
+from Attack import Attack
 from worldmap import *
 from sdl2 import *
 from state_machine import StateMachine
@@ -233,78 +233,6 @@ class Idle:
                                                      18, 19)
         pass
 
-class Attack:
-    motion = None
-    def __init__(self, character):
-        self.character = character
-        self.attack_frame = 0
-        self.attack_speed = 0
-        self.attack_time = 0
-        self.max_attack_count = 0
-        self.attack_count = 0
-        self.attack_frame_width = 0
-        self.attack_frame_height = 0
-        self.current_frame = 0
-        self.frame_time = 0
-        self.release_requested = False
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
-            Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
-            self.attack_frame = 8
-            self.attack_speed = 10
-            self.max_attack_count = 1
-            self.attack_frame_width = 60
-            self.attack_frame_height = 133
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
-            Attack.motion = load_image('resource/weapon/katana/katana_hou_sprite_sheet.png')
-            self.attack_frame = 11
-            self.attack_speed = 8
-            self.max_attack_count = 1
-            self.attack_frame_width = 79
-            self.attack_frame_height = 79
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
-            self.max_attack_count = 2
-            #근접 참격 강화 모션
-
-    def enter(self, e):
-        self.attack_time = get_time()
-        self.frame_time = get_time()
-        self.current_frame = 0
-        self.release_requested = False
-        pass
-    def exit(self, e):
-        pass
-    def on_input(self, event):
-        if event.type == SDL_MOUSEBUTTONUP and event.button == SDL_BUTTON_LEFT:
-            self.release_requested = True
-        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
-            self.release_requested = False
-        pass
-    def do(self):
-        if get_time() - self.frame_time > 1.0 / self.attack_speed:
-            self.current_frame += 1
-            self.frame_time = get_time()
-        if self.current_frame >= self.attack_frame:
-            if self.release_requested:
-                self.current_frame = 0
-                try:
-                    self.character.state_machine.cur_state.exit(('ATTACK_END', None))
-                    self.character.state_machine.cur_state = self.character.idle
-                    self.character.state_machine.cur_state.enter(('ATTACK_END', None))
-                except Exception:
-                    pass
-            else:
-                self.current_frame = 0
-
-        pass
-    def draw(self, camera=None):
-        sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
-        Attack.motion.clip_composite_draw(self.current_frame*self.attack_frame_width, 0,
-                                          self.attack_frame_width, self.attack_frame_height,
-                                          0, '',
-                                          sx, sy,
-                                          self.attack_frame_width, self.attack_frame_height)
-        pass
-
 
 class character:
     def __init__(self):
@@ -335,9 +263,8 @@ class character:
         self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {key_down: self.move, mouse_down : self.attack},
-            self.move: {key_down: self.move, key_up: self.move, stop: self.idle, mouse_down : self.attack},
-            self.attack: {mouse_down : self.attack, key_down : self.move}
+            self.idle: {key_down: self.move},
+            self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
         })
 
     def update(self):
@@ -357,15 +284,16 @@ class character:
         except:
             pass
         self.state_machine.update()
+        self.attack.update()
         self.weapon.update()
 
     def draw(self, camera=None):
         self.state_machine.draw(camera)
+        self.attack.draw(camera)
         self.weapon.draw(camera)
     def handle_event(self, event):
         try:
-            if self.state_machine.cur_state == self.attack:
-                self.attack.on_input(event)
+            self.attack.on_input(event)
         except Exception:
             pass
         self.state_machine.handle_state_event(('INPUT', event))
