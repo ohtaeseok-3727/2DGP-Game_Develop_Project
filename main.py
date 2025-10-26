@@ -29,7 +29,10 @@ def reset_world():
 def update_world():
     camera.update()
     for obj in world:
-        obj.update()
+        if isinstance(obj, character):
+            obj.update(camera)
+        else:
+            obj.update()
     pass
 
 def render_world():

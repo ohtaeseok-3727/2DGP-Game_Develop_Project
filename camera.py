@@ -24,6 +24,12 @@ class Camera:
         screen_x = (x - self.x) * self.zoom
         screen_y = (y - self.y) * self.zoom
         return screen_x, screen_y
+
+    def screen_to_world(self, screen_x, screen_y):
+        world_x = screen_x / self.zoom + self.x
+        world_y = screen_y / self.zoom + self.y
+        return world_x, world_y
+
     def set_for_draw(self):
         pass
     def unset_for_draw(self):

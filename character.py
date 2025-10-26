@@ -69,12 +69,19 @@ class weapon:
         self.greatsword_breaker_image = load_image('resource/weapon/greatsword/Greatsword_Breaker.png')
         pass
 
-    def update(self):
+    def update(self, camera=None):
         x = ctypes.c_int(0)
         y = ctypes.c_int(0)
         SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
-        mx = x.value
-        my = WorldMap.height - y.value
+
+        screen_x = x.value
+        screen_y = WorldMap.height - y.value
+
+        # 카메라가 있으면 스크린 좌표를 월드 좌표로 변환
+        if camera:
+            mx, my = camera.screen_to_world(screen_x, screen_y)
+        else:
+            mx, my = screen_x, screen_y
 
         dx = mx - self.character.x
         dy = my - self.character.y
@@ -93,6 +100,7 @@ class weapon:
 
     def draw(self, camera=None):
         draw_angle = math.degrees(self.angle) + 90 + 180
+        zoom = camera.zoom if camera else 1.0
 
         draw_x, draw_y = (camera.apply(self.x, self.y)) if camera else (self.x, self.y)
 
@@ -101,12 +109,14 @@ class weapon:
                 0, 0, 14, 40,
                 math.radians(draw_angle), 'h',
                 draw_x, draw_y,
+                14 * zoom, 40 * zoom
             )
         else:
             self.default_katana_image.clip_composite_draw(
                 0, 0, 14, 40,
                 math.radians(draw_angle), '',
                 draw_x, draw_y,
+                14 * zoom, 40 * zoom
             )
 
 class Move:
@@ -170,26 +180,30 @@ class Move:
         pass
     def draw(self, camera=None):
         sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
+        zoom = camera.zoom if camera else 1.0
+
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame * 18, 19,
                                            18, 19,
-                                           sx, sy)
+                                           sx, sy,
+                                           18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame * 18, 19,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
-                                                     18, 19)
+                                                     18 * zoom, 19 * zoom)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame * 18, 0,
                                            18, 19,
-                                           sx, sy)
+                                           sx, sy,
+                                           18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
             self.character.image.clip_composite_draw(self.character.frame * 18, 0,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
-                                                     18, 19)
+                                                     18 * zoom, 19 * zoom)
         pass
 
 class Idle:
@@ -211,26 +225,30 @@ class Idle:
         pass
     def draw(self, camera=None):
         sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
+        zoom = camera.zoom if camera else 1.0
+
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame*18, 57,
                                            18, 19,
-                                           sx, sy)
+                                           sx, sy,
+                                           18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame*18, 57,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
-                                                     18, 19)
+                                                     18 * zoom, 19 * zoom)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame*18, 38,
                                            18, 19,
-                                           sx, sy)
+                                           sx, sy,
+                                           18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
             self.character.image.clip_composite_draw(self.character.frame*18, 38,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
-                                                     18, 19)
+                                                     18 * zoom, 19 * zoom)
         pass
 
 
@@ -267,14 +285,21 @@ class character:
             self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
         })
 
-    def update(self):
+    def update(self, camera=None):
         mx, my = 0, 0
         try:
             x = ctypes.c_int(0)
             y = ctypes.c_int(0)
             SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
-            mx = x.value
-            my = WorldMap.height - y.value
+
+            screen_x = x.value
+            screen_y = WorldMap.height - y.value
+
+            # 카메라가 있으면 스크린 좌표를 월드 좌표로 변환
+            if camera:
+                mx, my = camera.screen_to_world(screen_x, screen_y)
+            else:
+                mx, my = screen_x, screen_y
 
             dx, dy = mx - self.x, my - self.y
             self.face_dir = 1 if dx >= 0 else -1
@@ -285,7 +310,7 @@ class character:
             pass
         self.state_machine.update()
         self.attack.update()
-        self.weapon.update()
+        self.weapon.update(camera)
 
     def draw(self, camera=None):
         self.state_machine.draw(camera)

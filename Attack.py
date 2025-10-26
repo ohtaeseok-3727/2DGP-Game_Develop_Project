@@ -60,12 +60,9 @@ class Attack:
         screen_x = x.value
         screen_y = get_canvas_height() - y.value
 
-        mouse_x, mouse_y = x.value, WorldMap.height - y.value
-
-        if camera :
-            world_x = screen_x + camera.x
-            world_y = screen_y + camera.y
-        else :
+        if camera:
+            world_x, world_y = camera.screen_to_world(screen_x, screen_y)
+        else:
             world_x = screen_x
             world_y = screen_y
 
@@ -113,6 +110,8 @@ class Attack:
         if not self.active:
             return
 
+        zoom = camera.zoom if camera else 1.0
+
         offset_x = math.cos(self.attack_angle) * 15
         offset_y = math.sin(self.attack_angle) * 15
 
@@ -128,6 +127,6 @@ class Attack:
             self.attack_frame_width, self.attack_frame_height,
             draw_angle, '',
             sx, sy,
-            self.attack_frame_width, self.attack_frame_height
+            self.attack_frame_width * zoom, self.attack_frame_height * zoom
         )
         pass
