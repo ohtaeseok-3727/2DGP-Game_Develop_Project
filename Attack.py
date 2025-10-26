@@ -21,17 +21,21 @@ class Attack:
         self.release_requested = False
         self.active = False
         self.attack_angle = 0
+
+        self.attack_cooldown = 0.5 # 마우스 연타로 공격속도가 증가되지 못하도록 딜레이 설정
+        self.last_attack_time = -self.attack_cooldown
+
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
-            self.attack_speed = 20
+            self.attack_speed = 15
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_hou_sprite_sheet.png')
             self.attack_frame = 11
-            self.attack_speed = 16
+            self.attack_speed = 12
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
@@ -39,9 +43,18 @@ class Attack:
             self.max_attack_count = 2
             #근접 참격 강화 모션
 
+    def can_attack(self):
+        current_time = get_time()
+        time_since_last_attack = current_time - self.last_attack_time
+        if time_since_last_attack >= self.attack_cooldown:
+            return True
+        return False
+
     def start(self, camera=None):
-        x=ctypes.c_int(0)
-        y=ctypes.c_int(0)
+        if not self.can_attack():
+            return
+        x = ctypes.c_int(0)
+        y = ctypes.c_int(0)
         SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
 
         screen_x = x.value
@@ -65,6 +78,7 @@ class Attack:
         self.frame_time = get_time()
         self.current_frame = 0
         self.release_requested = False
+        self.last_attack_time = get_time()
         pass
 
     def stop(self):
