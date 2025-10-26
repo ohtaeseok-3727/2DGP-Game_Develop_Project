@@ -215,20 +215,30 @@ class Attack:
     motion = None;
     def __init__(self, character):
         self.character = character
+        self.attack_frame = 0
+        self.attack_speed = 0
+        self.attack_time = 0
+        self.max_attack_count = 0
+        self.attack_count = 0
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = 'resource/weapon/katana/katana_default_sprite_sheet.png'
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = 'resource/weapon/katana/katana_hou_sprite_sheet.png'
     def enter(self, e):
-        pass
-    def attack_motion(self):
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
-            #기본 카타나 공격 모션
+            self.attack_frame = 6
+            self.attack_speed = 10
+            self.max_attack_count = 1
+            #기본 참격 모션
             pass
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
+            self.attack_frame = 11
+            self.attack_speed = 8
+            self.max_attack_count = 1
             #원거리 참격 모션
             pass
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
+            self.max_attack_count = 2
             #근접 참격 강화 모션
             pass
         pass
