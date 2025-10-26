@@ -99,14 +99,12 @@ class weapon:
                 0, 0, 14, 40,
                 math.radians(draw_angle), 'h',
                 self.x, self.y,
-                42, 120
             )
         else:
             self.default_katana_image.clip_composite_draw(
                 0, 0, 14, 40,
                 math.radians(draw_angle), '',
                 self.x, self.y,
-                42, 120
             )
 
 class Move:
@@ -170,17 +168,24 @@ class Move:
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame * 18, 19, 18, 19, self.character.x, self.character.y,
+            self.character.image.clip_draw(self.character.frame * 18, 19,
+                                           18, 19,
+                                           self.character.x, self.character.y,
                                            54, 57)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 19, 18, 19, 0, 'h', self.character.x,
-                                                     self.character.y, 54, 57)
+            self.character.image.clip_composite_draw(self.character.frame * 18, 19,
+                                                     18, 19,
+                                                     0, 'h',
+                                                     self.character.x, self.character.y)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame * 18, 0, 18, 19, self.character.x, self.character.y,
-                                           54, 57)
+            self.character.image.clip_draw(self.character.frame * 18, 0,
+                                           18, 19,
+                                           self.character.x, self.character.y)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 0, 18, 19, 0, 'h', self.character.x,
-                                                     self.character.y, 54, 57)
+            self.character.image.clip_composite_draw(self.character.frame * 18, 0,
+                                                     18, 19,
+                                                     0, 'h',
+                                                     self.character.x,self.character.y)
         pass
 
 class Idle:
@@ -202,13 +207,13 @@ class Idle:
         pass
     def draw(self):
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, 'h',self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, 'h',self.character.x, self.character.y, 18, 19)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame*18, 38, 18, 19, self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_draw(self.character.frame*18, 38, 18, 19, self.character.x, self.character.y)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 38, 18, 19, 0, 'h',self.character.x, self.character.y, 54, 57)
+            self.character.image.clip_composite_draw(self.character.frame*18, 38, 18, 19, 0, 'h',self.character.x, self.character.y, 18, 19)
         pass
 
 class Attack:
@@ -264,7 +269,6 @@ class Attack:
                                           0, '',
                                           self.character.x, self.character.y,
                                           self.attack_frame_width, self.attack_frame_height)
-        self.character.clip_draw
         pass
 
 
