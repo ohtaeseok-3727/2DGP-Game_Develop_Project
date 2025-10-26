@@ -291,9 +291,9 @@ class character:
         self.state_machine.draw(camera)
         self.attack.draw(camera)
         self.weapon.draw(camera)
-    def handle_event(self, event):
+    def handle_event(self, event, camera=None):
         try:
-            self.attack.on_input(event)
+            self.attack.on_input(event, camera)
         except Exception:
             pass
         self.state_machine.handle_state_event(('INPUT', event))

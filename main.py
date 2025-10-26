@@ -12,7 +12,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         else:
-            char.handle_event(event)
+            char.handle_event(event, camera)
 def reset_world():
     global world
     global char
