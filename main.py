@@ -29,13 +29,11 @@ def reset_world():
 def update_world():
     for obj in world:
         obj.update()
-    camera.update()
     pass
 
 def render_world():
     clear_canvas()
     for obj in world:
-        if isinstance(obj, WorldMap):
         obj.draw(camera)
     else :
         obj.draw()

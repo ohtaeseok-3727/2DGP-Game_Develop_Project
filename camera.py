@@ -1,4 +1,5 @@
 from pico2d import *
+from worldmap import WorldMap
 
 class Camera:
     def __init__(self, target):

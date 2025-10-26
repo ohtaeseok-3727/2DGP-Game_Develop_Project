@@ -91,20 +91,22 @@ class weapon:
 
         self.angle = mouse_angle
 
-    def draw(self):
+    def draw(self, camera=None):
         draw_angle = math.degrees(self.angle) + 90 + 180
+
+        draw_x, draw_y = (camera.apply(self.x, self.y)) if camera else (self.x, self.y)
 
         if self.character.face_dir == 1:
             self.default_katana_image.clip_composite_draw(
                 0, 0, 14, 40,
                 math.radians(draw_angle), 'h',
-                self.x, self.y,
+                draw_x, draw_y,
             )
         else:
             self.default_katana_image.clip_composite_draw(
                 0, 0, 14, 40,
                 math.radians(draw_angle), '',
-                self.x, self.y,
+                draw_x, draw_y,
             )
 
 class Move:
@@ -166,26 +168,26 @@ class Move:
                 not self.character.up_pressed and not self.character.down_pressed):
             self.character.state_machine.handle_state_event(('STOP', 0))
         pass
-    def draw(self):
+    def draw(self, camera=None):
+        sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
             self.character.image.clip_draw(self.character.frame * 18, 19,
                                            18, 19,
-                                           self.character.x, self.character.y,
-                                           54, 57)
+                                           sx, sy)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
             self.character.image.clip_composite_draw(self.character.frame * 18, 19,
                                                      18, 19,
                                                      0, 'h',
-                                                     self.character.x, self.character.y)
+                                                     sx, sy)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
             self.character.image.clip_draw(self.character.frame * 18, 0,
                                            18, 19,
-                                           self.character.x, self.character.y)
+                                           sx, sy)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
             self.character.image.clip_composite_draw(self.character.frame * 18, 0,
                                                      18, 19,
                                                      0, 'h',
-                                                     self.character.x,self.character.y)
+                                                     sx, sy)
         pass
 
 class Idle:
@@ -205,15 +207,26 @@ class Idle:
             self.character.frame = (self.character.frame + 1) % 6
             self.frame_time = get_time()
         pass
-    def draw(self):
+    def draw(self, camera=None):
+        sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame*18, 57, 18, 19, self.character.x, self.character.y)
+            self.character.image.clip_draw(self.character.frame*18, 57,
+                                           18, 19,
+                                           self.character.x, self.character.y)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 57, 18, 19, 0, 'h',self.character.x, self.character.y, 18, 19)
+            self.character.image.clip_composite_draw(self.character.frame*18, 57,
+                                                     18, 19,
+                                                     0, 'h',
+                                                     sx, sy)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame*18, 38, 18, 19, self.character.x, self.character.y)
+            self.character.image.clip_draw(self.character.frame*18, 38,
+                                           18, 19,
+                                           self.character.x, self.character.y)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 38, 18, 19, 0, 'h',self.character.x, self.character.y, 18, 19)
+            self.character.image.clip_composite_draw(self.character.frame*18, 38,
+                                                     18, 19,
+                                                     0, 'h',
+                                                     sx, sy)
         pass
 
 class Attack:
@@ -263,11 +276,12 @@ class Attack:
             self.character.state_machine.handle_state_event(('MOUSE_UP', None))
 
         pass
-    def draw(self):
+    def draw(self, camera=None):
+        sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
         Attack.motion.clip_composite_draw(self.current_frame*self.attack_frame_width, 0,
                                           self.attack_frame_width, self.attack_frame_height,
                                           0, '',
-                                          self.character.x, self.character.y,
+                                          sx, sy,
                                           self.attack_frame_width, self.attack_frame_height)
         pass
 
@@ -325,8 +339,8 @@ class character:
         self.state_machine.update()
         self.weapon.update()
 
-    def draw(self):
-        self.state_machine.draw()
-        self.weapon.draw()
+    def draw(self, camera=None):
+        self.state_machine.draw(camera)
+        self.weapon.draw(camera)
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
