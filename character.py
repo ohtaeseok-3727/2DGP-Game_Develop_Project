@@ -223,14 +223,14 @@ class Attack:
         self.attack_frame_width = 0
         self.attack_frame_height = 0
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
-            Attack.motion = 'resource/weapon/katana/katana_default_sprite_sheet.png'
+            Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
             self.attack_speed = 10
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
-            Attack.motion = 'resource/weapon/katana/katana_hou_sprite_sheet.png'
+            Attack.motion = load_image('resource/weapon/katana/katana_hou_sprite_sheet.png')
             self.attack_frame = 11
             self.attack_speed = 8
             self.max_attack_count = 1
@@ -283,8 +283,8 @@ class character:
         self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {key_down: self.move},
-            self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
+            self.idle: {key_down: self.move, mouse_down : self.attack},
+            self.move: {key_down: self.move, key_up: self.move, stop: self.idle, mouse_down : self.attack},
             self.attack: {mouse_down : self.attack, mouse_up : self.idle, key_down : self.move}
         })
 
