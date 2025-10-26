@@ -1,5 +1,4 @@
 from pico2d import *
-from worldmap import *
 
 class Camera:
     def __init__(self, target):
@@ -16,8 +15,9 @@ class Camera:
         self.x = max(0, min(self.x, WorldMap.width - self.screen_width))
         self.y = max(0, min(self.y, WorldMap.height - self.screen_height))
         pass
+    def apply(self, x, y):
+        return x - self.x, y - self.y
     def set_for_draw(self):
-
         pass
     def unset_for_draw(self):
         pass

@@ -35,8 +35,11 @@ def update_world():
 def render_world():
     clear_canvas()
     for obj in world:
+        if isinstance(obj, WorldMap):
+        obj.draw(camera)
+    else :
         obj.draw()
-    camera.unset_for_draw()
+    update_canvas()
 
 running = True
 

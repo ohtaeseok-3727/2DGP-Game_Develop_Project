@@ -10,7 +10,7 @@ class WorldMap:
         self.rows = self.height // self.cell
     def update(self):
         pass
-    def draw(self):
+    def draw(self, camera):
         for x in range(0, WorldMap.width+1, WorldMap.cell):
             draw_line(x, 0, x, WorldMap.height)
         for y in range(0, WorldMap.height+1, WorldMap.cell):
