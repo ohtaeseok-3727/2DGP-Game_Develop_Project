@@ -1,8 +1,5 @@
 from pico2d import *
 from worldmap import *
-import ctypes
-import sdl2
-from OpenGL.GL import *
 
 class Camera:
     def __init__(self, target):
@@ -20,10 +17,7 @@ class Camera:
         self.y = max(0, min(self.y, WorldMap.height - self.screen_height))
         pass
     def set_for_draw(self):
-        glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
-        glTranslatef(-self.x, -self.y, 0)
+
         pass
     def unset_for_draw(self):
-        glPopMatrix()
         pass

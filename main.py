@@ -34,11 +34,9 @@ def update_world():
 
 def render_world():
     clear_canvas()
-    camera.set_for_draw()
     for obj in world:
         obj.draw()
     camera.unset_for_draw()
-    update_canvas()
 
 running = True
 
