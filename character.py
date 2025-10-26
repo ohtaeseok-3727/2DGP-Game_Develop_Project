@@ -23,6 +23,10 @@ def W_down(e):
 def W_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_w
 
+def Mouse_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT
+def Mouse_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT
 def key_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN
 def key_up(e):
