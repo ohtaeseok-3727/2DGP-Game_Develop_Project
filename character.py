@@ -23,10 +23,11 @@ def W_down(e):
 def W_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_w
 
-def Mouse_down(e):
+def mouse_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT
-def Mouse_up(e):
+def mouse_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONUP and e[1].button == SDL_BUTTON_LEFT
+
 def key_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN
 def key_up(e):
@@ -211,9 +212,25 @@ class Idle:
         pass
 
 class Attack:
+    motion = None;
     def __init__(self, character):
         self.character = character
+        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
+            Attack.motion = 'resource/weapon/katana/katana_default_sprite_sheet.png'
+        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
+            Attack.motion = 'resource/weapon/katana/katana_hou_sprite_sheet.png'
     def enter(self, e):
+        pass
+    def attack_motion(self):
+        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
+            #기본 카타나 공격 모션
+            pass
+        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
+            #원거리 참격 모션
+            pass
+        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
+            #근접 참격 강화 모션
+            pass
         pass
     def exit(self, e):
         pass
@@ -254,7 +271,7 @@ class character:
         self.state_machine = StateMachine(self.idle, {
             self.idle: {key_down: self.move},
             self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
-            self.attack: {}
+            self.attack: {mouse_down : self.attack, mouse_up : self.idle, key_down : self.move}
         })
 
     def update(self):
