@@ -27,6 +27,7 @@ def reset_world():
     world.append(char)
 
 def update_world():
+    camera.update()
     for obj in world:
         obj.update()
     pass
@@ -35,8 +36,6 @@ def render_world():
     clear_canvas()
     for obj in world:
         obj.draw(camera)
-    else :
-        obj.draw()
     update_canvas()
 
 running = True

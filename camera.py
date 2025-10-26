@@ -8,16 +8,22 @@ class Camera:
         self.y = 0
         self.screen_width = get_canvas_width()
         self.screen_height = get_canvas_height()
+        self.zoom = 2.0
         pass
     def update(self):
-        self.x = self.target.x - self.screen_width // 2
-        self.y = self.target.y - self.screen_height // 2
+        effective_width = self.screen_width / self.zoom
+        effective_height = self.screen_height / self.zoom
 
-        self.x = max(0, min(self.x, WorldMap.width - self.screen_width))
-        self.y = max(0, min(self.y, WorldMap.height - self.screen_height))
+        self.x = self.target.x - effective_width / 2
+        self.y = self.target.y - effective_height / 2
+
+        self.x = max(0, min(self.x, WorldMap.width - effective_width))
+        self.y = max(0, min(self.y, WorldMap.height - effective_height))
         pass
     def apply(self, x, y):
-        return x - self.x, y - self.y
+        screen_x = (x - self.x) * self.zoom
+        screen_y = (y - self.y) * self.zoom
+        return screen_x, screen_y
     def set_for_draw(self):
         pass
     def unset_for_draw(self):

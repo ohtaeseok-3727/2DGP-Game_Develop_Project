@@ -11,7 +11,11 @@ class WorldMap:
     def update(self):
         pass
     def draw(self, camera):
-        for x in range(0, WorldMap.width+1, WorldMap.cell):
-            draw_line(x, 0, x, WorldMap.height)
-        for y in range(0, WorldMap.height+1, WorldMap.cell):
-            draw_line(0, y, WorldMap.width, y)
+        for x in range(0, WorldMap.width + 1, WorldMap.cell):
+            sx1, sy1 = camera.apply(x, 0)
+            sx2, sy2 = camera.apply(x, WorldMap.height)
+            draw_line(sx1, sy1, sx2, sy2)
+        for y in range(0, WorldMap.height + 1, WorldMap.cell):
+            sx1, sy1 = camera.apply(0, y)
+            sx2, sy2 = camera.apply(WorldMap.width, y)
+            draw_line(sx1, sy1, sx2, sy2)
