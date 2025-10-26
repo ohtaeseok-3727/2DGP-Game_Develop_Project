@@ -246,6 +246,7 @@ class Attack:
         self.attack_frame_height = 0
         self.current_frame = 0
         self.frame_time = 0
+        self.release_requested = False
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
@@ -268,16 +269,31 @@ class Attack:
         self.attack_time = get_time()
         self.frame_time = get_time()
         self.current_frame = 0
+        self.release_requested = False
         pass
     def exit(self, e):
+        pass
+    def on_input(self, event):
+        if event.type == SDL_MOUSEBUTTONUP and event.button == SDL_BUTTON_LEFT:
+            self.release_requested = True
+        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+            self.release_requested = False
         pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.attack_speed:
             self.current_frame += 1
             self.frame_time = get_time()
         if self.current_frame >= self.attack_frame:
-            self.current_frame = 0
-            self.character.state_machine.handle_state_event(('MOUSE_UP', None))
+            if self.release_requested:
+                self.current_frame = 0
+                try:
+                    self.character.state_machine.cur_state.exit(('ATTACK_END', None))
+                    self.character.state_machine.cur_state = self.character.idle
+                    self.character.state_machine.cur_state.enter(('ATTACK_END', None))
+                except Exception:
+                    pass
+            else:
+                self.current_frame = 0
 
         pass
     def draw(self, camera=None):
@@ -347,4 +363,9 @@ class character:
         self.state_machine.draw(camera)
         self.weapon.draw(camera)
     def handle_event(self, event):
+        try:
+            if self.state_machine.cur_state == self.attack:
+                self.attack.on_input(event)
+        except Exception:
+            pass
         self.state_machine.handle_state_event(('INPUT', event))
