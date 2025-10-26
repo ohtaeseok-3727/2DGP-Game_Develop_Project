@@ -222,6 +222,8 @@ class Attack:
         self.attack_count = 0
         self.attack_frame_width = 0
         self.attack_frame_height = 0
+        self.current_frame = 0
+        self.frame_time = 0
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
@@ -239,18 +241,30 @@ class Attack:
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             self.max_attack_count = 2
             #근접 참격 강화 모션
+
     def enter(self, e):
         self.attack_time = get_time()
+        self.frame_time = get_time()
+        self.current_frame = 0
         pass
     def exit(self, e):
         pass
     def do(self):
+        if get_time() - self.frame_time > 1.0 / self.attack_speed:
+            self.current_frame += 1
+            self.frame_time = get_time()
+        if self.current_frame >= self.attack_frame:
+            self.current_frame = 0
+            self.character.state_machine.handle_state_event(('MOUSE_UP', None))
+
         pass
     def draw(self):
-        Attack.motion.clip_composite_draw(self.attack_frame*self.attack_frame_width, 0,
+        Attack.motion.clip_composite_draw(self.current_frame*self.attack_frame_width, 0,
                                           self.attack_frame_width, self.attack_frame_height,
                                           0, '',
-                                          self.character.x, self.character.y)
+                                          self.character.x, self.character.y,
+                                          self.attack_frame_width, self.attack_frame_height)
+        self.character.clip_draw
         pass
 
 
@@ -285,7 +299,7 @@ class character:
         self.state_machine = StateMachine(self.idle, {
             self.idle: {key_down: self.move, mouse_down : self.attack},
             self.move: {key_down: self.move, key_up: self.move, stop: self.idle, mouse_down : self.attack},
-            self.attack: {mouse_down : self.attack, mouse_up : self.idle, key_down : self.move}
+            self.attack: {mouse_down : self.attack, key_down : self.move}
         })
 
     def update(self):
