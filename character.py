@@ -169,7 +169,11 @@ class Move:
 
 
     def exit(self, e):
-        pass
+        try:
+            if space_down(e):
+                self.character.dash.start()
+        except Exception:
+            pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
             self.character.frame = (self.character.frame + 1) % 8
@@ -220,8 +224,13 @@ class Idle:
         self.character.dir = 0
         self.character.updown_dir = 0
         pass
+
     def exit(self, e):
-        pass
+        try:
+            if space_down(e):
+                self.character.dash.start()
+        except Exception:
+            pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
             self.character.frame = (self.character.frame + 1) % 6
@@ -286,9 +295,8 @@ class character:
         self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {space_down : self.dash, key_down: self.move},
-            self.move: {space_down : self.dash, key_down: self.move, key_up: self.move, stop: self.idle},
-            self.dash: {stop: self.idle}
+            self.idle: {space_down : self.idle, key_down: self.move},
+            self.move: {space_down : self.move, key_down: self.move, key_up: self.move, stop: self.idle},
         })
 
     def update(self, camera=None):
@@ -328,5 +336,4 @@ class character:
             self.attack.on_input(event, camera)
         except Exception:
             pass
-        self.dash.on_input(event)
         self.state_machine.handle_state_event(('INPUT', event))
