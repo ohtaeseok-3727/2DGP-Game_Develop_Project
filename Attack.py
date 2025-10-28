@@ -104,7 +104,6 @@ class Attack:
                 self.stop()
             else:
                 self.stop()
-
         pass
     def draw(self, camera=None):
         if not self.active:
