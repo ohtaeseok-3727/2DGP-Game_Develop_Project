@@ -318,6 +318,7 @@ class character:
             dx, dy = mx - self.x, my - self.y
             self.face_dir = 1 if dx >= 0 else -1
             self.face_updown_dir = 1 if dy >= 0 else -1
+
         except Exception as e:
             pass
         except:

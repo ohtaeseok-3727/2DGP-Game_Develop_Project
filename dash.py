@@ -1,5 +1,8 @@
 import math
 from pico2d import *
+from ctypes import *
+from sdl2 import *
+from worldmap import WorldMap
 
 class dashstate:
     def __init__(self, character):
@@ -19,22 +22,18 @@ class dashstate:
         time_since_last_dash = current_time - self.last_dash_time
         return time_since_last_dash > self.dash_cooldown and self.character.can_dash > 0
 
-    def start(self):
+    def start(self, camera=None):
         if not self.check_dash():
             return
 
         dx = self.character.dir
         dy = self.character.updown_dir
 
-        # 이동 입력이 없으면 바라보는 방향을 사용
         if dx == 0 and dy == 0:
-            dx = self.character.face_dir
-            dy = self.character.face_updown_dir
+            return
 
-        # 정규화해서 대각선에서도 일정속도가 나오도록 함
         length = math.hypot(dx, dy)
         if length == 0:
-            # 안전 fallback: 오른쪽으로 대쉬
             nx, ny = 1.0, 0.0
         else:
             nx, ny = dx / length, dy / length
@@ -66,8 +65,8 @@ class dashstate:
         self.working = False
         pass
 
-    def on_input(self, event):
+    def on_input(self, event, camera=None):
         if event.type == SDL_KEYDOWN:
             if event.key == SDLK_SPACE:
-                self.start()
+                self.start(camera)
         pass
