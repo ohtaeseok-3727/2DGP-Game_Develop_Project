@@ -23,6 +23,9 @@ def W_down(e):
 def W_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_w
 
+def space_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+
 def mouse_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_MOUSEBUTTONDOWN and e[1].button == SDL_BUTTON_LEFT
 def mouse_up(e):
@@ -267,6 +270,9 @@ class dash :
         self.vy = 0
         pass
     def enter(self, e):
+        if self.character.can_dash <=0:
+            self.working = False
+            return
         self.working = True
         self.startx = self.character.x
         self.starty = self.character.y
@@ -281,16 +287,12 @@ class dash :
         self.vy = dy*self.speed
         pass
     def exit(self, e):
+        if self.working:
+            self.character.can_dash -=1
         pass
-    def start(self):
-        if not self.working :
-            if self.character.can_dash <= 0:
-                return
-        self.enter()
-        pass
-    def update(self):
+    def do(self):
         if not self.working:
-            if self.character.can_dash <= 0:
+            self.character.state_machine.handle_state_event(('STOP', 0))
             return
         prev_x, prev_y = self.character.x, self.character.y
         self.character.x += self.vx
@@ -301,11 +303,7 @@ class dash :
             self.character.frame = (self.character.frame + 1) % 8
             self.frame_time = get_time()
         if self.move_distance >= 50.0:
-            self.end()
-    def end(self):
-        self.working = False
-        self.character.can_dash -= 1
-
+            self.character.state_machine.handle_state_event(('STOP', 0))
         pass
     def draw(self, camera=None):
         sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
@@ -360,12 +358,14 @@ class character:
 
         self.idle = Idle(self)
         self.move = Move(self)
+        self.dash = dash(self)
         self.attack = Attack(self)
         self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {key_down: self.move},
-            self.move: {key_down: self.move, key_up: self.move, stop: self.idle},
+            self.idle: {key_down: self.move, space_down : self.dash},
+            self.move: {key_down: self.move, key_up: self.move, stop: self.idle, space_down : self.dash},
+            self.dash: {stop: self.idle}
         })
 
     def update(self, camera=None):
