@@ -8,7 +8,7 @@ class Camera:
         self.y = 0
         self.screen_width = get_canvas_width()
         self.screen_height = get_canvas_height()
-        self.zoom = 2.0
+        self.zoom = 3.0
         pass
     def update(self):
         effective_width = self.screen_width / self.zoom
