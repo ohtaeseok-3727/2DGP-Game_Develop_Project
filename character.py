@@ -251,6 +251,17 @@ class Idle:
                                                      18 * zoom, 19 * zoom)
         pass
 
+class dash :
+    def __init__(self, character):
+        pass
+    def enter(self, e):
+        pass
+    def exit(self, e):
+        pass
+    def do(self):
+        pass
+    def draw(self, camera=None):
+        pass
 
 class character:
     def __init__(self):
