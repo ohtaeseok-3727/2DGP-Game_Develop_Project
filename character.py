@@ -316,6 +316,7 @@ class character:
             pass
         self.state_machine.update()
         self.attack.update()
+        self.dash.update()
         self.weapon.update(camera)
 
     def draw(self, camera=None):
@@ -327,4 +328,5 @@ class character:
             self.attack.on_input(event, camera)
         except Exception:
             pass
+        self.dash.on_input(event)
         self.state_machine.handle_state_event(('INPUT', event))
