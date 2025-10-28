@@ -229,6 +229,7 @@ class Idle:
         try:
             if space_down(e):
                 self.character.dash.start()
+                self.character.dash_recovery_time = get_time()
         except Exception:
             pass
     def do(self):
@@ -277,6 +278,7 @@ class character:
         self.dir = 0 # 1: right, -1: left
         self.max_dash = 2
         self.can_dash = self.max_dash
+        self.dash_recovery_time = 0
         self.weapon_type = 'katana' # 카타나 또는 대검
         self.weapon_rank = 0 # 0: 기본 1: 원거리 참격 2: 근접 참격 강화
         self.STR = 20
@@ -318,6 +320,10 @@ class character:
             dx, dy = mx - self.x, my - self.y
             self.face_dir = 1 if dx >= 0 else -1
             self.face_updown_dir = 1 if dy >= 0 else -1
+
+            if self.can_dash < 2 and get_time() - self.dash_recovery_time > 5 :
+                self.can_dash += 1
+                print('대쉬 회복')
 
         except Exception as e:
             pass
