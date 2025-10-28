@@ -253,12 +253,33 @@ class Idle:
 
 class dash :
     def __init__(self, character):
+        self.character = character
+        self.fps = 30
+        self.frame_time = 0
+        self.working = False
+        self.startx = 0
+        self.starty = 0
+        self.endx = 0
+        self.endy = 0
         pass
     def enter(self, e):
+        self.working = True
+        self.startx = self.character.x
+        self.starty = self.character.y
         pass
     def exit(self, e):
         pass
-    def do(self):
+    def start(self):
+        if not self.working :
+            if self.character.can_dash <= 0:
+                return
+        if self.character.updown_dir != 0:
+            self.character.y += self.character.updown_dir * 10
+        if self.character.dir != 0:
+            self.character.x += self.character.dir * 10
+        pass
+    def end(self):
+
         pass
     def draw(self, camera=None):
         pass
