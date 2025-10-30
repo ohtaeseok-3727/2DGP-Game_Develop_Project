@@ -172,6 +172,7 @@ class Move:
         try:
             if space_down(e):
                 self.character.dash.start()
+
         except Exception:
             pass
     def do(self):
@@ -229,7 +230,7 @@ class Idle:
         try:
             if space_down(e):
                 self.character.dash.start()
-                self.character.dash_recovery_time = get_time()
+
         except Exception:
             pass
     def do(self):
@@ -324,6 +325,7 @@ class character:
             if self.can_dash < 2 and get_time() - self.dash_recovery_time > 5 :
                 self.can_dash += 1
                 print('대쉬 회복')
+                self.dash_recovery_time = get_time()
 
         except Exception as e:
             pass

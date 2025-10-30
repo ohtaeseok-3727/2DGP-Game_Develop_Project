@@ -61,6 +61,8 @@ class dashstate:
 
     def stop(self):
         if self.working:
+            if self.character.can_dash == 2:
+                self.character.dash_recovery_time = get_time()
             self.character.can_dash = max(0, self.character.can_dash - 1)
         self.working = False
         pass
