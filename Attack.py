@@ -111,8 +111,8 @@ class Attack:
 
         zoom = camera.zoom if camera else 1.0
 
-        offset_x = math.cos(self.attack_angle) * 15
-        offset_y = math.sin(self.attack_angle) * 15
+        offset_x = math.cos(self.attack_angle) * 25
+        offset_y = math.sin(self.attack_angle) * 25
 
         draw_x = self.character.x + offset_x
         draw_y = self.character.y + offset_y
