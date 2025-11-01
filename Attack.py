@@ -24,6 +24,7 @@ class Attack:
 
         self.attack_x = 0
         self.attack_y = 0
+        self.attack_range = 1
 
         self.is_combo_count = False
         self.combo_count = 0
@@ -39,6 +40,7 @@ class Attack:
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
+            self.attack_range = 1
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
@@ -54,6 +56,7 @@ class Attack:
             self.attack_frame_width = 60
             self.attack_frame_height = 133
             self.combo_trigger_frame = 4
+            self.attack_range = 1.5
             #근접 참격 강화 모션
 
     def can_attack(self):
@@ -171,6 +174,6 @@ class Attack:
                 self.attack_frame_width, self.attack_frame_height,
                 draw_angle, '',
                 sx, sy,
-                self.attack_frame_width * zoom * 1.5, self.attack_frame_height * zoom * 1.5
+                self.attack_frame_width * zoom * self.attack_range, self.attack_frame_height * zoom * self.attack_range
             )
         pass
