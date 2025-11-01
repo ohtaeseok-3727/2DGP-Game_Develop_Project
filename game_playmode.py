@@ -4,10 +4,11 @@ from worldmap import WorldMap
 from camera import Camera
 import game_world
 import game_framework
-from object import *
+from game_object import anvil
+import upgrade_mode
 
 def handle_events():
-    global running
+    global running, anvil
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -15,21 +16,25 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
-            if event.key == SDLK_f:
+            elif event.key == SDLK_f:
                 if anvil.in_range(char):
                     game_framework.push_mode(upgrade_mode)
+                else:
+                    print("대장간이 너무 멀다")
+            else:
+                char.handle_event(event, game_world.camera)
         else:
             char.handle_event(event, game_world.camera)
 
 def init():
-    global char
+    global char, anvil
 
     game_world.clear()
 
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
-    anvil = object.anvil()
+    anvil = anvil()
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
