@@ -4,6 +4,7 @@ from worldmap import WorldMap
 from camera import Camera
 import game_world
 import game_framework
+import object
 
 def handle_events():
     global running
@@ -24,10 +25,12 @@ def init():
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
+    anvil = object.anvil()
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 1)
+    game_world.add_object(anvil, 1)
 
 def update():
     game_world.update()
