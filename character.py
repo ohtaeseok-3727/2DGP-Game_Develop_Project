@@ -270,6 +270,7 @@ class Idle:
 class character:
     def __init__(self):
         self.image = load_image('resource/character/character_sprites_vertical_merged.png')
+        self.cursor = load_image('resource/character/Cursor.png')
         self.x = WorldMap.width/2
         self.y = WorldMap.height/2
         self.frame = 0
@@ -340,6 +341,23 @@ class character:
         self.state_machine.draw(camera)
         self.attack.draw(camera)
         self.weapon.draw(camera)
+        import ctypes
+        from sdl2.mouse import SDL_GetMouseState
+
+        x = ctypes.c_int(0)
+        y = ctypes.c_int(0)
+        SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
+
+        screen_x = x.value
+        screen_y = WorldMap.height - y.value
+
+        if camera:
+            world_x, world_y = camera.screen_to_world(screen_x, screen_y)
+            sx, sy = camera.apply(world_x, world_y)
+        else:
+            sx, sy = screen_x, screen_y
+
+        self.cursor.draw(sx, sy, 56, 66)
     def handle_event(self, event, camera=None):
         try:
             self.attack.on_input(event, camera)
