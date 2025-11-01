@@ -9,16 +9,21 @@ class Camera:
         self.screen_width = get_canvas_width()
         self.screen_height = get_canvas_height()
         self.zoom = 3.0
+        self.smooth = 0.2
         pass
     def update(self):
         effective_width = self.screen_width / self.zoom
         effective_height = self.screen_height / self.zoom
 
-        self.x = self.target.x - effective_width / 2
-        self.y = self.target.y - effective_height / 2
+        target_x = self.target.x - effective_width / 2
+        target_y = self.target.y - effective_height / 2
 
-        self.x = max(0, min(self.x, WorldMap.width - effective_width))
-        self.y = max(0, min(self.y, WorldMap.height - effective_height))
+        target_x = max(0, min(target_x, WorldMap.width - effective_width))
+        target_y = max(0, min(target_y, WorldMap.height - effective_height))
+
+        # 선형 보간을 사용한 부드러운 카메라 이동
+        self.x += (target_x - self.x) * self.smooth
+        self.y += (target_y - self.y) * self.smooth
         pass
     def apply(self, x, y):
         screen_x = (x - self.x) * self.zoom
