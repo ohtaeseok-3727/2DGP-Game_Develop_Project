@@ -25,6 +25,9 @@ class Attack:
         self.attack_x = 0
         self.attack_y = 0
 
+        self.is_combo_count = False
+        self.combo_count = 0
+
         self.attack_cooldown = 0.5
         self.last_attack_time = -self.attack_cooldown
 
@@ -84,11 +87,20 @@ class Attack:
         self.current_frame = 0
         self.release_requested = False
         self.last_attack_time = get_time()
+
+        if self.character.weapon_rank == 2 :
+            self.combo_count += 1
+            self.is_combo_count = True
         pass
 
     def stop(self):
         self.active = False
         self.release_requested = False
+
+        if self.character.weapon_rank == 2:
+            if self.combo_count >= self.max_attack_count:
+                self.combo_count = 0
+                self.is_combo_active = False
         pass
 
     def on_input(self, event, camera=None):
@@ -108,8 +120,10 @@ class Attack:
             self.frame_time = get_time()
 
         if self.current_frame >= self.attack_frame:
-            if self.release_requested:
-                self.stop()
+            if self.character.weapon_rank == 2 and self.combo_count < self.max_attack_count:
+                self.current_frame = 0
+                self.frame_time = get_time()
+                self.combo_count += 1
             else:
                 self.stop()
         pass
