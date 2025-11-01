@@ -10,7 +10,7 @@ class dashstate:
         self.working = False
         self.distance = 0
         self.target_ditance = 50
-        self.speed = 10
+        self.speed = 7
         self.vx = 0
         self.vy = 0
         self.dash_cooldown = 0.3
