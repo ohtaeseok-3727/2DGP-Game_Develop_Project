@@ -8,10 +8,12 @@ class anvil:
         self.image = load_image('resource/object/Anvil.png')
         self.x = 300
         self.y = 200
-        self.interaction_x1 = self.x - 20
-        self.interaction_x2 = self.x + 20
-        self.interaction_y1 = self.y - 20
-        self.interaction_y2 = self.y + 20
+        self.interaction_range = 50
+    def update(self, camera=None):
+        pass
+    def in_range(self, character):
+        distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
+        return distance <= self.interaction_range
     def draw(self, camera=None):
         if camera:
             screen_x, screen_y = camera.apply(self.x, self.y)

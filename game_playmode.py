@@ -4,7 +4,7 @@ from worldmap import WorldMap
 from camera import Camera
 import game_world
 import game_framework
-import object
+from object import *
 
 def handle_events():
     global running
@@ -12,8 +12,12 @@ def handle_events():
     for event in events:
         if event.type == SDL_QUIT:
             running = False
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            game_framework.quit()
+        elif event.type == SDL_KEYDOWN:
+            if event.key == SDLK_ESCAPE:
+                game_framework.quit()
+            if event.key == SDLK_f:
+                if anvil.in_range(char):
+                    game_framework.push_mode(upgrade_mode)
         else:
             char.handle_event(event, game_world.camera)
 
