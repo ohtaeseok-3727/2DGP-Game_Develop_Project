@@ -22,7 +22,10 @@ class Attack:
         self.active = False
         self.attack_angle = 0
 
-        self.attack_cooldown = 0.5 # 마우스 연타로 공격속도가 증가되지 못하도록 딜레이 설정
+        self.attack_x = 0
+        self.attack_y = 0
+
+        self.attack_cooldown = 0.5
         self.last_attack_time = -self.attack_cooldown
 
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
@@ -33,14 +36,15 @@ class Attack:
             self.attack_frame_width = 60
             self.attack_frame_height = 133
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
-            Attack.motion = load_image('resource/weapon/katana/katana_hou_sprite_sheet.png')
+            Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
-            self.attack_speed = 12
+            self.attack_speed = 30
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             self.max_attack_count = 2
+            self.attack_speed = 30
             #근접 참격 강화 모션
 
     def can_attack(self):
@@ -66,9 +70,13 @@ class Attack:
             world_x = screen_x
             world_y = screen_y
 
-        delta_x = world_x - self.character.x
-        delta_y = world_y - self.character.y
-        self.attack_angle = math.atan2(delta_y, delta_x)
+        if self.character.weapon_rank == 1:
+            self.attack_x = world_x
+            self.attack_y = world_y
+        else:
+            delta_x = world_x - self.character.x
+            delta_y = world_y - self.character.y
+            self.attack_angle = math.atan2(delta_y, delta_x)
 
         self.active = True
         self.attack_time = get_time()
@@ -105,27 +113,41 @@ class Attack:
             else:
                 self.stop()
         pass
+
     def draw(self, camera=None):
         if not self.active:
             return
 
         zoom = camera.zoom if camera else 1.0
 
-        offset_x = math.cos(self.attack_angle) * 25
-        offset_y = math.sin(self.attack_angle) * 25
+        if self.character.weapon_rank == 1:
+            draw_x = self.attack_x
+            draw_y = self.attack_y
+            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
 
-        draw_x = self.character.x + offset_x
-        draw_y = self.character.y + offset_y
+            Attack.motion.clip_composite_draw(
+                self.current_frame * self.attack_frame_width, 0,
+                self.attack_frame_width, self.attack_frame_height,
+                0, '',
+                sx, sy,
+                self.attack_frame_width * zoom, self.attack_frame_height * zoom
+            )
 
+        else:
+            offset_x = math.cos(self.attack_angle) * 25
+            offset_y = math.sin(self.attack_angle) * 25
 
-        sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
-        draw_angle = self.attack_angle - math.pi / 2
+            draw_x = self.character.x + offset_x
+            draw_y = self.character.y + offset_y
 
-        Attack.motion.clip_composite_draw(
-            self.current_frame * self.attack_frame_width, 0,
-            self.attack_frame_width, self.attack_frame_height,
-            draw_angle, '',
-            sx, sy,
-            self.attack_frame_width * zoom, self.attack_frame_height * zoom
-        )
+            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
+            draw_angle = self.attack_angle - math.pi / 2
+
+            Attack.motion.clip_composite_draw(
+                self.current_frame * self.attack_frame_width, 0,
+                self.attack_frame_width, self.attack_frame_height,
+                draw_angle, '',
+                sx, sy,
+                self.attack_frame_width * zoom, self.attack_frame_height * zoom
+            )
         pass
