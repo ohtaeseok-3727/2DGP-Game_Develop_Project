@@ -6,10 +6,8 @@ from weapon import weapon
 import game_world
 
 
-buttons = []
-
-
 class UpgradeButton:
+    images = {}
     def __init__(self, x, y, width, height, rank, text):
         self.x = x
         self.y = y
@@ -18,14 +16,19 @@ class UpgradeButton:
         self.rank = rank
         self.text = text
 
+        if rank not in UpgradeButton.images:
+            UpgradeButton.images[rank] = load_image(f'resource/UI/Upgrade_Tooltip_{rank}.png')
+
+        self.image = UpgradeButton.images[rank]
+
     def is_clicked(self, mx, my):
         return (self.x - self.width // 2 < mx < self.x + self.width // 2 and
                 self.y - self.height // 2 < my < self.y + self.height // 2)
 
     def draw(self):
-        draw_rectangle(self.x - self.width // 2, self.y - self.height // 2,
-                       self.x + self.width // 2, self.y + self.height // 2)
-        # 텍스트는 간단히 표시 (폰트 로드 필요시 추가)
+        self.image.draw(self.x, self.y, self.width, self.height)
+
+
 
 
 def init():
@@ -33,9 +36,8 @@ def init():
     char = game_playmode.char
 
     buttons = [
-        UpgradeButton(300, 400, 150, 50, 0, "기본 카타나"),
-        UpgradeButton(500, 400, 150, 50, 1, "호우 (원거리)"),
-        UpgradeButton(700, 400, 150, 50, 2, "무라마사 (연속공격)")
+        UpgradeButton(500, 450, 300, 125, 1, "호우 (원거리)"),
+        UpgradeButton(500, 300, 300, 125, 2, "무라마사 (연속공격)")
     ]
 
 
@@ -51,23 +53,17 @@ def update():
 def draw():
     clear_canvas()
 
-    # 게임 월드를 배경으로 그리기
     game_world.render()
 
-    # 반투명 오버레이
     draw_rectangle(0, 0, get_canvas_width(), get_canvas_height())
 
-    # UI 배경
     draw_rectangle(200, 200, 900, 600)
 
-    # 버튼들 그리기
     for button in buttons:
         button.draw()
 
-    # 현재 무기 정보 표시
     if char:
         rank_text = f"현재 무기 랭크: {char.weapon_rank}"
-        # 간단한 텍스트 표시 (폰트 사용시 개선 가능)
 
     update_canvas()
 
