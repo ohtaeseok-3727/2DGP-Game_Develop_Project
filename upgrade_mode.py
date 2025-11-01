@@ -55,10 +55,6 @@ def draw():
 
     game_world.render()
 
-    draw_rectangle(0, 0, get_canvas_width(), get_canvas_height())
-
-    draw_rectangle(200, 200, 900, 600)
-
     for button in buttons:
         button.draw()
 
