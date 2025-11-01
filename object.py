@@ -13,5 +13,11 @@ class anvil:
         self.interaction_y1 = self.y - 20
         self.interaction_y2 = self.y + 20
     def draw(self, camera=None):
-        self.image.draw(self.x, self.y)
-        pass
+        if camera:
+            screen_x, screen_y = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+            self.image.draw(screen_x, screen_y,
+                          self.image.w * zoom,
+                          self.image.h * zoom)
+        else:
+            self.image.draw(self.x, self.y)
