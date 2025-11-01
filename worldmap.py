@@ -8,7 +8,7 @@ class WorldMap:
     def __init__(self):
         self.cols = self.width // self.cell
         self.rows = self.height // self.cell
-    def update(self):
+    def update(self, camera=None):
         pass
     def draw(self, camera):
         for x in range(0, WorldMap.width + 1, WorldMap.cell):

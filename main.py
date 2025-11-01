@@ -2,6 +2,7 @@ from pico2d import *
 from character import character
 from worldmap import WorldMap
 from camera import Camera
+import game_world
 
 def handle_events():
     global running
@@ -12,33 +13,27 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             running = False
         else:
-            char.handle_event(event, camera)
-def reset_world():
-    global world
-    global char
-    global camera
+            char.handle_event(event, game_world.camera)
 
-    world = []
+def reset_world():
+    global char
+
+    game_world.clear()
 
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
-    world.append(world_map)
-    world.append(char)
+
+    game_world.set_camera(camera)
+    game_world.add_object(world_map, 0)
+    game_world.add_object(char, 1)
 
 def update_world():
-    camera.update()
-    for obj in world:
-        if isinstance(obj, character):
-            obj.update(camera)
-        else:
-            obj.update()
-    pass
+    game_world.update()
 
 def render_world():
     clear_canvas()
-    for obj in world:
-        obj.draw(camera)
+    game_world.render()
     update_canvas()
 
 running = True
