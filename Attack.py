@@ -27,8 +27,9 @@ class Attack:
 
         self.is_combo_count = False
         self.combo_count = 0
+        self.combo_trigger_frame = 4
 
-        self.attack_cooldown = 0.5
+        self.attack_cooldown = 0.7
         self.last_attack_time = -self.attack_cooldown
 
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
@@ -38,16 +39,21 @@ class Attack:
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
+        elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
             self.attack_speed = 30
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
-        if self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
+        elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
+            Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
+            self.attack_frame = 8
+            self.attack_speed = 40
             self.max_attack_count = 2
-            self.attack_speed = 30
+            self.attack_frame_width = 60
+            self.attack_frame_height = 133
+            self.combo_trigger_frame = 4
             #근접 참격 강화 모션
 
     def can_attack(self):
@@ -119,12 +125,15 @@ class Attack:
             self.current_frame += 1
             self.frame_time = get_time()
 
-        if self.current_frame >= self.attack_frame:
-            if self.character.weapon_rank == 2 and self.combo_count < self.max_attack_count:
+        if self.character.weapon_rank == 2:
+            if self.current_frame == self.combo_trigger_frame and self.combo_count < self.max_attack_count:
                 self.current_frame = 0
                 self.frame_time = get_time()
                 self.combo_count += 1
-            else:
+            elif self.current_frame >= self.attack_frame:
+                self.stop()
+        else:
+            if self.current_frame >= self.attack_frame:
                 self.stop()
         pass
 
@@ -162,6 +171,6 @@ class Attack:
                 self.attack_frame_width, self.attack_frame_height,
                 draw_angle, '',
                 sx, sy,
-                self.attack_frame_width * zoom, self.attack_frame_height * zoom
+                self.attack_frame_width * zoom * 1.5, self.attack_frame_height * zoom * 1.5
             )
         pass
