@@ -246,15 +246,16 @@ class character:
             self.face_dir = 1 if dx >= 0 else -1
             self.face_updown_dir = 1 if dy >= 0 else -1
 
-            if self.can_dash < 2 and get_time() - self.dash_recovery_time > 5 :
-                self.can_dash += 1
-                print('대쉬 회복')
-                self.dash_recovery_time = get_time()
-
         except Exception as e:
             pass
         except:
             pass
+
+        if self.can_dash < 2 and get_time() - self.dash_recovery_time > 5:
+            self.can_dash += 1
+            print('대쉬 회복')
+            self.dash_recovery_time = get_time()
+
         self.state_machine.update()
         self.attack.update()
         self.dash.update()
