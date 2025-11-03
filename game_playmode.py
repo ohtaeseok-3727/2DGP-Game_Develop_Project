@@ -7,6 +7,7 @@ import game_framework
 from game_object import anvil
 import upgrade_mode
 import inventory_mode
+import status_mode
 
 def handle_events():
     global running, anvil
@@ -22,6 +23,10 @@ def handle_events():
                     game_framework.push_mode(upgrade_mode)
                 else:
                     print("대장간이 너무 멀다")
+            elif event.key == SDLK_v:
+                game_framework.push_mode(inventory_mode)
+            elif event.key == SDLK_c:
+                game_framework.push_mode(status_mode)
             else:
                 char.handle_event(event, game_world.camera)
         else:
