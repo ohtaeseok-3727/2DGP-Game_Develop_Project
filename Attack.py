@@ -4,6 +4,49 @@ import math
 import ctypes
 from sdl2.mouse import SDL_GetMouseState
 from worldmap import WorldMap
+import game_world
+
+class AttackVisual:
+    def __init__(self, attack):
+        self.attack = attack
+    def update(self, camera=None):
+        pass
+    def draw(self, camera=None):
+        atk = self.attack
+        if not atk.active:
+            return
+        zoom = camera.zoom if camera else 1.0
+
+        if atk.character.weapon_rank == 1:
+            draw_x = atk.attack_x
+            draw_y = atk.attack_y
+            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
+
+            Attack.motion.clip_composite_draw(
+                atk.current_frame * atk.attack_frame_width, 0,
+                atk.attack_frame_width, atk.attack_frame_height,
+                0, '',
+                sx, sy,
+                atk.attack_frame_width * zoom, atk.attack_frame_height * zoom
+            )
+        else:
+            offset_x = math.cos(atk.attack_angle) * 25
+            offset_y = math.sin(atk.attack_angle) * 25
+
+            draw_x = atk.character.x + offset_x
+            draw_y = atk.character.y + offset_y
+
+            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
+            draw_angle = atk.attack_angle - math.pi / 2
+
+            Attack.motion.clip_composite_draw(
+                atk.current_frame * atk.attack_frame_width, 0,
+                atk.attack_frame_width, atk.attack_frame_height,
+                draw_angle, '',
+                sx, sy,
+                atk.attack_frame_width * zoom * atk.attack_range, atk.attack_frame_height * zoom * atk.attack_range
+            )
+        pass
 
 class Attack:
     motion = None
@@ -32,6 +75,8 @@ class Attack:
 
         self.attack_cooldown = 0.7
         self.last_attack_time = -self.attack_cooldown
+
+        self.visual = None
 
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
@@ -101,10 +146,24 @@ class Attack:
             self.combo_count += 1
             self.is_combo_count = True
         pass
+        try:
+            if self.visual is None:
+                self.visual = AttackVisual(self)
+                game_world.add_object(self.visual, 2)
+        except Exception:
+            self.visual = None
 
     def stop(self):
         self.active = False
         self.release_requested = False
+
+        try:
+            if self.visual is not None:
+                game_world.remove_object(self.visual)
+        except Exception:
+            pass
+        finally:
+            self.visual = None
 
         if self.character.weapon_rank == 2:
             if self.combo_count >= self.max_attack_count:
@@ -141,39 +200,4 @@ class Attack:
         pass
 
     def draw(self, camera=None):
-        if not self.active:
-            return
-
-        zoom = camera.zoom if camera else 1.0
-
-        if self.character.weapon_rank == 1:
-            draw_x = self.attack_x
-            draw_y = self.attack_y
-            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
-
-            Attack.motion.clip_composite_draw(
-                self.current_frame * self.attack_frame_width, 0,
-                self.attack_frame_width, self.attack_frame_height,
-                0, '',
-                sx, sy,
-                self.attack_frame_width * zoom, self.attack_frame_height * zoom
-            )
-
-        else:
-            offset_x = math.cos(self.attack_angle) * 25
-            offset_y = math.sin(self.attack_angle) * 25
-
-            draw_x = self.character.x + offset_x
-            draw_y = self.character.y + offset_y
-
-            sx, sy = (camera.apply(draw_x, draw_y)) if camera else (draw_x, draw_y)
-            draw_angle = self.attack_angle - math.pi / 2
-
-            Attack.motion.clip_composite_draw(
-                self.current_frame * self.attack_frame_width, 0,
-                self.attack_frame_width, self.attack_frame_height,
-                draw_angle, '',
-                sx, sy,
-                self.attack_frame_width * zoom * self.attack_range, self.attack_frame_height * zoom * self.attack_range
-            )
         pass
