@@ -8,7 +8,7 @@ class anvil:
         self.image = load_image('resource/object/Anvil.png')
         self.x = 300
         self.y = 200
-        self.interaction_range = 50
+        self.interaction_range = 30
     def update(self, camera=None):
         pass
     def in_range(self, character):

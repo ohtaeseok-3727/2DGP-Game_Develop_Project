@@ -38,7 +38,7 @@ def init():
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
-    game_world.add_object(char, 1)
+    game_world.add_object(char, 2)
     game_world.add_object(anvil, 1)
 
 def update():
