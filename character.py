@@ -222,8 +222,8 @@ class character:
         self.weapon = weapon(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {space_down : self.idle, key_down: self.move},
-            self.move: {space_down : self.move, key_down: self.move, key_up: self.move, stop: self.idle},
+            self.idle: {space_down : self.idle, F_down:self.idle, key_down: self.move},
+            self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle},
         })
 
     def update(self, camera=None):
