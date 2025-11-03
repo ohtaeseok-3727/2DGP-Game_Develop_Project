@@ -78,7 +78,7 @@ def draw():
             fx = int(sx - text_width / 2)
             fy = int(sy + 4)
 
-            font.draw(fx, fy, text, (255, 255, 255))
+            font.draw(fx, fy, text, (0, 0, 0))
     except Exception as e:
         print(f'Font draw error: {e}')
         pass
