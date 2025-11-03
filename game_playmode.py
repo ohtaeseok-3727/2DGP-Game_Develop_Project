@@ -6,6 +6,7 @@ import game_world
 import game_framework
 from game_object import anvil
 import upgrade_mode
+import inventory_mode
 
 def handle_events():
     global running, anvil
@@ -42,9 +43,9 @@ def init():
     game_world.add_object(anvil, 1)
     font = None
     candidates = [
-        'resource/font/NanumGothic.ttf',  # 프로젝트 내 폰트 (있다면 추가)
-        'C:/Windows/Fonts/malgun.ttf',  # Windows: 맑은 고딕 (대부분 존재)
-        None  # pico2d 기본(환경에 따라 실패할 수 있음)
+        'resource/font/NanumGothic.ttf',
+        'C:/Windows/Fonts/malgun.ttf',
+        None
     ]
     for fp in candidates:
         try:
