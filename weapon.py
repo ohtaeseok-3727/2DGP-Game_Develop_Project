@@ -80,15 +80,15 @@ class weapon:
 
         if self.character.face_dir == 1:
             weapon.image.clip_composite_draw(
-                0, 0, 14, 40,
+                0, 0, 11, 35,
                 math.radians(draw_angle), 'h',
                 draw_x, draw_y,
-                14 * zoom, 40 * zoom
+                11 * zoom, 35 * zoom
             )
         else:
             weapon.image.clip_composite_draw(
-                0, 0, 14, 40,
+                0, 0, 11, 35,
                 math.radians(draw_angle), '',
                 draw_x, draw_y,
-                14 * zoom, 40 * zoom
+                11 * zoom, 35 * zoom
             )
