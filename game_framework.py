@@ -1,11 +1,8 @@
-from pico2d import *
-
+import time
+frame_time = 0.0
 
 running = None
 stack = None
-frame_time = 0.0
-target_fps = 60
-
 
 def change_mode(mode):
     global stack
@@ -45,26 +42,23 @@ def quit():
 
 
 def run(start_mode):
-    global running, stack, frame_time, target_fps
-
+    global running, stack
     running = True
     stack = [start_mode]
     start_mode.init()
 
+    global frame_time
     frame_time = 0.0
-    frame_interval = 1.0 / target_fps
+    current_time = time.time()
 
     while running:
-        current_time = get_time()
-
         stack[-1].handle_events()
         stack[-1].update()
         stack[-1].draw()
 
-        elapsed = get_time() - current_time
-        if elapsed < frame_interval:
-            from pico2d import delay
-            delay(frame_interval - elapsed)
+        frame_time = time.time() - current_time
+        frame_rate = 1.0/frame_time
+        current_time += frame_time
 
     # repeatedly delete the top of the stack
     while (len(stack) > 0):

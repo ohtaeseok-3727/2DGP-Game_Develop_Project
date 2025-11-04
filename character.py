@@ -6,6 +6,7 @@ from sdl2 import *
 from state_machine import StateMachine
 import ctypes
 from sdl2.mouse import SDL_GetMouseState
+import game_framework
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -44,6 +45,13 @@ def key_up(e):
 
 def stop(e):
     return e[0] == 'STOP'
+
+PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
+RUN_SPEED_KMPH = 20.0  # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
 
 
 class Move:
@@ -103,8 +111,8 @@ class Move:
             self.character.frame = (self.character.frame + 1) % 8
             self.frame_time = get_time()
 
-        self.character.x += self.character.dir * 5
-        self.character.y += self.character.updown_dir * 5
+        self.character.x += self.character.dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.character.y += self.character.updown_dir * RUN_SPEED_PPS * game_framework.frame_time
 
         if (not self.character.left_pressed and not self.character.right_pressed and
                 not self.character.up_pressed and not self.character.down_pressed):

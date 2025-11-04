@@ -3,6 +3,14 @@ from pico2d import *
 from ctypes import *
 from sdl2 import *
 from worldmap import WorldMap
+import game_framework
+
+PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
+RUN_SPEED_KMPH = 50.0  # Km / Hour
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
 
 class dashstate:
     def __init__(self, character):
@@ -38,8 +46,8 @@ class dashstate:
         else:
             nx, ny = dx / length, dy / length
 
-        self.vx = nx * self.speed
-        self.vy = ny * self.speed
+        self.vx = nx * RUN_SPEED_PPS * game_framework.frame_time
+        self.vy = ny * RUN_SPEED_PPS * game_framework.frame_time
         self.distance = 0.0
         self.working = True
         self.last_dash_time = get_time()
