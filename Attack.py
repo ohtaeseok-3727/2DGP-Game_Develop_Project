@@ -89,14 +89,14 @@ class Attack:
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
-            self.attack_speed = 30
+            self.attack_speed = 40
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
-            self.attack_speed = 40
+            self.attack_speed = 33
             self.max_attack_count = 2
             self.attack_frame_width = 60
             self.attack_frame_height = 133
