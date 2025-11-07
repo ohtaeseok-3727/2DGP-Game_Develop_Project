@@ -87,10 +87,18 @@ class Monster:
          pass
 
     def die(self):
+
          pass
 
     def get_bb(self):
-         pass
+        half_w = self.frame_width / 2
+        half_h = self.frame_height / 2
+        return (
+            self.x - half_w,
+            self.y - half_h,
+            self.x + half_w,
+            self.y + half_h
+        )
 
     def handle_collision(self, group, other):
          pass
@@ -103,7 +111,7 @@ class Monster:
         sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
 
         self.image.clip_draw(
-            self.frame * self.frame_width, 0,
+            nt(self.frame) * self.frame_width, 0,
             self.frame_width, self.frame_height,
             sx, sy,
             self.frame_width * zoom, self.frame_height * zoom
