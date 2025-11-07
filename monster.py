@@ -160,8 +160,8 @@ class Monster:
          pass
 
     def get_bb(self):
-        half_w = self.frame_width / 2
-        half_h = self.frame_height / 2
+        half_w = (self.frame_width / 2) - self.frame_width / 20
+        half_h = (self.frame_height / 2) - self.frame_height / 5
         return (
             self.x - half_w,
             self.y - half_h,
@@ -177,6 +177,14 @@ class Monster:
             return
 
         self.state_machine.draw(camera)
+        # 바운딩 박스 그리기
+        left, bottom, right, top = self.get_bb()
+        if camera:
+            sl, sb = camera.apply(left, bottom)
+            sr, st = camera.apply(right, top)
+            draw_rectangle(sl, sb, sr, st)
+        else:
+            draw_rectangle(left, bottom, right, top)
 
         # HP 바 그리기(임시)
         if camera:
