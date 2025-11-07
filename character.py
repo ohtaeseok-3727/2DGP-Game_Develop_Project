@@ -269,6 +269,9 @@ class character:
         self.dash.update()
         self.weapon.update(camera)
 
+    def get_bb(self):
+        return self.x - 10, self.y - 10, self.x + 10, self.y + 10
+
     def draw(self, camera=None):
         self.state_machine.draw(camera)
         self.attack.draw(camera)
@@ -290,6 +293,13 @@ class character:
             sx, sy = screen_x, screen_y
 
         self.cursor.draw(sx, sy, 56, 66)
+        left, bottom, right, top = self.get_bb()
+        if camera:
+            sl, sb = camera.apply(left, bottom)
+            sr, st = camera.apply(right, top)
+            draw_rectangle(sl, sb, sr, st)
+        else:
+            draw_rectangle(left, bottom, right, top)
     def handle_event(self, event, camera=None):
         try:
             self.attack.on_input(event, camera)

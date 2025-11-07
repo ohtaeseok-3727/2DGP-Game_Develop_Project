@@ -18,7 +18,9 @@ ATTACK_SPEED_PPS = (ATTACK_SPEED_MPS * PIXEL_PER_METER)
 class AttackVisual:
     def __init__(self, attack):
         self.attack = attack
+        self.bb_corners = [(0, 0)] * 4
     def update(self, camera=None):
+        self.get_bb()
         pass
     def draw(self, camera=None):
         atk = self.attack
@@ -55,8 +57,74 @@ class AttackVisual:
                 sx, sy,
                 atk.attack_frame_width * zoom * atk.attack_range, atk.attack_frame_height * zoom * atk.attack_range
             )
-        pass
-    def 
+        if self.attack.active and self.bb_corners:
+            if camera:
+                screen_corners = [camera.apply(x, y) for x, y in self.bb_corners]
+            else:
+                screen_corners = self.bb_corners
+            # 회전된 사각형 그리기
+            for i in range(4):
+                x1, y1 = screen_corners[i]
+                x2, y2 = screen_corners[(i + 1) % 4]
+                draw_line(x1, y1, x2, y2)
+
+    def get_bb(self):
+        atk = self.attack
+        if not atk.active:
+            self.bb_corners = [(0, 0)] * 4
+            return 0, 0, 0, 0
+
+        if atk.character.weapon_rank == 1:
+            # 원거리 공격: 회전 없음
+            draw_x = atk.attack_x
+            draw_y = atk.attack_y
+            half_w = atk.attack_frame_width / 2
+            half_h = atk.attack_frame_height / 2
+
+            self.bb_corners = [
+                (draw_x - half_w, draw_y - half_h),
+                (draw_x + half_w, draw_y - half_h),
+                (draw_x + half_w, draw_y + half_h),
+                (draw_x - half_w, draw_y + half_h)
+            ]
+        else:
+            # 근접 공격: draw()와 동일한 계산
+            offset_x = math.cos(atk.attack_angle) * 25
+            offset_y = math.sin(atk.attack_angle) * 25
+
+            draw_x = atk.character.x + offset_x
+            draw_y = atk.character.y + offset_y
+
+            # draw()와 동일한 크기
+            half_w = (atk.attack_frame_width * atk.attack_range) / 2
+            half_h = (atk.attack_frame_height * atk.attack_range) / 2
+
+            # draw()와 동일한 회전 각도
+            draw_angle = atk.attack_angle - math.pi / 2
+
+            cos_a = math.cos(draw_angle)
+            sin_a = math.sin(draw_angle)
+
+            # 4개 꼭짓점 계산 (중심 기준 상대 좌표 -> 회전 -> 월드 좌표)
+            corners = [
+                (-half_w, -half_h),  # 좌하
+                (half_w, -half_h),  # 우하
+                (half_w, half_h),  # 우상
+                (-half_w, half_h)  # 좌상
+            ]
+
+            self.bb_corners = []
+            for px, py in corners:
+                rx = px * cos_a - py * sin_a
+                ry = px * sin_a + py * cos_a
+                self.bb_corners.append((draw_x + rx, draw_y + ry))
+
+        # AABB로 변환하여 반환 (충돌 감지용)
+        xs = [x for x, y in self.bb_corners]
+        ys = [y for x, y in self.bb_corners]
+
+        return (min(xs), min(ys), max(xs), max(ys))
+
 
 class Attack:
     motion = None
