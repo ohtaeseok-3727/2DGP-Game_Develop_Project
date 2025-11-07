@@ -8,6 +8,7 @@ from game_object import anvil
 import upgrade_mode
 import inventory_mode
 import status_mode
+from monster import Monster
 
 def handle_events():
     global running, anvil
@@ -33,7 +34,7 @@ def handle_events():
             char.handle_event(event, game_world.camera)
 
 def init():
-    global char, anvil, font
+    global char, anvil, font, monsters
 
     game_world.clear()
 
@@ -41,6 +42,18 @@ def init():
     char = character()
     camera = Camera(char)
     anvil = anvil()
+
+    monsters = []
+
+    small_slime1 = Monster(400, 300, 'small_blue_slime')
+    small_slime1.set_target(char)
+    game_world.add_object(small_slime1, 2)
+    monsters.append(small_slime1)
+
+    blue_slime1 = Monster(500, 400, 'blue_slime')
+    blue_slime1.set_target(char)
+    game_world.add_object(blue_slime1, 2)
+    monsters.append(blue_slime1)
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)

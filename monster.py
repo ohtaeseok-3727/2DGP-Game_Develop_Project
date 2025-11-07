@@ -32,6 +32,7 @@ class Monster:
             self.detection_range = 150
             self.attack_range = 5
             self.speed_multiplier = 1.0
+            self.state = 2 # 2:idle, 1:move, 0:die
 
             if 'small_blue_slime' not in Monster.images:
                 Monster.images['small_blue_slime'] = load_image('resource/monster/small_blue_slime_sprite_sheet.png')
@@ -41,12 +42,13 @@ class Monster:
             self.hp = 100
             self.max_hp = 100
             self.damage = 10
-            self.frame_width = 14
-            self.frame_height = 33
+            self.frame_width = 27
+            self.frame_height = 22
             self.max_frames = 10
             self.detection_range = 200
             self.attack_range = 30
             self.speed_multiplier = 0.8
+            self.state = 2  # 2:idle, 1:move, 0:die
 
             if 'blue_slime' not in Monster.images:
                 Monster.images['blue_slime'] = load_image('resource/monster/blue_slime_sprite_sheet.png')
@@ -70,16 +72,13 @@ class Monster:
 
             if distance < self.detection_range and distance > self.attack_range:
                 if distance > 0:
-                    # 정규화된 방향 벡터
                     nx = dx / distance
                     ny = dy / distance
 
-                    # 시간 기반 이동
                     move_speed = MONSTER_SPEED_PPS * self.speed_multiplier
                     self.x += nx * move_speed * game_framework.frame_time
                     self.y += ny * move_speed * game_framework.frame_time
 
-        # 피격 쿨타임
         if self.hit_cooldown > 0:
             self.hit_cooldown -= game_framework.frame_time
 
@@ -101,33 +100,7 @@ class Monster:
         )
 
     def handle_collision(self, group, other):
-         pass
+        pass
 
     def draw(self, camera=None):
-        if not self.is_alive:
-            return
-
-        zoom = camera.zoom if camera else 1.0
-        sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
-
-        self.image.clip_draw(
-            nt(self.frame) * self.frame_width, 0,
-            self.frame_width, self.frame_height,
-            sx, sy,
-            self.frame_width * zoom, self.frame_height * zoom
-        )
-
-        # HP 바
-        if camera:
-            bar_width = 40 * zoom
-            bar_height = 5 * zoom
-            bar_x = sx - bar_width / 2
-            bar_y = sy + (self.frame_height / 2 + 10) * zoom
-
-            # 배경 (빨간색)
-            draw_rectangle(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height)
-
-            # HP (초록색)
-            hp_ratio = max(0, self.hp / self.max_hp)
-            if hp_ratio > 0:
-                draw_rectangle(bar_x, bar_y, bar_x + bar_width * hp_ratio, bar_y + bar_height)
+        pass
