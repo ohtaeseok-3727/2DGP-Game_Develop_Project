@@ -3,8 +3,17 @@ from sdl2 import SDL_MOUSEBUTTONUP, SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN
 import math
 import ctypes
 from sdl2.mouse import SDL_GetMouseState
+
+import game_framework
 from worldmap import WorldMap
 import game_world
+
+PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
+ATTACK_SPEED_KMPH = 100.0  # Km / Hour
+ATTACK_SPEED_MPM = (ATTACK_SPEED_KMPH * 1000.0 / 60.0)
+ATTACK_SPEED_MPS = (ATTACK_SPEED_MPM / 60.0)
+ATTACK_SPEED_PPS = (ATTACK_SPEED_MPS * PIXEL_PER_METER)
+
 
 class AttackVisual:
     def __init__(self, attack):
@@ -47,6 +56,7 @@ class AttackVisual:
                 atk.attack_frame_width * zoom * atk.attack_range, atk.attack_frame_height * zoom * atk.attack_range
             )
         pass
+    def 
 
 class Attack:
     motion = None
@@ -60,7 +70,7 @@ class Attack:
         self.attack_frame_width = 0
         self.attack_frame_height = 0
         self.current_frame = 0
-        self.frame_time = 0
+        self.current_frame_f = 0.0
         self.release_requested = False
         self.active = False
         self.attack_angle = 0
@@ -86,6 +96,7 @@ class Attack:
             self.attack_frame_width = 60
             self.attack_frame_height = 133
             self.attack_range = 1
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 1.0
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
@@ -93,6 +104,7 @@ class Attack:
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 2.0
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
@@ -102,6 +114,7 @@ class Attack:
             self.attack_frame_height = 133
             self.combo_trigger_frame = 4
             self.attack_range = 1.5
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 1.4
             #근접 참격 강화 모션
 
     def can_attack(self):
@@ -137,8 +150,8 @@ class Attack:
 
         self.active = True
         self.attack_time = get_time()
-        self.frame_time = get_time()
         self.current_frame = 0
+        self.current_frame_f = 0.0
         self.release_requested = False
         self.last_attack_time = get_time()
 
@@ -183,14 +196,19 @@ class Attack:
         if not self.active:
             return
 
-        if get_time() - self.frame_time > 1.0 / self.attack_speed:
-            self.current_frame += 1
-            self.frame_time = get_time()
+        if self.attack_frame_width>0:
+            frames_per_second = self.attack_speed_pps / self.attack_frame_width
+        else:
+            frames_per_second = 0.0
+
+        prev_frame_int = self.current_frame
+        self.current_frame_f += frames_per_second * game_framework.frame_time
+        self.current_frame = int(self.current_frame_f)
 
         if self.character.weapon_rank == 2:
             if self.current_frame == self.combo_trigger_frame and self.combo_count < self.max_attack_count:
                 self.current_frame = 0
-                self.frame_time = get_time()
+                self.current_frame_f = 0.0
                 self.combo_count += 1
             elif self.current_frame >= self.attack_frame:
                 self.stop()
