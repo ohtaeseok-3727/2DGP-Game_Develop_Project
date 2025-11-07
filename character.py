@@ -293,6 +293,7 @@ class character:
             sx, sy = screen_x, screen_y
 
         self.cursor.draw(sx, sy, 56, 66)
+
         left, bottom, right, top = self.get_bb()
         if camera:
             sl, sb = camera.apply(left, bottom)

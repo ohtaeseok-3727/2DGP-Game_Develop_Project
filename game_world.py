@@ -61,6 +61,64 @@ def collide(a, b):
 
     return True
 
+
+def collide_obb(a, b):
+    """다중 바운딩 박스 OBB 충돌 검사"""
+    # AttackVisual 객체의 다중 바운딩 박스 처리
+    if hasattr(a, 'bb_list') and a.bb_list:
+        boxes_a = a.bb_list
+    else:
+        left, bottom, right, top = a.get_bb()
+        boxes_a = [[
+            (left, bottom), (right, bottom),
+            (right, top), (left, top)
+        ]]
+
+    if hasattr(b, 'bb_list') and b.bb_list:
+        boxes_b = b.bb_list
+    else:
+        left, bottom, right, top = b.get_bb()
+        boxes_b = [[
+            (left, bottom), (right, bottom),
+            (right, top), (left, top)
+        ]]
+
+    def get_axes(corners):
+        axes = []
+        for i in range(len(corners)):
+            p1 = corners[i]
+            p2 = corners[(i + 1) % len(corners)]
+            edge = (p2[0] - p1[0], p2[1] - p1[1])
+            normal = (-edge[1], edge[0])
+            length = (normal[0] ** 2 + normal[1] ** 2) ** 0.5
+            if length > 0:
+                axes.append((normal[0] / length, normal[1] / length))
+        return axes
+
+    def project(corners, axis):
+        dots = [c[0] * axis[0] + c[1] * axis[1] for c in corners]
+        return min(dots), max(dots)
+
+    def check_box_collision(box_a, box_b):
+        axes = get_axes(box_a) + get_axes(box_b)
+
+        for axis in axes:
+            min_a, max_a = project(box_a, axis)
+            min_b, max_b = project(box_b, axis)
+
+            if max_a < min_b or max_b < min_a:
+                return False
+        return True
+
+    # 모든 박스 조합 검사
+    for box_a in boxes_a:
+        for box_b in boxes_b:
+            if check_box_collision(box_a, box_b):
+                return True
+
+    return False
+
+
 collision_pair = {} # key : 충돌 종류, value : [a객체 리스트, b객체 리스트]
 
 def add_collision_pairs(group, a, b):
@@ -76,6 +134,12 @@ def handle_collisions():
     for group, pairs in collision_pair.items():
         for a in pairs[0]:
             for b in pairs[1]:
-                if collide(a, b):
+                # 공격 충돌은 OBB 사용
+                if hasattr(a, 'bb_corners') or hasattr(b, 'bb_corners'):
+                    if collide_obb(a, b):
+                        a.handle_collision(group, b)
+                        b.handle_collision(group, a)
+                # 일반 충돌은 AABB 사용
+                elif collide(a, b):
                     a.handle_collision(group, b)
                     b.handle_collision(group, a)
