@@ -2,12 +2,19 @@ from pico2d import *
 import math
 import game_framework
 import game_world
+from state_machine import StateMachine
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MONSTER_SPEED_KMPH = 10.0
 MONSTER_SPEED_MPM = (MONSTER_SPEED_KMPH * 1000.0 / 60.0)
 MONSTER_SPEED_MPS = (MONSTER_SPEED_MPM / 60.0)
 MONSTER_SPEED_PPS = (MONSTER_SPEED_MPS * PIXEL_PER_METER)
+
+def target_in_range(e):
+    return e[0] == 'TARGET_IN_RANGE'
+
+def target_out_of_range(e):
+    return e[0] == 'TARGET_OUT'
 
 
 class Monster:
