@@ -16,6 +16,80 @@ def target_in_range(e):
 def target_out_of_range(e):
     return e[0] == 'TARGET_OUT'
 
+class Idle:
+    def __init__(self, monster):
+        self.monster = monster
+
+    def enter(self, e):
+        self.monster.frame = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 6
+
+        # 타겟 감지
+        if self.monster.target:
+            dx = self.monster.target.x - self.monster.x
+            dy = self.monster.target.y - self.monster.y
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance < self.monster.detection_range:
+                self.monster.state_machine.handle_state_event(('TARGET_IN_RANGE', 0))
+
+    def draw(self, camera):
+        zoom = camera.zoom if camera else 1.0
+        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
+
+        frame_index = int(self.monster.frame)
+        self.monster.image.clip_draw(
+            frame_index * self.monster.frame_width, self.monster.frame_height*2,
+            self.monster.frame_width, self.monster.frame_height,
+            sx, sy,
+            self.monster.frame_width * zoom, self.monster.frame_height * zoom
+        )
+
+class Move:
+    def __init__(self, monster):
+        self.monster = monster
+
+    def enter(self, e):
+        self.monster.frame = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 5
+
+        if self.monster.target and (self.monster.target.is_alive if hasattr(self.monster.target, 'is_alive') else True):
+            dx = self.monster.target.x - self.monster.x
+            dy = self.monster.target.y - self.monster.y
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance >= self.monster.detection_range or distance <= self.monster.attack_range:
+                self.monster.state_machine.handle_state_event(('TARGET_OUT', 0))
+            elif distance > self.monster.attack_range:
+                nx = dx / distance
+                ny = dy / distance
+
+                move_speed = MONSTER_SPEED_PPS * self.monster.speed_multiplier * game_framework.frame_time
+                self.monster.x += nx * move_speed
+                self.monster.y += ny * move_speed
+
+    def draw(self, camera):
+        zoom = camera.zoom if camera else 1.0
+        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
+
+        self.monster.image.clip_draw(
+            int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
+            self.monster.frame_width, self.monster.frame_height,
+            sx, sy,
+            self.monster.frame_width * zoom, self.monster.frame_height * zoom
+        )
+
+
 
 class Monster:
     images = {}
@@ -39,7 +113,6 @@ class Monster:
             self.detection_range = 150
             self.attack_range = 5
             self.speed_multiplier = 1.0
-            self.state = 2 # 2:idle, 1:move, 0:die
 
             if 'small_blue_slime' not in Monster.images:
                 Monster.images['small_blue_slime'] = load_image('resource/monster/small_blue_slime_sprite_sheet.png')
@@ -55,13 +128,20 @@ class Monster:
             self.detection_range = 200
             self.attack_range = 30
             self.speed_multiplier = 0.8
-            self.state = 2  # 2:idle, 1:move, 0:die
 
             if 'blue_slime' not in Monster.images:
                 Monster.images['blue_slime'] = load_image('resource/monster/blue_slime_sprite_sheet.png')
             self.image = Monster.images['blue_slime']
 
         self.hit_cooldown = 0
+
+        self.idle = Idle(self)
+        self.move = Move(self)
+
+        self.state_machine = StateMachine(self.idle, {
+            self.idle: {target_in_range: self.move},
+            self.move: {target_out_of_range: self.idle}
+        })
 
     def set_target(self, target):
         self.target = target
@@ -70,24 +150,7 @@ class Monster:
         if not self.is_alive:
             return
 
-        self.frame = (self.frame + self.fps * game_framework.frame_time) % self.max_frames
-
-        if self.target and (self.target.is_alive if hasattr(self.target, 'is_alive') else True):
-            dx = self.target.x - self.x
-            dy = self.target.y - self.y
-            distance = math.sqrt(dx * dx + dy * dy)
-
-            if distance < self.detection_range and distance > self.attack_range:
-                if distance > 0:
-                    nx = dx / distance
-                    ny = dy / distance
-
-                    move_speed = MONSTER_SPEED_PPS * self.speed_multiplier
-                    self.x += nx * move_speed * game_framework.frame_time
-                    self.y += ny * move_speed * game_framework.frame_time
-
-        if self.hit_cooldown > 0:
-            self.hit_cooldown -= game_framework.frame_time
+        self.state_machine.update()
 
     def take_damage(self, damage):
          pass
@@ -110,4 +173,24 @@ class Monster:
         pass
 
     def draw(self, camera=None):
-        pass
+        if not self.is_alive:
+            return
+
+        self.state_machine.draw(camera)
+
+        # HP 바 그리기(임시)
+        if camera:
+            zoom = camera.zoom
+            sx, sy = camera.apply(self.x, self.y)
+            bar_width = 40 * zoom
+            bar_height = 5 * zoom
+            bar_x = sx - bar_width / 2
+            bar_y = sy + (self.frame_height / 2 + 10) * zoom
+
+            # HP 바 테두리
+            draw_rectangle(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height)
+
+            # HP 바 내부
+            hp_ratio = max(0, self.hp / self.max_hp)
+            if hp_ratio > 0:
+                draw_rectangle(bar_x, bar_y, bar_x + bar_width * hp_ratio, bar_y + bar_height)
