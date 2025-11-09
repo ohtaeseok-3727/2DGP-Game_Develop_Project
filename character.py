@@ -203,6 +203,11 @@ class character:
     def __init__(self):
         self.image = load_image('resource/character/character_sprites_vertical_merged.png')
         self.cursor = None
+        self.hp_background = load_image('resource/character/HP_Background.png')
+        self.hp = load_image('resource/character/HP.png')
+        self.dash_background = load_image('resource/character/DashHUD.png')
+        self.dash_icon = load_image('resource/character/DashHUD 1.png')
+
         self.x = WorldMap.width/2
         self.y = WorldMap.height/2
         self.frame = 0
@@ -218,6 +223,9 @@ class character:
         self.STR = 20
         self.critical = 0.05
         self.critical_damage = 1.5
+
+        self.max_hp = 100
+        self.now_hp = self.max_hp
 
         self.left_pressed = False
         self.right_pressed = False
@@ -266,6 +274,42 @@ class character:
             draw_rectangle(sl, sb, sr, st)
         else:
             draw_rectangle(left, bottom, right, top)
+
+        screen_height = get_canvas_height()
+        hp_bar_x = 20
+        hp_bar_y = screen_height - 50
+
+        if self.hp_background:
+            self.hp_background.draw(hp_bar_x + 105, hp_bar_y + 17, 210, 34)
+
+        hp_ratio = max(0, min(1, self.now_hp / self.max_hp))
+        hp_width = 200 * hp_ratio
+
+        # HP 바 이미지 그리기
+        if self.hp and hp_ratio > 0:
+            self.hp.clip_draw(
+                0, 0,
+                int(200 * hp_ratio), 30,
+                hp_bar_x + 5 + hp_width / 2, hp_bar_y + 17,
+                hp_width, 30
+            )
+
+        # 대쉬 HUD 그리기
+        dash_hud_y = hp_bar_y - 50
+        dash_spacing = 40
+        dash_size = 30
+
+        for i in range(self.max_dash):
+            dash_x = hp_bar_x + i * dash_spacing
+
+            if self.dash_background:
+                self.dash_background.draw(dash_x + dash_size / 2, dash_hud_y, dash_size, dash_size)
+
+            if i < self.can_dash and self.dash_icon:
+                self.dash_icon.draw(dash_x + dash_size / 2, dash_hud_y, dash_size, dash_size)
+
+
+
     def handle_event(self, event, camera=None):
         try:
             self.attack.on_input(event, camera)
