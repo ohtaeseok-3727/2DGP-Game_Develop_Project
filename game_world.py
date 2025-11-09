@@ -1,9 +1,14 @@
 world = [[],[],[]]
 camera = None
+cursor = None
 
 def set_camera(cam):
     global camera
     camera = cam
+
+def set_cursor(csr):
+    global cursor
+    cursor = csr
 
 def add_object(o, depth):
     world[depth].append(o)
@@ -30,6 +35,8 @@ def remove_object(o):
 def update():
     if camera:
         camera.update()
+    if cursor:
+        cursor.update(camera)
 
     for layer in world:
         for o in layer:
@@ -45,6 +52,10 @@ def render():
     for layer in world:
         for o in layer:
             o.draw(camera)
+
+def render_cursor():
+    if cursor:
+        cursor.draw(camera)
 
 def clear():
     for layer in world:

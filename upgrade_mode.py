@@ -58,6 +58,8 @@ def draw():
     for button in buttons:
         button.draw()
 
+    game_world.render_cursor()
+
     if char:
         rank_text = f"현재 무기 랭크: {char.weapon_rank}"
 

@@ -9,6 +9,7 @@ import upgrade_mode
 import inventory_mode
 import status_mode
 from monster import Monster
+from cursor import Cursor
 
 def handle_events():
     global running, anvil
@@ -42,6 +43,10 @@ def init():
     char = character()
     camera = Camera(char)
     anvil = anvil()
+
+    cursor = Cursor()
+    char.cursor = cursor
+    game_world.set_cursor(cursor)
 
     monsters = []
 
@@ -101,6 +106,7 @@ def draw():
     except Exception as e:
         print(f'Font draw error: {e}')
         pass
+    game_world.render_cursor() 
     update_canvas()
 
 def finish():

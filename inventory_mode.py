@@ -32,6 +32,7 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
+    game_world.render_cursor()
     update_canvas()
 
 

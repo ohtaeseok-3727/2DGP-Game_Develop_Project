@@ -7,6 +7,7 @@ from state_machine import StateMachine
 import ctypes
 from sdl2.mouse import SDL_GetMouseState
 import game_framework
+from cursor import Cursor
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -201,7 +202,7 @@ class Idle:
 class character:
     def __init__(self):
         self.image = load_image('resource/character/character_sprites_vertical_merged.png')
-        self.cursor = load_image('resource/character/Cursor.png')
+        self.cursor = None
         self.x = WorldMap.width/2
         self.y = WorldMap.height/2
         self.frame = 0
@@ -235,29 +236,10 @@ class character:
         })
 
     def update(self, camera=None):
-        mx, my = 0, 0
-        try:
-            x = ctypes.c_int(0)
-            y = ctypes.c_int(0)
-            SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
-
-            screen_x = x.value
-            screen_y = WorldMap.height - y.value
-
-            # 카메라가 있으면 스크린 좌표를 월드 좌표로 변환
-            if camera:
-                mx, my = camera.screen_to_world(screen_x, screen_y)
-            else:
-                mx, my = screen_x, screen_y
-
-            dx, dy = mx - self.x, my - self.y
+        if self.cursor:
+            dx, dy = self.cursor.x - self.x, self.cursor.y - self.y
             self.face_dir = 1 if dx >= 0 else -1
             self.face_updown_dir = 1 if dy >= 0 else -1
-
-        except Exception as e:
-            pass
-        except:
-            pass
 
         if self.can_dash < 2 and get_time() - self.dash_recovery_time > 5:
             self.can_dash += 1
@@ -276,23 +258,6 @@ class character:
         self.state_machine.draw(camera)
         self.attack.draw(camera)
         self.weapon.draw(camera)
-        import ctypes
-        from sdl2.mouse import SDL_GetMouseState
-
-        x = ctypes.c_int(0)
-        y = ctypes.c_int(0)
-        SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
-
-        screen_x = x.value
-        screen_y = WorldMap.height - y.value
-
-        if camera:
-            world_x, world_y = camera.screen_to_world(screen_x, screen_y)
-            sx, sy = camera.apply(world_x, world_y)
-        else:
-            sx, sy = screen_x, screen_y
-
-        self.cursor.draw(sx, sy, 56, 66)
 
         left, bottom, right, top = self.get_bb()
         if camera:
