@@ -93,6 +93,8 @@ class Move:
 
 class Monster:
     images = {}
+    hp_bar = None
+    hp_background = None
     def __init__(self, x, y, monster_type='blue_slime'):
         self.x = x
         self.y = y
@@ -134,6 +136,10 @@ class Monster:
             self.image = Monster.images['blue_slime']
 
         self.hit_cooldown = 0
+
+        if Monster.hp_bar == None or Monster.hp_background == None:
+            Monster.hp_bar = load_image('resource/character/HP.png')
+            Monster.hp_background = load_image('resource/character/HP_Background.png')
 
         self.idle = Idle(self)
         self.move = Move(self)
@@ -186,19 +192,24 @@ class Monster:
         else:
             draw_rectangle(left, bottom, right, top)
 
-        # HP 바 그리기(임시)
         if camera:
             zoom = camera.zoom
             sx, sy = camera.apply(self.x, self.y)
-            bar_width = 40 * zoom
+            bar_width = 50 * zoom
             bar_height = 5 * zoom
             bar_x = sx - bar_width / 2
             bar_y = sy + (self.frame_height / 2 + 10) * zoom
 
-            # HP 바 테두리
-            draw_rectangle(bar_x, bar_y, bar_x + bar_width, bar_y + bar_height)
+            if Monster.hp_background:
+                Monster.hp_background.draw(bar_x + 52, bar_y + 11, 104, 22)
 
-            # HP 바 내부
-            hp_ratio = max(0, self.hp / self.max_hp)
-            if hp_ratio > 0:
-                draw_rectangle(bar_x, bar_y, bar_x + bar_width * hp_ratio, bar_y + bar_height)
+            hp_ratio = max(0, min(1, self.hp / self.max_hp))
+            hp_width = 100 * hp_ratio
+
+            if self.hp and hp_ratio > 0:
+                Monster.hp_bar.clip_draw(
+                    0, 0,
+                    int(200 * hp_ratio), 30,
+                    bar_x + 2 + hp_width / 2, bar_y + 10,
+                    hp_width, 20
+                )
