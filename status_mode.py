@@ -4,21 +4,31 @@ import game_playmode
 from Attack import Attack
 from weapon import weapon
 import game_world
+from worldmap import WorldMap
 
 
-class UpgradeButton:
-    def __init__(self, x, y, width, height, rank, text):
+class State_UI:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.image = load_image(f'resource/character/CharacterUI_Base.png')
         pass
 
     def is_clicked(self, mx, my):
         pass
     def draw(self):
+        self.image.draw(self.x, self.y, self.width, self.height)
         pass
 
 
 
 
 def init():
+    global char, state_ui
+    char = game_playmode.char
+    state_ui = State_UI(WorldMap.width/8, WorldMap.height/2, 320, 446)
     pass
 
 def finish():
@@ -32,6 +42,8 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
+    state_ui.draw()
+    game_world.render_cursor()
     update_canvas()
 
 
@@ -41,7 +53,7 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:
-            if event.key == SDLK_ESCAPE or event.key == SDLK_f:
+            if event.key == SDLK_ESCAPE or event.key == SDLK_c:
                 game_framework.pop_mode()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx, my = event.x, get_canvas_height() - event.y
