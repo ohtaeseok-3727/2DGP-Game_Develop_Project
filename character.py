@@ -57,8 +57,6 @@ TIME_PER_ACTION = 0.02
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
-
-
 class Move:
     def __init__(self, character):
         self.character = character
@@ -229,7 +227,7 @@ class character:
         self.critical_damage = 1.5
 
         self.max_hp = 100
-        self.now_hp = self.max_hp
+        self.now_hp = 60
 
         self.left_pressed = False
         self.right_pressed = False
@@ -297,6 +295,7 @@ class character:
                 hp_bar_x + 5 + hp_width / 2, hp_bar_y + 17,
                 hp_width, 30
             )
+
 
         # 대쉬 HUD 그리기
         dash_hud_y = hp_bar_y - 50
