@@ -55,8 +55,12 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE or event.key == SDLK_c:
                 game_framework.pop_mode()
-        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
-            mx, my = event.x, get_canvas_height() - event.y
+            else:
+                char.handle_event(event, game_world.camera)
+        elif event.type == SDL_KEYUP:
+            char.handle_event(event, game_world.camera)
+        elif event.type == SDL_MOUSEBUTTONDOWN or event.type == SDL_MOUSEBUTTONUP:
+            char.handle_event(event, game_world.camera)
 
 
 def pause():
