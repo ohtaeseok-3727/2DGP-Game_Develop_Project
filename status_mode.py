@@ -5,6 +5,7 @@ from Attack import Attack
 from weapon import weapon
 import game_world
 from worldmap import WorldMap
+import math
 
 
 class State_UI:
@@ -20,6 +21,11 @@ class State_UI:
         pass
     def draw(self):
         self.image.draw(self.x, self.y, self.width, self.height)
+        if game_playmode.char.weapon.image:
+            game_playmode.char.weapon.image.clip_composite_draw(0, 0, 11, 35,
+                math.radians(270), 'h',
+                self.x, self.y + self.height/6,
+                11 * 10, 35 * 10)
         pass
 
 
@@ -28,7 +34,7 @@ class State_UI:
 def init():
     global char, state_ui
     char = game_playmode.char
-    state_ui = State_UI(WorldMap.width/8, WorldMap.height/2, 320, 446)
+    state_ui = State_UI(WorldMap.width/5, WorldMap.height/2, 480, 669)
     pass
 
 def finish():
