@@ -55,7 +55,7 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:
-            if event.key == SDLK_ESCAPE or event.key == SDLK_f:
+            if event.key == SDLK_ESCAPE or event.key == SDLK_v:
                 game_framework.pop_mode()
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx, my = event.x, get_canvas_height() - event.y
