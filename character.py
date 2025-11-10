@@ -53,6 +53,10 @@ RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
+TIME_PER_ACTION = 0.02
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+FRAMES_PER_ACTION = 8
+
 
 
 class Move:
@@ -109,7 +113,7 @@ class Move:
             pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
-            self.character.frame = (self.character.frame + 1) % 8
+            self.character.frame = (self.character.frame+FRAMES_PER_ACTION*ACTION_PER_TIME*game_framework.frame_time) % 8
             self.frame_time = get_time()
 
         self.character.x += self.character.dir * RUN_SPEED_PPS * game_framework.frame_time
@@ -124,23 +128,23 @@ class Move:
         zoom = camera.zoom if camera else 1.0
 
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame * 18, 19,
+            self.character.image.clip_draw(int(self.character.frame) * 18, 19,
                                            18, 19,
                                            sx, sy,
                                            18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 19,
+            self.character.image.clip_composite_draw(int(self.character.frame) * 18, 19,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
                                                      18 * zoom, 19 * zoom)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame * 18, 0,
+            self.character.image.clip_draw(int(self.character.frame) * 18, 0,
                                            18, 19,
                                            sx, sy,
                                            18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame * 18, 0,
+            self.character.image.clip_composite_draw(int(self.character.frame) * 18, 0,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
@@ -167,7 +171,7 @@ class Idle:
             pass
     def do(self):
         if get_time() - self.frame_time > 1.0 / self.fps:
-            self.character.frame = (self.character.frame + 1) % 6
+            self.character.frame = (self.character.frame+FRAMES_PER_ACTION*ACTION_PER_TIME*game_framework.frame_time) % 6
             self.frame_time = get_time()
         pass
     def draw(self, camera=None):
@@ -175,23 +179,23 @@ class Idle:
         zoom = camera.zoom if camera else 1.0
 
         if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_draw(self.character.frame*18, 57,
+            self.character.image.clip_draw(int(self.character.frame)*18, 57,
                                            18, 19,
                                            sx, sy,
                                            18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == -1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 57,
+            self.character.image.clip_composite_draw(int(self.character.frame)*18, 57,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
                                                      18 * zoom, 19 * zoom)
         if self.character.face_dir == 1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_draw(self.character.frame*18, 38,
+            self.character.image.clip_draw(int(self.character.frame)*18, 38,
                                            18, 19,
                                            sx, sy,
                                            18 * zoom, 19 * zoom)
         if self.character.face_dir == -1 and self.character.face_updown_dir == 1:
-            self.character.image.clip_composite_draw(self.character.frame*18, 38,
+            self.character.image.clip_composite_draw(int(self.character.frame)*18, 38,
                                                      18, 19,
                                                      0, 'h',
                                                      sx, sy,
