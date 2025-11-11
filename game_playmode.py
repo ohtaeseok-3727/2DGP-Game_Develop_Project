@@ -1,3 +1,5 @@
+import random
+
 from pico2d import *
 from character import character
 from worldmap import WorldMap
@@ -50,10 +52,11 @@ def init():
 
     monsters = []
 
-    small_slime1 = Monster(400, 300, 'small_blue_slime')
-    small_slime1.set_target(char)
-    game_world.add_object(small_slime1, 2)
-    monsters.append(small_slime1)
+    for i in range(5):
+        small_slime = Monster(random.randint(100, 700), random.randint(100, 500), 'small_blue_slime')
+        small_slime.set_target(char)
+        game_world.add_object(small_slime, 2)
+        monsters.append(small_slime)
 
     blue_slime1 = Monster(500, 400, 'blue_slime')
     blue_slime1.set_target(char)
