@@ -22,11 +22,12 @@ class weapon:
     greatsword_breaker = {'name': '브레이커', 'damage': 0, 'attack1_width' :74, 'attack1_height': 111, 'attack2_width' :120, 'attack2_height': 116, 'speed': 0.9}
 
     image = None
-
+    name = ''
     def __init__(self, character):
         self.character = character
         self.x = character.x
         self.y = character.y
+        self.attack_coefficient = 0.0
 
         self.angle = 0
         # 캐릭터 중심에서 손까지의 거리
@@ -37,10 +38,16 @@ class weapon:
         if self.character.weapon_type == 'katana':
             if self.character.weapon_rank == 0:
                 weapon.image = load_image('resource/weapon/katana/katana_Default.png')
+                weapon.name = '카타나'
+                self.attack_coefficient = 1.0
             elif self.character.weapon_rank == 1:
                 weapon.image = load_image('resource/weapon/katana/katana_Hou.png')
+                weapon.name = '호우'
+                self.attack_coefficient = 1.5
             elif self.character.weapon_rank == 2:
                 weapon.image = load_image('resource/weapon/katana/katana_Muramasa.png')
+                self.attack_coefficient = 1.0
+                weapon.name = '무라마사'
         pass
 
     def update(self, camera=None):
