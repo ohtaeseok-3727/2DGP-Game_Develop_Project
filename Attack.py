@@ -50,16 +50,16 @@ class AttackVisual:
             ]]
         else:
             # 근접 공격: 하나의 박스
-            offset_x = math.cos(atk.attack_angle) * 25
-            offset_y = math.sin(atk.attack_angle) * 25
+            offset_x = math.cos(atk.attack_start_angle) * 25
+            offset_y = math.sin(atk.attack_start_angle) * 25
 
-            base_x = atk.character.x + offset_x
-            base_y = atk.character.y + offset_y
+            base_x = atk.attack_start_x + offset_x
+            base_y = atk.attack_start_y + offset_y
 
             full_w = (atk.attack_frame_width * atk.attack_range)
             full_h = (atk.attack_frame_height * atk.attack_range)
 
-            draw_angle = atk.attack_angle - math.pi / 2
+            draw_angle = atk.attack_start_angle - math.pi / 2
             cos_a = math.cos(draw_angle)
             sin_a = math.sin(draw_angle)
 
@@ -201,34 +201,34 @@ class Attack:
 
         self.visual = None
 
+        self.attack_start_x = 0
+        self.attack_start_y = 0
+        self.attack_start_angle = 0
 
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
-            self.attack_speed = 15
             self.max_attack_count = 1
             self.attack_frame_width = 60
             self.attack_frame_height = 133
             self.attack_range = 1
-            self.attack_speed_pps = ATTACK_SPEED_PPS * 1.0
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 1.4
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 1:
             Attack.motion = load_image('resource/weapon/katana/katana_Hou_swing_sprite_sheet.png')
             self.attack_frame = 11
-            self.attack_speed = 40
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
-            self.attack_speed_pps = ATTACK_SPEED_PPS * 2.0
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 2.8
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
-            self.attack_speed = 33
             self.max_attack_count = 2
             self.attack_frame_width = 60
             self.attack_frame_height = 133
             self.combo_trigger_frame = 4
             self.attack_range = 1.5
-            self.attack_speed_pps = ATTACK_SPEED_PPS * 1.4
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 3.0
             #근접 참격 강화 모션
 
         self.damage = self.character.ATK * self.character.weapon.attack_coefficient
@@ -274,6 +274,10 @@ class Attack:
             delta_x = world_x - self.character.x
             delta_y = world_y - self.character.y
             self.attack_angle = math.atan2(delta_y, delta_x)
+
+        self.attack_start_x = self.character.x
+        self.attack_start_y = self.character.y
+        self.attack_start_angle = self.attack_angle
 
         self.active = True
         self.attack_time = get_time()
