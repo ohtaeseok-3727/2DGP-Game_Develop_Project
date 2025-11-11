@@ -12,6 +12,7 @@ import inventory_mode
 import status_mode
 from monster import Monster
 from cursor import Cursor
+from Attack import *
 
 def handle_events():
     global running, anvil
@@ -69,9 +70,10 @@ def init():
     game_world.add_object(anvil, 1)
 
     for monster in monsters:
-        game_world.add_collision_pairs('monster:monster', monster, None)
-    for monster in monsters:
         game_world.add_collision_pairs('monster:monster', None, monster)
+    for monster in monsters:
+        game_world.add_collision_pairs('monster:monster', monster, None)
+
 
     font = None
     candidates = [

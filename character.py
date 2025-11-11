@@ -8,6 +8,7 @@ import ctypes
 from sdl2.mouse import SDL_GetMouseState
 import game_framework
 from cursor import Cursor
+import game_world
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -237,13 +238,15 @@ class character:
         self.idle = Idle(self)
         self.move = Move(self)
         self.dash = dashstate(self)
-        self.attack = Attack(self)
         self.weapon = weapon(self)
+        self.attack = Attack(self)
 
         self.state_machine = StateMachine(self.idle, {
             self.idle: {space_down : self.idle, F_down:self.idle, key_down: self.move},
             self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle},
         })
+
+        game_world.add_collision_pairs('character:monster', self, None)
 
     def update(self, camera=None):
         if self.cursor:
@@ -310,6 +313,9 @@ class character:
 
             if i < self.can_dash and self.dash_icon:
                 self.dash_icon.draw(dash_x + dash_size / 2, dash_hud_y, dash_size, dash_size)
+
+    def handle_collision(self, group, other):
+        pass
 
 
 

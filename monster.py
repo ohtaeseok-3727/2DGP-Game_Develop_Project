@@ -113,8 +113,8 @@ class Monster:
             self.frame_height = 12
             self.max_frames = 6
             self.detection_range = 150
-            self.attack_range = 5
             self.speed_multiplier = 1.0
+            self.attack_range = 10
 
             if 'small_blue_slime' not in Monster.images:
                 Monster.images['small_blue_slime'] = load_image('resource/monster/small_blue_slime_sprite_sheet.png')
@@ -128,18 +128,21 @@ class Monster:
             self.frame_height = 22
             self.max_frames = 10
             self.detection_range = 200
-            self.attack_range = 30
             self.speed_multiplier = 0.8
+            self.attack_range = 30
 
             if 'blue_slime' not in Monster.images:
                 Monster.images['blue_slime'] = load_image('resource/monster/blue_slime_sprite_sheet.png')
             self.image = Monster.images['blue_slime']
 
-        self.hit_cooldown = 0
+        self.hit_cooldown = 0.1
 
         if Monster.hp_bar == None or Monster.hp_background == None:
             Monster.hp_bar = load_image('resource/character/HP.png')
             Monster.hp_background = load_image('resource/character/HP_Background.png')
+
+        self.monster_type = monster_type
+        self.name = monster_type
 
         self.idle = Idle(self)
         self.move = Move(self)
@@ -148,6 +151,9 @@ class Monster:
             self.idle: {target_in_range: self.move},
             self.move: {target_out_of_range: self.idle}
         })
+
+        game_world.add_collision_pairs('character:monster', None, self)
+        game_world.add_collision_pairs('monster:attack', self, None)
 
     def set_target(self, target):
         self.target = target
@@ -158,13 +164,6 @@ class Monster:
 
         self.state_machine.update()
 
-    def take_damage(self, damage):
-         pass
-
-    def die(self):
-
-         pass
-
     def get_bb(self):
         half_w = (self.frame_width / 2) - self.frame_width / 20
         half_h = (self.frame_height / 2) - self.frame_height / 5
@@ -174,6 +173,13 @@ class Monster:
             self.x + half_w,
             self.y + half_h
         )
+
+    def take_damage(self, damage):
+        """데미지를 받는 메서드"""
+        self.hp -= damage
+        print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
+        if self.hp <= 0:
+            self.die()
 
     def handle_collision(self, group, other):
         if group == 'monster:monster':
@@ -198,6 +204,9 @@ class Monster:
                 self.y += ny * push_distance
                 other.x -= nx * push_distance
                 other.y -= ny * push_distance
+
+        if group == 'monster:attack':
+            pass
 
     def draw(self, camera=None):
         if not self.is_alive:
