@@ -22,7 +22,9 @@ class Back:
                 self.y - self.height // 2 < my < self.y + self.height // 2)
 
     def draw(self):
-        self.image.draw(self.x, self.y, self.width, self.height)
+        screen_x = get_canvas_width() // 2
+        screen_y = get_canvas_height() // 2
+        self.image.draw(screen_x, screen_y, self.width, self.height)
 
 
 
@@ -30,7 +32,7 @@ class Back:
 def init():
     global char, back_ui
     char = game_playmode.char
-    back_ui = Back(WorldMap.width/2, WorldMap.height/2, 846, 528)
+    back_ui = Back(get_canvas_width() // 2, get_canvas_height() // 2, 846, 528)
     pass
 
 def finish():

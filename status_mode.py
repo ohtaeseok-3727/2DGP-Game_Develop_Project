@@ -33,19 +33,21 @@ class State_UI:
     def is_clicked(self, mx, my):
         pass
     def draw(self):
-        self.image.draw(self.x, self.y, self.width, self.height)
+        screen_x = self.width // 2 + 20
+        screen_y = get_canvas_height() // 2
+        self.image.draw(screen_x, screen_y, self.width, self.height)
         if game_playmode.char.weapon.image:
             game_playmode.char.weapon.image.clip_composite_draw(0, 0, 11, 35,
                 math.radians(270), 'h',
-                self.x, self.y + self.height/6,
+                screen_x, screen_y + self.height/6,
                 11 * 8, 35 * 8)
 
         if self.font_15 and self.font_20:
             char = game_playmode.char
             wp = game_playmode.char.weapon
             at = game_playmode.char.attack
-            base_x = self.x - 180
-            base_y = self.y - 130
+            base_x = screen_x - 180
+            base_y = screen_y - 130
             line_height = 30
 
             self.font_20.draw(base_x + 50, base_y + line_height*4, f'무기 정보({wp.name})', (255, 255, 255))
@@ -56,7 +58,7 @@ class State_UI:
             self.font_20.draw(base_x+50, base_y+line_height, f'캐릭터 정보', (255, 255, 255))
 
             self.font_15.draw(base_x, base_y, f'HP: {char.now_hp} / {char.max_hp}', (255, 255, 255))
-            self.font_15.draw(base_x, base_y - line_height, f'STR: {char.STR}', (255, 255, 255))
+            self.font_15.draw(base_x, base_y - line_height, f'공격력: {char.ATK}', (255, 255, 255))
             self.font_15.draw(base_x, base_y - line_height * 2, f'치명타율: {char.critical * 100:.1f}%',
                                   (255, 255, 255))
             self.font_15.draw(base_x, base_y - line_height * 3, f'치명타 데미지: {char.critical_damage * 100:.0f}%',
@@ -71,7 +73,7 @@ class State_UI:
 def init():
     global char, state_ui
     char = game_playmode.char
-    state_ui = State_UI(WorldMap.width/5, WorldMap.height/2, 480, 669)
+    state_ui = State_UI(20, get_canvas_height() // 2, 480, 669)
     pass
 
 def finish():
