@@ -248,6 +248,8 @@ class Attack:
         if self.active:
             return
 
+        self.damage = self.character.ATK * self.character.weapon.attack_coefficient
+
         # 기존 visual이 있으면 완전히 제거
         if self.visual is not None and self.combo_count == 0:
             try:
