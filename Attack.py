@@ -192,7 +192,7 @@ class Attack:
         self.attack_y = 0
         self.attack_range = 1
 
-        self.is_combo_count = False
+        self.is_combo_active = False
         self.combo_count = 0
         self.combo_trigger_frame = 4
 
@@ -245,7 +245,7 @@ class Attack:
             return
 
         # 기존 visual이 있으면 완전히 제거
-        if self.visual is not None:
+        if self.visual is not None and self.combo_count == 0:
             try:
                 game_world.remove_collision_object(self.visual)
                 game_world.remove_object(self.visual)
@@ -283,8 +283,9 @@ class Attack:
         self.last_attack_time = get_time()
 
         if self.character.weapon_rank == 2 :
+            if self.combo_count==0:
+                self.is_combo_active = True
             self.combo_count += 1
-            self.is_combo_count = True
 
         try:
             if self.visual is None:
@@ -342,10 +343,24 @@ class Attack:
         self.current_frame = int(self.current_frame_f)
 
         if self.character.weapon_rank == 2:
-            if self.current_frame == self.combo_trigger_frame and self.combo_count < self.max_attack_count:
+            if (self.current_frame == self.combo_trigger_frame and
+                    prev_frame_int != self.combo_trigger_frame and
+                    self.combo_count < self.max_attack_count):
+
+                self.active = False
+
+                # visual은 제거하지 않고 재사용
+                if self.visual:
+                    self.visual.hit_targets.clear()
+
+                # 프레임 리셋하고 바로 다음 공격 시작
                 self.current_frame = 0
                 self.current_frame_f = 0.0
+                self.active = True
                 self.combo_count += 1
+
+            elif self.current_frame >= self.attack_frame:
+                self.stop()
             elif self.current_frame >= self.attack_frame:
                 self.stop()
         else:
