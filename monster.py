@@ -176,10 +176,26 @@ class Monster:
 
     def take_damage(self, damage):
         """데미지를 받는 메서드"""
+        if not self.is_alive:
+            return
+
         self.hp -= damage
         print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
         if self.hp <= 0:
             self.die()
+
+    def die(self):
+        if not self.is_alive:
+            return
+
+        print(f'{self.name}이(가) 사망했습니다.')
+        self.is_alive = False
+
+        try:
+            game_world.remove_collision_object(self)
+            game_world.remove_object(self)
+        except Exception as e:
+            print(f'몬스터 제거 오류: {e}')
 
     def handle_collision(self, group, other):
         if group == 'monster:monster':
