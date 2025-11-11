@@ -1,8 +1,8 @@
 from pico2d import *
 
 class WorldMap:
-    width = 1366
-    height = 768
+    width = 800
+    height = 600
     cell = 64
 
     def __init__(self):

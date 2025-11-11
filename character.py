@@ -222,8 +222,8 @@ class character:
         self.dash_recovery_time = 0
         self.weapon_type = 'katana' # 카타나 또는 대검
         self.weapon_rank = 0 # 0: 기본 1: 원거리 참격 2: 근접 참격 강화
-        self.STR = 20
-        self.critical = 0.05
+        self.ATK = 20
+        self.critical = 0.00
         self.critical_damage = 1.5
 
         self.max_hp = 100
