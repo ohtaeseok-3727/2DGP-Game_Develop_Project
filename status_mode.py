@@ -40,7 +40,7 @@ class State_UI:
                 self.x, self.y + self.height/6,
                 11 * 8, 35 * 8)
 
-        if self.font:
+        if self.font_15 and self.font_20:
             char = game_playmode.char
             wp = game_playmode.char.weapon
             at = game_playmode.char.attack
@@ -48,25 +48,20 @@ class State_UI:
             base_y = self.y - 130
             line_height = 30
 
-            if self.font_15 and self.font_20:
-                char = game_playmode.char
-                wp = game_playmode.char.weapon
-                at = game_playmode.char.attack
-                base_x = self.x - 180
-                base_y = self.y - 130
-                line_height = 30
+            self.font_20.draw(base_x + 50, base_y + line_height*4, f'무기 정보({wp.name})', (255, 255, 255))
 
-                self.font_20.draw(base_x + 50, base_y + 120, f'무기 정보({wp.name})', (255, 255, 255))
+            self.font_15.draw(base_x, base_y + line_height*3, f'무기계수: {wp.attack_coefficient}', (255, 255, 255))
+            self.font_15.draw(base_x, base_y + line_height*2, f'무기 공격 횟수: {at.max_attack_count}',  (255, 255, 255))
 
-                self.font_15.draw(base_x, base_y + 100, f'무기계수: {wp.attack_coefficient}', (255, 255, 255))
-                self.font_15.draw(base_x, base_y + 80, f'무기 공격 횟수: {at.max_attack_count}', (255, 255, 255))
-                self.font_15.draw(base_x, base_y, f'HP: {char.now_hp} / {char.max_hp}', (255, 255, 255))
-                self.font_15.draw(base_x, base_y - line_height, f'STR: {char.STR}', (255, 255, 255))
-                self.font_15.draw(base_x, base_y - line_height * 2, f'치명타율: {char.critical * 100:.1f}%',
+            self.font_20.draw(base_x+50, base_y+line_height, f'캐릭터 정보', (255, 255, 255))
+
+            self.font_15.draw(base_x, base_y, f'HP: {char.now_hp} / {char.max_hp}', (255, 255, 255))
+            self.font_15.draw(base_x, base_y - line_height, f'STR: {char.STR}', (255, 255, 255))
+            self.font_15.draw(base_x, base_y - line_height * 2, f'치명타율: {char.critical * 100:.1f}%',
                                   (255, 255, 255))
-                self.font_15.draw(base_x, base_y - line_height * 3, f'치명타 데미지: {char.critical_damage * 100:.0f}%',
+            self.font_15.draw(base_x, base_y - line_height * 3, f'치명타 데미지: {char.critical_damage * 100:.0f}%',
                                   (255, 255, 255))
-                self.font_15.draw(base_x, base_y - line_height * 4, f'대쉬: {char.can_dash} / {char.max_dash}',
+            self.font_15.draw(base_x, base_y - line_height * 4, f'대쉬: {char.can_dash} / {char.max_dash}',
                                   (255, 255, 255))
         pass
 
