@@ -157,3 +157,36 @@ def handle_collisions():
                 elif collide(a, b):
                     a.handle_collision(group, b)
                     b.handle_collision(group, a)
+
+def collide_obb_boxes(boxes_a, boxes_b):
+    """두 박스 리스트 간의 충돌 검사"""
+    def get_axes(corners):
+        axes = []
+        for i in range(len(corners)):
+            p1 = corners[i]
+            p2 = corners[(i + 1) % len(corners)]
+            edge = (p2[0] - p1[0], p2[1] - p1[1])
+            normal = (-edge[1], edge[0])
+            length = (normal[0] ** 2 + normal[1] ** 2) ** 0.5
+            if length > 0:
+                axes.append((normal[0] / length, normal[1] / length))
+        return axes
+
+    def project(corners, axis):
+        dots = [c[0] * axis[0] + c[1] * axis[1] for c in corners]
+        return min(dots), max(dots)
+
+    def check_box_collision(box_a, box_b):
+        axes = get_axes(box_a) + get_axes(box_b)
+        for axis in axes:
+            min_a, max_a = project(box_a, axis)
+            min_b, max_b = project(box_b, axis)
+            if max_a < min_b or max_b < min_a:
+                return False
+        return True
+
+    for box_a in boxes_a:
+        for box_b in boxes_b:
+            if check_box_collision(box_a, box_b):
+                return True
+    return False

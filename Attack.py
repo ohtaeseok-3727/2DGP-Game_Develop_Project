@@ -22,6 +22,7 @@ class AttackVisual:
         self.num_boxes = 3  # 바운딩 박스 개수 (조절 가능)
         self.damage = attack.damage
         self.hit_targets = set()
+        self.valid_targets = set()
 
 
     def update(self, camera=None):
@@ -36,7 +37,6 @@ class AttackVisual:
             return []
 
         if atk.character.weapon_rank == 1:
-            # 원거리 공격: 단일 박스
             draw_x = atk.attack_x
             draw_y = atk.attack_y
             half_w = atk.attack_frame_width / 2
@@ -49,7 +49,6 @@ class AttackVisual:
                 (draw_x - half_w, draw_y + half_h)
             ]]
         else:
-            # 근접 공격: 하나의 박스
             offset_x = math.cos(atk.attack_start_angle) * 25
             offset_y = math.sin(atk.attack_start_angle) * 25
 
@@ -63,11 +62,9 @@ class AttackVisual:
             cos_a = math.cos(draw_angle)
             sin_a = math.sin(draw_angle)
 
-            # 전체 크기의 반
             half_w = full_w / 2
             half_h = full_h / 2
 
-            # 4개 꼭짓점
             corners = [
                 (-half_w, -half_h),
                 (half_w, -half_h),
@@ -108,6 +105,10 @@ class AttackVisual:
 
     def handle_collision(self, group, other):
         if other in self.hit_targets:
+            return
+
+        # valid_targets에 없으면 무시
+        if other not in self.valid_targets:
             return
 
         # 이미 죽은 몬스터는 무시
@@ -219,7 +220,7 @@ class Attack:
             self.max_attack_count = 1
             self.attack_frame_width = 79
             self.attack_frame_height = 79
-            self.attack_speed_pps = ATTACK_SPEED_PPS * 2.8
+            self.attack_speed_pps = ATTACK_SPEED_PPS * 2.2
         elif self.character.weapon_type == 'katana' and self.character.weapon_rank == 2:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
@@ -242,6 +243,9 @@ class Attack:
 
     def start(self, camera=None):
         if not self.can_attack():
+            return
+
+        if self.active:
             return
 
         # 기존 visual이 있으면 완전히 제거
@@ -294,18 +298,48 @@ class Attack:
         try:
             if self.visual is None:
                 self.visual = AttackVisual(self)
-                game_world.add_object(self.visual, 2)
-
+                # 공격 시작 시점의 범위 내 몬스터 수집
+                self.visual.update_bb()
                 for obj in game_world.world[2]:
                     if hasattr(obj, 'take_damage') and obj != self.visual:
-                        game_world.add_collision_pairs('attack:monster', self.visual, obj)
+                        if self._is_in_attack_range(obj):
+                            self.visual.valid_targets.add(obj)
+
+                game_world.add_object(self.visual, 2)
+
+                for obj in self.visual.valid_targets:
+                    game_world.add_collision_pairs('attack:monster', self.visual, obj)
             else:
-                # 재사용 시 hit_targets 초기화
+                # 재사용 시 초기화
                 self.visual.hit_targets.clear()
+                self.visual.valid_targets.clear()
                 self.visual.damage = self.damage
+
+                # 새로운 범위 내 몬스터 수집
+                self.visual.update_bb()
+                for obj in game_world.world[2]:
+                    if hasattr(obj, 'take_damage') and obj != self.visual:
+                        if self._is_in_attack_range(obj):
+                            self.visual.valid_targets.add(obj)
+                            game_world.add_collision_pairs('attack:monster', self.visual, obj)
         except Exception:
             print(f"AttackVisual 생성 오류: {e}")
             self.visual = None
+
+    def _is_in_attack_range(self, target):
+        """타겟이 공격 범위 내에 있는지 확인"""
+        if not self.visual or not self.visual.bb_list:
+            return False
+
+        target_bb = target.get_bb()
+        target_box = [
+            (target_bb[0], target_bb[1]),
+            (target_bb[2], target_bb[1]),
+            (target_bb[2], target_bb[3]),
+            (target_bb[0], target_bb[3])
+        ]
+
+        return game_world.collide_obb_boxes(self.visual.bb_list, [target_box])
 
     def stop(self):
         self.active = False
