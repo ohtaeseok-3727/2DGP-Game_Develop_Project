@@ -20,6 +20,9 @@ class AttackVisual:
         self.attack = attack
         self.bb_list = []  # 여러 개의 바운딩 박스 리스트
         self.num_boxes = 3  # 바운딩 박스 개수 (조절 가능)
+        self.damage = attack.damage
+        self.hit_targets = set()
+
 
     def update(self, camera=None):
         self.update_bb()
@@ -102,7 +105,17 @@ class AttackVisual:
         return min(all_x), min(all_y), max(all_x), max(all_y)
 
     def handle_collision(self, group, other):
-        pass
+        if other in self.hit_targets:
+            return
+
+        # 이미 죽은 몬스터는 무시
+        if hasattr(other, 'is_alive') and not other.is_alive:
+            return
+
+        if 'attack:monster' in group:
+            if hasattr(other, 'take_damage'):
+                other.take_damage(self.damage)
+                self.hit_targets.add(other)
 
     def draw(self, camera=None):
         atk = self.attack
@@ -186,6 +199,7 @@ class Attack:
 
         self.visual = None
 
+
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
             self.attack_frame = 8
@@ -214,6 +228,8 @@ class Attack:
             self.attack_range = 1.5
             self.attack_speed_pps = ATTACK_SPEED_PPS * 1.4
             #근접 참격 강화 모션
+
+        self.damage = self.character.ATK * self.character.weapon.attack_coefficient
 
     def can_attack(self):
         current_time = get_time()
@@ -262,11 +278,15 @@ class Attack:
                 self.visual = AttackVisual(self)
                 game_world.add_object(self.visual, 2)
 
-                enemies = game_world.world[2]
-                for enemy in enemies:
-                    if hasattr(enemy, 'handle_collision'):
-                        game_world.add_collision_pairs('obb:attack:enemy', self.visual, enemy)
+                for obj in game_world.world[2]:
+                    if hasattr(obj, 'take_damage') and obj != self.visual:
+                        game_world.add_collision_pairs('attack:monster', self.visual, obj)
+            else:
+                # 재사용 시 hit_targets 초기화
+                self.visual.hit_targets.clear()
+                self.visual.damage = self.damage
         except Exception:
+            print(f"AttackVisual 생성 오류: {e}")
             self.visual = None
 
     def stop(self):
@@ -275,17 +295,17 @@ class Attack:
 
         try:
             if self.visual is not None:
+                game_world.remove_collision_object(self.visual)
                 game_world.remove_object(self.visual)
-        except Exception:
-            pass
-        finally:
+                self.visual = None
+        except Exception as e:
+            print(f"AttackVisual 제거 오류: {e}")
             self.visual = None
 
         if self.character.weapon_rank == 2:
             if self.combo_count >= self.max_attack_count:
                 self.combo_count = 0
                 self.is_combo_active = False
-        pass
 
     def on_input(self, event, camera=None):
         if event.type == SDL_MOUSEBUTTONUP and event.button == SDL_BUTTON_LEFT:
