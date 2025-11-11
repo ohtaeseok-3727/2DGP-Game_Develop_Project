@@ -22,10 +22,9 @@ class AttackVisual:
         self.num_boxes = 3  # 바운딩 박스 개수 (조절 가능)
 
     def update(self, camera=None):
-        self.get_bb()
+        self.update_bb()
 
-    def get_bb(self):
-        #바운딩 박스 분할 계산
+    def update_bb(self):
         atk = self.attack
         if not atk.active:
             self.bb_list = []
@@ -45,7 +44,7 @@ class AttackVisual:
                 (draw_x - half_w, draw_y + half_h)
             ]]
         else:
-            # 근접 공격: 여러 개의 박스로 분할
+            # 근접 공격: 하나의 박스
             offset_x = math.cos(atk.attack_angle) * 25
             offset_y = math.sin(atk.attack_angle) * 25
 
@@ -59,43 +58,51 @@ class AttackVisual:
             cos_a = math.cos(draw_angle)
             sin_a = math.sin(draw_angle)
 
-            self.bb_list = []
+            # 전체 크기의 반
+            half_w = full_w / 2
+            half_h = full_h / 2
 
-            # 공격 범위를 세로로 num_boxes개로 분할
-            segment_h = full_h / self.num_boxes
+            # 4개 꼭짓점
+            corners = [
+                (-half_w, -half_h),
+                (half_w, -half_h),
+                (half_w, half_h),
+                (-half_w, half_h)
+            ]
 
-            for i in range(self.num_boxes):
-                # 각 세그먼트의 중심 오프셋 계산
-                offset_from_center = (i - (self.num_boxes - 1) / 2) * segment_h
+            box_corners = []
+            for px, py in corners:
+                rx = px * cos_a - py * sin_a
+                ry = px * sin_a + py * cos_a
+                box_corners.append((base_x + rx, base_y + ry))
 
-                # 세그먼트 중심 계산
-                seg_center_local_x = 0
-                seg_center_local_y = offset_from_center
-
-                seg_center_x = base_x + seg_center_local_y * sin_a
-                seg_center_y = base_y - seg_center_local_y * cos_a
-
-                # 세그먼트의 반 크기
-                half_w = full_w / 2
-                half_h = segment_h / 2
-
-                # 4개 꼭짓점 (세그먼트 중심 기준)
-                corners = [
-                    (-half_w, -half_h),
-                    (half_w, -half_h),
-                    (half_w, half_h),
-                    (-half_w, half_h)
-                ]
-
-                box_corners = []
-                for px, py in corners:
-                    rx = px * cos_a - py * sin_a
-                    ry = px * sin_a + py * cos_a
-                    box_corners.append((seg_center_x + rx, seg_center_y + ry))
-
-                self.bb_list.append(box_corners)
+            self.bb_list = [box_corners]
 
         return self.bb_list
+    def get_bb(self):
+        atk = self.attack
+        if not atk.active:
+            return 0, 0, 0, 0
+
+        if not self.bb_list:
+            return 0, 0, 0, 0
+
+        # 모든 바운딩 박스를 포함하는 AABB 계산
+        all_x = []
+        all_y = []
+
+        for box in self.bb_list:
+            for x, y in box:
+                all_x.append(x)
+                all_y.append(y)
+
+        if not all_x:
+            return 0, 0, 0, 0
+
+        return min(all_x), min(all_y), max(all_x), max(all_y)
+
+    def handle_collision(self, group, other):
+        pass
 
     def draw(self, camera=None):
         atk = self.attack
