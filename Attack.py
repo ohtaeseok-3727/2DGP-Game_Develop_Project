@@ -25,6 +25,8 @@ class AttackVisual:
 
 
     def update(self, camera=None):
+        if not self.attack.active:
+            return
         self.update_bb()
 
     def update_bb(self):
@@ -241,6 +243,17 @@ class Attack:
     def start(self, camera=None):
         if not self.can_attack():
             return
+
+        # 기존 visual이 있으면 완전히 제거
+        if self.visual is not None:
+            try:
+                game_world.remove_collision_object(self.visual)
+                game_world.remove_object(self.visual)
+            except Exception:
+                pass
+            finally:
+                self.visual = None
+
         x = ctypes.c_int(0)
         y = ctypes.c_int(0)
         SDL_GetMouseState(ctypes.byref(x), ctypes.byref(y))
@@ -272,7 +285,7 @@ class Attack:
         if self.character.weapon_rank == 2 :
             self.combo_count += 1
             self.is_combo_count = True
-        pass
+
         try:
             if self.visual is None:
                 self.visual = AttackVisual(self)
