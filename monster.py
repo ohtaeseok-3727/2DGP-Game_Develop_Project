@@ -176,7 +176,28 @@ class Monster:
         )
 
     def handle_collision(self, group, other):
-        pass
+        if group == 'monster:monster':
+            dx = self.x - other.x
+            dy = self.y - other.y
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            # 최소 거리 계산 (두 몬스터의 반경 합)
+            min_distance = (self.frame_width + other.frame_width) / 2
+
+            if distance < min_distance and distance > 0:
+                # 겹침 정도 계산
+                overlap = min_distance - distance
+
+                # 정규화된 방향 벡터
+                nx = dx / distance
+                ny = dy / distance
+
+                # 각 몬스터를 반대 방향으로 밀어냄
+                push_distance = overlap / 2
+                self.x += nx * push_distance
+                self.y += ny * push_distance
+                other.x -= nx * push_distance
+                other.y -= ny * push_distance
 
     def draw(self, camera=None):
         if not self.is_alive:

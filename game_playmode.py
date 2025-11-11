@@ -67,6 +67,12 @@ def init():
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
     game_world.add_object(anvil, 1)
+
+    for monster in monsters:
+        game_world.add_collision_pairs('monster:monster', monster, None)
+    for monster in monsters:
+        game_world.add_collision_pairs('monster:monster', None, monster)
+
     font = None
     candidates = [
         'resource/font/NanumGothic.ttf',
@@ -84,6 +90,7 @@ def init():
 
 def update():
     game_world.update()
+    game_world.handle_collisions()
 
 def draw():
     clear_canvas()
