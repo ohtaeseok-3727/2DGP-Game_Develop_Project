@@ -129,7 +129,7 @@ class Monster:
             self.max_frames = 10
             self.detection_range = 200
             self.speed_multiplier = 0.8
-            self.attack_range = 30
+            self.attack_range = 10
 
             if 'blue_slime' not in Monster.images:
                 Monster.images['blue_slime'] = load_image('resource/monster/blue_slime_sprite_sheet.png')

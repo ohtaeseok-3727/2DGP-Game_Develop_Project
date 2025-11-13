@@ -228,7 +228,10 @@ class character:
         self.critical_damage = 1.5
 
         self.max_hp = 100
-        self.now_hp = 60
+        self.now_hp = self.max_hp
+
+        self.hit_cooldown = 0.5
+        self.last_hit_time = -self.hit_cooldown
 
         self.left_pressed = False
         self.right_pressed = False
@@ -315,6 +318,11 @@ class character:
                 self.dash_icon.draw(dash_x + dash_size / 2, dash_hud_y, dash_size, dash_size)
 
     def handle_collision(self, group, other):
+        current_time = get_time()
+        if group=='character:monster':
+            if current_time - self.last_hit_time >= self.hit_cooldown:
+                self.now_hp = max(0, self.now_hp - other.damage)
+                self.last_hit_time = current_time
         pass
 
 
