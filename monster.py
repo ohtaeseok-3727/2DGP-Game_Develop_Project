@@ -63,31 +63,40 @@ class Move:
     def do(self):
         self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 5
 
-        if self.monster.target and (self.monster.target.is_alive if hasattr(self.monster.target, 'is_alive') else True):
+        if self.monster.target:
             dx = self.monster.target.x - self.monster.x
             dy = self.monster.target.y - self.monster.y
-            distance = math.sqrt(dx * dx + dy * dy)
+            distance = math.sqrt(dx ** 2 + dy ** 2)
 
-            if distance >= self.monster.detection_range or distance <= self.monster.attack_range:
-                self.monster.state_machine.handle_state_event(('TARGET_OUT', 0))
-            elif distance > self.monster.attack_range:
-                nx = dx / distance
-                ny = dy / distance
+            if distance > 0:
+                dir_x = dx / distance
+                dir_y = dy / distance
 
-                move_speed = MONSTER_SPEED_PPS * self.monster.speed_multiplier * game_framework.frame_time
-                self.monster.x += nx * move_speed
-                self.monster.y += ny * move_speed
+                if abs(dx) > abs(dy):
+                    self.monster.face_dir = 1 if dx > 0 else -1
+
+                self.monster.x += dir_x * MONSTER_SPEED_PPS * game_framework.frame_time
+                self.monster.y += dir_y * MONSTER_SPEED_PPS * game_framework.frame_time
 
     def draw(self, camera):
-        zoom = camera.zoom if camera else 1.0
         sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
+        zoom = camera.zoom if camera else 1.0
 
-        self.monster.image.clip_draw(
-            int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
-            self.monster.frame_width, self.monster.frame_height,
-            sx, sy,
-            self.monster.frame_width * zoom, self.monster.frame_height * zoom
-        )
+        if self.monster.face_dir == 1:
+            self.monster.image.clip_draw(
+                int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
+                self.monster.frame_width, self.monster.frame_height,
+                sx, sy,
+                self.monster.frame_width * zoom, self.monster.frame_height * zoom
+            )
+        else:
+            self.monster.image.clip_composite_draw(
+                int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
+                self.monster.frame_width, self.monster.frame_height,
+                0, 'h',
+                sx, sy,
+                self.monster.frame_width * zoom, self.monster.frame_height * zoom
+            )
 
 
 
@@ -104,6 +113,7 @@ class Monster:
         self.fps = 10
         self.is_alive = True
         self.target = None
+        self.face_dir = 1
 
         if monster_type == 'small_blue_slime':
             self.hp = 50
