@@ -30,6 +30,7 @@ def handle_events():
 
                 if sephirite.in_range(char):
                     game_framework.push_mode(selection_mode)
+
             elif event.key == SDLK_v:
                 game_framework.push_mode(inventory_mode)
             elif event.key == SDLK_c:
