@@ -110,10 +110,11 @@ class InventoryUI:
 
 
 def init():
-    global char, back_ui
+    global char, inventory_ui, mouse_x, mouse_y
     char = game_playmode.char
-    back_ui = Back(get_canvas_width() // 2, get_canvas_height() // 2, 846, 528)
-    pass
+    inventory_ui = InventoryUI()
+    inventory_ui.update_items(char.inventory)
+    mouse_x, mouse_y = 0, 0
 
 def finish():
     pass
@@ -126,12 +127,13 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
-    back_ui.draw()
+    inventory_ui.draw()
     game_world.render_cursor()
     update_canvas()
 
 
 def handle_events():
+    global mouse_x, mouse_y
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -139,6 +141,10 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE or event.key == SDLK_v:
                 game_framework.pop_mode()
+        elif event.type == SDL_MOUSEMOTION:
+            mouse_x = event.x
+            mouse_y = get_canvas_height() - event.y
+            inventory_ui.update_hover(mouse_x, mouse_y)
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx, my = event.x, get_canvas_height() - event.y
 
