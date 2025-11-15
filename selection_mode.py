@@ -20,11 +20,13 @@ class ItemSlot:
         self.item_type = item_type
         self.hovered = False
 
+        self.item = Item(0, 0, item_type)
+
         self.item_effects = {
             'AmuletOFAspiration': {'critical': 0.05},
             'AncientAnvil': {'ATK': 5},
             'Aquamarine': {'max_hp': 20},
-            'ArtificialSpiritlfiel': {'critical_damage': 0.2},
+            'ArtificialSpiritIfiel': {'critical_damage': 0.2},
             'AstronomicalTelescope': {'critical_damage': 0.5},
             'BlackScales': {'critical': 0.3},
             'BladeOfLight': {'ATK': 10},
@@ -45,6 +47,12 @@ class ItemSlot:
                 ItemSlot.slot_image = load_image('resource/UI/slot.png')
             except:
                 ItemSlot.slot_image = None
+
+        try:
+            self.tooltip_image = load_image('resource/UI/Item_ToolTip.png')
+        except Exception as e:
+            print(f'툴팁 이미지 로드 실패: {e}')
+            self.tooltip_image = None
 
         try:
             self.item_image = load_image(f'resource/item/{item_type}.png')
@@ -76,24 +84,42 @@ class ItemSlot:
         if not self.hovered or not font:
             return
 
+        if not self.item:
+            return
+
+        tooltip_width = 210
+        tooltip_height = 90
+
         tooltip_x = self.x + 80
         tooltip_y = self.y + 40
 
-        draw_rectangle(
-            tooltip_x - 100, tooltip_y - 60,
-            tooltip_x + 100, tooltip_y + 20
-        )
+        if self.tooltip_image:
+            self.tooltip_image.draw(tooltip_x, tooltip_y, tooltip_width, tooltip_height)
+        else:
+            draw_rectangle(
+                tooltip_x - tooltip_width // 2, tooltip_y - tooltip_height // 2,
+                tooltip_x + tooltip_width // 2, tooltip_y + tooltip_height // 2
+            )
 
-        font.draw(tooltip_x - 90, tooltip_y + 5,
-                  self.item_type, (255, 255, 255))
+        if font:
+            font.draw(
+                tooltip_x - tooltip_width // 2 + 10,
+                tooltip_y + tooltip_height // 2 - 30,
+                self.item_type,
+                (255, 255, 255)
+            )
 
-        effects = self.item_effects.get(self.item_type, {})
-        y_offset = -15
-        for stat, value in effects.items():
-            stat_text = f"{stat}: +{value}"
-            font.draw(tooltip_x - 90, tooltip_y + y_offset,
-                      stat_text, (200, 200, 200))
-            y_offset -= 20
+            effects = self.item_effects.get(self.item_type, {})
+            y_offset = -20
+            for stat, value in effects.items():
+                stat_text = f"{stat}: +{value}"
+                font.draw(
+                    tooltip_x - tooltip_width // 2 + 10,
+                    tooltip_y + y_offset,
+                    stat_text,
+                    (200, 200, 200)
+                )
+                y_offset -= 25
 
 
 def init():
@@ -101,12 +127,23 @@ def init():
     char = game_playmode.char
 
     all_item_types = [
-        'AmuletOFAspiration', 'AncientAnvil', 'Aquamarine',
-        'ArtificialSpiritlfiel', 'AstronomicalTelescope', 'BlackScales',
-        'BladeOfLight', 'BloodOfObrus', 'BloodstoneRing',
-        'BloodTear', 'BlueBand', 'BlueBohoBracelet',
-        'BlueInkBottle', 'BluePearl', 'BlueRing',
-        'BluntBellKnife', 'CrownOfPride'
+        'AmuletOFAspiration',
+    'AncientAnvil',
+    'Aquamarine',
+    'ArtificialSpiritIfiel',
+    'AstronomicalTelescope',
+    'BlackScales',
+    'BladeOfLight',
+    'BloodOfObrus',
+    'BloodstoneRing',
+    'BloodTear',
+    'BlueBand',
+    'BlueBohoBracelet',
+    'BlueInkBottle',
+    'BluePearl',
+    'BlueRing',
+    'BluntBellKnife',
+    'CrownOfPride'
     ]
 
     selected_items = random.sample(all_item_types, 5)

@@ -22,12 +22,13 @@ class Item:
         self.image = Item.images.get(item_type)
 
         self.item_effects = {
-            'AmuletOFAspiration': {'critical': 0.05},
+            'AmuletOfAspiration': {'critical': 0.05},
             'AncientAnvil': {'ATK': 5},
             'Aquamarine': {'max_hp': 20},
-            'ArtificialSpiritlfiel': {'critical_damage': 0.2},
+            'ArtificialSpiritIfiel': {'critical_damage': 0.2},
             'AstronomicalTelescope': {'critical_damage': 0.5},
             'BlackScales': {'critical': 0.3},
+            'BlackteaBag': {'max_hp': 15},
             'BladeOfLight': {'ATK': 10},
             'BloodOfObrus': {'max_hp': 30},
             'BloodstoneRing': {'critical': 0.5},
