@@ -9,13 +9,6 @@ class anvil:
         self.x = 300
         self.y = 200
         self.interaction_range = 30
-
-        self.frame_width = 12
-        self.frame_height = 15
-        self.total_frames = 11
-        self.current_frame = 0
-        self.frame_time = 0
-        self.fps = 10
     def update(self, camera=None):
 
         pass
@@ -39,6 +32,13 @@ class Sephrite:
         self.x = 400
         self.y = 300
         self.interaction_range = 30
+
+        self.frame_width = 12
+        self.frame_height = 15
+        self.total_frames = 11
+        self.current_frame = 0
+        self.frame_time = 0
+        self.fps = 10
         pass
     def update(self, camera=None):
         self.frame_time += game_framework.frame_time
@@ -50,7 +50,6 @@ class Sephrite:
     def in_range(self, character):
         distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
         return distance <= self.interaction_range
-        pass
 
     def draw(self, camera=None):
         if camera:
@@ -62,11 +61,12 @@ class Sephrite:
 
         frame_x = int(self.current_frame) * self.frame_width
 
-        Sephrite.image.clip_draw(
+        self.image.clip_draw(
             frame_x, 0,
             self.frame_width, self.frame_height,
             sx, sy,
             self.frame_width * zoom, self.frame_height * zoom
         )
+
     def get_bb(self):
         return self.x - 6, self.y - 7, self.x + 6, self.y + 7
