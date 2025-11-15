@@ -7,12 +7,20 @@ import game_world
 from worldmap import WorldMap
 
 class itemslot:
+    slot_image = None
     def __init__(self, x, y, size):
         self.x = x
         self.y = y
         self.size = size
         self.item = None
         self.hovered = False
+
+        if itemslot.slot_image is None:
+            try:
+                itemslot.slot_image = load_image('resource/UI/slot.png')
+            except Exception as e:
+                print(f'슬롯 이미지 로드 실패: {e}')
+                itemslot.slot_image = None
 
     def set_item(self, item):
         self.item = item
@@ -28,17 +36,27 @@ class itemslot:
                 self.y - half < my < self.y + half)
 
     def draw(self):
-        color = (255, 255, 100) if self.hovered else (200, 200, 200)
-        draw_rectangle(self.x - self.size // 2, self.y - self.size // 2,
-                       self.x + self.size // 2, self.y + self.size // 2, color)
+        if itemslot.slot_image:
+            itemslot.slot_image.draw(self.x, self.y, self.size, self.size)
+        else:
+            if self.hovered:
+                draw_rectangle(self.x - self.size // 2, self.y - self.size // 2,
+                               self.x + self.size // 2, self.y + self.size // 2)
+            else:
+                draw_rectangle(self.x - self.size // 2, self.y - self.size // 2,
+                               self.x + self.size // 2, self.y + self.size // 2)
+
         if self.item and self.item.image:
             self.item.image.draw(self.x, self.y, self.size - 10, self.size - 10)
+
+        if self.hovered:
+            pass
 
 
 class InventoryUI:
     image = None
     def __init__(self):
-        self.width = 846
+        self.width = 796
         self.height = 528
         self.x = get_canvas_width() // 2
         self.y = get_canvas_height() // 2
@@ -47,21 +65,34 @@ class InventoryUI:
 
         self.slots = []
         self.rows = 4
-        self.cols = 5
+        self.cols = 6
         self.padding = 10
-        self.slot_size = 70
+        self.slot_size = 100
 
         start_x = self.x - (self.cols * self.slot_size) // 2
         start_y = self.y + (self.rows * self.slot_size) // 2
 
         for row in range(self.rows):
             for col in range(self.cols):
-                slot_x = start_x + col * (self.slot_size + self.padding) + self.slot_size // 2
+                slot_x = start_x + col * (self.slot_size + self.padding) + self.slot_size // 2 - 25
                 slot_y = start_y - row * (self.slot_size + self.padding) - self.slot_size // 2
                 self.slots.append(itemslot(slot_x, slot_y, self.slot_size))
 
         self.hovered_slot = None
-        self.font = load_font('resource/font/NanumGothic.ttf', 16)
+        self.font = None
+        candidates = [
+            'resource/font/NanumGothic.ttf',
+            'C:/Windows/Fonts/malgun.ttf',
+            None
+        ]
+        for fp in candidates:
+            try:
+                self.font = load_font(fp, 16)
+                print(f'Font loaded: {fp}')
+                break
+            except Exception as e:
+                print(f'Font load failed: {fp} -> {e}')
+                self.font = None
 
     def update_items(self, inventory):
         for i, item in enumerate(inventory):
@@ -78,7 +109,7 @@ class InventoryUI:
                 slot.hovered = False
 
     def draw(self):
-        self.background.draw(self.x, self.y, self.width, self.height)
+        self.image.draw(self.x, self.y, self.width, self.height)
 
         for slot in self.slots:
             slot.draw()
@@ -144,7 +175,7 @@ def handle_events():
         elif event.type == SDL_MOUSEMOTION:
             mouse_x = event.x
             mouse_y = get_canvas_height() - event.y
-            inventory_ui.update_hover(mouse_x, mouse_y)
+            inventory_ui.update_hovered(mouse_x, mouse_y)
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx, my = event.x, get_canvas_height() - event.y
 
