@@ -20,6 +20,26 @@ class ItemSlot:
         self.item_type = item_type
         self.hovered = False
 
+        self.item_effects = {
+            'AmuletOFAspiration': {'critical': 0.05},
+            'AncientAnvil': {'ATK': 5},
+            'Aquamarine': {'max_hp': 20},
+            'ArtificialSpiritlfiel': {'critical_damage': 0.2},
+            'AstronomicalTelescope': {'critical_damage': 0.5},
+            'BlackScales': {'critical': 0.3},
+            'BladeOfLight': {'ATK': 10},
+            'BloodOfObrus': {'max_hp': 30},
+            'BloodstoneRing': {'critical': 0.5},
+            'BloodTear': {'max_hp': 50},
+            'BlueBand': {'ATK': 20},
+            'BlueBohoBracelet': {'critical': 0.15},
+            'BlueInkBottle': {'critical_damage': 0.3},
+            'BluePearl': {'max_hp': 25},
+            'BlueRing': {'ATK': 5},
+            'BluntBellKnife': {'critical': 0.1},
+            'CrownOfPride': {'critical': 0.7}
+        }
+
         if ItemSlot.slot_image is None:
             try:
                 ItemSlot.slot_image = load_image('resource/UI/slot.png')
@@ -52,9 +72,32 @@ class ItemSlot:
         if self.item_image:
             self.item_image.draw(self.x, self.y, self.size - 10, self.size - 10)
 
+    def draw_tooltip(self, font):
+        if not self.hovered or not font:
+            return
+
+        tooltip_x = self.x + 80
+        tooltip_y = self.y + 40
+
+        draw_rectangle(
+            tooltip_x - 100, tooltip_y - 60,
+            tooltip_x + 100, tooltip_y + 20
+        )
+
+        font.draw(tooltip_x - 90, tooltip_y + 5,
+                  self.item_type, (255, 255, 255))
+
+        effects = self.item_effects.get(self.item_type, {})
+        y_offset = -15
+        for stat, value in effects.items():
+            stat_text = f"{stat}: +{value}"
+            font.draw(tooltip_x - 90, tooltip_y + y_offset,
+                      stat_text, (200, 200, 200))
+            y_offset -= 20
+
 
 def init():
-    global char, slots, all_item_types
+    global char, slots, all_item_types, font
     char = game_playmode.char
 
     all_item_types = [
@@ -80,6 +123,21 @@ def init():
         y = center_y + radius * math.sin(angle)
         slots.append(ItemSlot(int(x), int(y), slot_size, selected_items[i]))
 
+    font = None
+    candidates = [
+        'resource/font/NanumGothic.ttf',
+        'C:/Windows/Fonts/malgun.ttf',
+        None
+    ]
+    for fp in candidates:
+        try:
+            font = load_font(fp, 16)
+            print(f'Font loaded: {fp}')
+            break
+        except Exception as e:
+            print(f'Font load failed: {fp} -> {e}')
+            font = None
+
     pass
 
 def finish():
@@ -99,6 +157,10 @@ def draw():
 
     for slot in slots:
         slot.draw()
+
+    for slot in slots:
+        if slot.hovered:
+            slot.draw_tooltip(font)
 
     game_world.render_cursor()
     update_canvas()
