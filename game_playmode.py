@@ -6,7 +6,7 @@ from worldmap import WorldMap
 from camera import Camera
 import game_world
 import game_framework
-from game_object import anvil
+from game_object import *
 import upgrade_mode
 import inventory_mode
 import status_mode
@@ -46,6 +46,7 @@ def init():
     char = character()
     camera = Camera(char)
     anvil = anvil()
+    sephrite = Sephrite()
 
     cursor = Cursor()
     char.cursor = cursor
@@ -68,6 +69,7 @@ def init():
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
     game_world.add_object(anvil, 1)
+    game_world.add_object(sephrite, 1)
 
     for monster in monsters:
         game_world.add_collision_pairs('monster:monster', None, monster)
