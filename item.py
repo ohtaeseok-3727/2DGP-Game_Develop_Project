@@ -41,11 +41,30 @@ class Item:
             'CrownOfPride': {'critical': 0.7}
         }
 
-    
+    def apply_effect(self, character):
+        effects = self.item_effects.get(self.item_type, {})
+
+        for stat, value in effects.items():
+            if stat == 'ATK':
+                character.ATK += value
+            elif stat == 'max_hp':
+                character.max_hp += value
+                character.now_hp += value
+            elif stat == 'critical':
+                character.critical += value
+            elif stat == 'critical_damage':
+                character.critical_damage += value
+
+    def get_bb(self):
+        return self.x - 10, self.y - 10, self.x + 10, self.y + 10
 
     def update(self):
         pass
 
     def draw(self, camera=None):
+        if self.image and camera:
+            sx, sy = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+            self.image.draw(sx, sy, 20 * zoom, 20 * zoom)
         pass
 
