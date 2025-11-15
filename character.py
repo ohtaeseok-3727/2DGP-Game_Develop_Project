@@ -249,7 +249,14 @@ class character:
             self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle},
         })
 
+        self.inventory = []
+
         game_world.add_collision_pairs('character:monster', self, None)
+
+    def add_item(self, item):
+        self.inventory.append(item)
+        item.apply_effect(self)
+        print(f'{item.item_type} 획득')
 
     def update(self, camera=None):
         if self.cursor:
