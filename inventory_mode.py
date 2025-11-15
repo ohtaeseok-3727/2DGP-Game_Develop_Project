@@ -6,6 +6,34 @@ from weapon import weapon
 import game_world
 from worldmap import WorldMap
 
+class itmeslot:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.item = None
+        self.hovered = False
+
+    def set_item(self, item):
+        self.item = item
+
+
+    def is_clicked(self, mx, my):
+        return (self.x - self.width // 2 < mx < self.x + self.width // 2 and
+                self.y - self.height // 2 < my < self.y + self.height // 2)
+
+    def is_hovered(self, mx, my):
+        half = self.size//2
+        return (self.x - half < mx < self.x + half and
+                self.y - half < my < self.y + half)
+
+    def draw(self):
+        color = (255, 255, 100) if self.hovered else (200, 200, 200)
+        draw_rectangle(self.x - self.size // 2, self.y - self.size // 2,
+                       self.x + self.size // 2, self.y + self.size // 2, color)
+        if self.item and self.item.image:
+            self.item.image.draw(self.x, self.y, self.size - 10, self.size - 10)
+
 
 class Back:
     image = None
