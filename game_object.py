@@ -23,3 +23,15 @@ class anvil:
                           self.image.h * zoom)
         else:
             self.image.draw(self.x, self.y)
+
+
+class Sephrite:
+    def __init__(self):
+        pass
+    def update(self, camera=None):
+        pass
+    def in_range(self, character):
+        pass
+
+    def draw(self, camera=None):
+        pass
