@@ -13,6 +13,7 @@ import status_mode
 from monster import Monster
 from cursor import Cursor
 from Attack import *
+import selection_mode
 
 def handle_events():
     global running, anvil
@@ -27,7 +28,7 @@ def handle_events():
                 if anvil.in_range(char):
                     game_framework.push_mode(upgrade_mode)
 
-                if Sephrite.in_range(char):
+                if sephirite.in_range(char):
                     game_framework.push_mode(selection_mode)
             elif event.key == SDLK_v:
                 game_framework.push_mode(inventory_mode)
@@ -39,7 +40,7 @@ def handle_events():
             char.handle_event(event, game_world.camera)
 
 def init():
-    global char, anvil, font, monsters
+    global char, anvil, font, monsters, sephirite
 
     game_world.clear()
 
@@ -47,7 +48,7 @@ def init():
     char = character()
     camera = Camera(char)
     anvil = anvil()
-    sephrite = Sephrite()
+    sephirite = Sephirite()
 
     cursor = Cursor()
     char.cursor = cursor
@@ -70,7 +71,7 @@ def init():
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
     game_world.add_object(anvil, 1)
-    game_world.add_object(sephrite, 1)
+    game_world.add_object(sephirite, 1)
 
     for monster in monsters:
         game_world.add_collision_pairs('monster:monster', None, monster)

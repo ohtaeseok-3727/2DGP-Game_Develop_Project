@@ -26,7 +26,7 @@ class anvil:
             self.image.draw(self.x, self.y)
 
 
-class Sephrite:
+class Sephirite:
     def __init__(self):
         self.image = load_image('resource/object/Sephirite_SpriteSheet.png')
         self.x = 400
