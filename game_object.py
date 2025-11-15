@@ -27,11 +27,24 @@ class anvil:
 
 class Sephrite:
     def __init__(self):
+        self.image = load_image('resource/object/Sephirite_SpriteSheet.png')
+        self.x = 400
+        self.y = 300
+        self.interaction_range = 30
         pass
     def update(self, camera=None):
         pass
     def in_range(self, character):
+        distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
+        return distance <= self.interaction_range
         pass
 
     def draw(self, camera=None):
-        pass
+        if camera:
+            screen_x, screen_y = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+            self.image.draw(screen_x, screen_y,
+                          self.image.w * zoom,
+                          self.image.h * zoom)
+        else:
+            self.image.draw(self.x, self.y)
