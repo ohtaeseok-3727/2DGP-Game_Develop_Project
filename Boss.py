@@ -68,6 +68,10 @@ class Move:
             dy = self.monster.target.y - self.monster.y
             distance = math.sqrt(dx ** 2 + dy ** 2)
 
+            if distance >= self.monster.detection_range:
+                self.monster.state_machine.handle_state_event(('TARGET_OUT', 0))
+                return
+
             if distance > 0:
                 dir_x = dx / distance
                 dir_y = dy / distance
@@ -100,59 +104,40 @@ class Move:
 
 
 
-class Monster:
-    images = {}
+class KingSlime:
+    images = None
     hp_bar = None
     hp_background = None
-    def __init__(self, x, y, monster_type='blue_slime'):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.monster_type = monster_type
+        self.name = 'KingSlime'
         self.frame = 0
         self.frame_time = 0
         self.fps = 10
         self.is_alive = True
         self.target = None
         self.face_dir = 1
+        self.hp = 5000
+        self.max_hp = 5000
+        self.frame_width = 27
+        self.frame_height = 22
+        self.max_frames = 10
+        self.detection_range = 200
+        self.speed_multiplier = 0.8
+        self.attack_range = 10
+        self.width = 135
+        self.height = 110
 
-        if monster_type == 'small_blue_slime':
-            self.hp = 50
-            self.max_hp = 50
-            self.damage = 5
-            self.frame_width = 17
-            self.frame_height = 12
-            self.max_frames = 6
-            self.detection_range = 150
-            self.speed_multiplier = 1.0
-            self.attack_range = 10
-
-            if 'small_blue_slime' not in Monster.images:
-                Monster.images['small_blue_slime'] = load_image('resource/monster/small_blue_slime_sprite_sheet.png')
-            self.image = Monster.images['small_blue_slime']
-
-        elif monster_type == 'blue_slime':
-            self.hp = 100
-            self.max_hp = 100
-            self.damage = 10
-            self.frame_width = 27
-            self.frame_height = 22
-            self.max_frames = 10
-            self.detection_range = 200
-            self.speed_multiplier = 0.8
-            self.attack_range = 10
-
-            if 'blue_slime' not in Monster.images:
-                Monster.images['blue_slime'] = load_image('resource/monster/blue_slime_sprite_sheet.png')
-            self.image = Monster.images['blue_slime']
 
         self.hit_cooldown = 0.1
 
-        if Monster.hp_bar == None or Monster.hp_background == None:
-            Monster.hp_bar = load_image('resource/character/HP.png')
-            Monster.hp_background = load_image('resource/character/HP_Background.png')
+        if KingSlime.images == None:
+            KingSlime.images = load_image('resource/monster/blue_slime_sprite_sheet.png')
 
-        self.monster_type = monster_type
-        self.name = monster_type
+        if KingSlime.hp_bar == None or KingSlime.hp_background == None:
+            KingSlime.hp_bar = load_image('resource/character/HP.png')
+            KingSlime.hp_background = load_image('resource/character/HP_Background.png')
 
         self.idle = Idle(self)
         self.move = Move(self)
@@ -162,8 +147,9 @@ class Monster:
             self.move: {target_out_of_range: self.idle}
         })
 
-        game_world.add_collision_pairs('character:monster', None, self)
-        game_world.add_collision_pairs('monster:attack', self, None)
+        game_world.add_collision_pairs('character:Boss', None, self)
+        game_world.add_collision_pairs('Boss:attack', self, None)
+        game_world.add_collision_pairs('Boss:monster', self, None)
 
     def set_target(self, target):
         self.target = target
@@ -175,8 +161,8 @@ class Monster:
         self.state_machine.update()
 
     def get_bb(self):
-        half_w = (self.frame_width / 2) - self.frame_width / 20
-        half_h = (self.frame_height / 2) - self.frame_height / 5
+        half_w = (self.width / 2) - self.width / 20
+        half_h = (self.height / 2) - self.height / 5
         return (
             self.x - half_w,
             self.y - half_h,
@@ -209,27 +195,7 @@ class Monster:
 
     def handle_collision(self, group, other):
         if group == 'monster:monster':
-            dx = self.x - other.x
-            dy = self.y - other.y
-            distance = math.sqrt(dx * dx + dy * dy)
-
-            # 최소 거리 계산 (두 몬스터의 반경 합)
-            min_distance = (self.frame_width + other.frame_width) / 2
-
-            if distance < min_distance and distance > 0:
-                # 겹침 정도 계산
-                overlap = min_distance - distance
-
-                # 정규화된 방향 벡터
-                nx = dx / distance
-                ny = dy / distance
-
-                # 각 몬스터를 반대 방향으로 밀어냄
-                push_distance = overlap / 2
-                self.x += nx * push_distance
-                self.y += ny * push_distance
-                other.x -= nx * push_distance
-                other.y -= ny * push_distance
+            pass
 
         if group == 'monster:attack':
             pass
@@ -248,24 +214,31 @@ class Monster:
         else:
             draw_rectangle(left, bottom, right, top)
 
-        if camera:
-            zoom = camera.zoom
-            sx, sy = camera.apply(self.x, self.y)
-            bar_width = 50 * zoom
-            bar_height = 5 * zoom
-            bar_x = sx - bar_width / 2
-            bar_y = sy + (self.frame_height / 2 + 10) * zoom
+        screen_w = get_canvas_width()
+        screen_h = get_canvas_height()
 
-            if Monster.hp_background:
-                Monster.hp_background.draw(bar_x + 52, bar_y + 11, 104, 22)
+        total_bar_width = 1000
+        total_bar_height = 40
+        margin_bottom = 20
 
-            hp_ratio = max(0, min(1, self.hp / self.max_hp))
-            hp_width = 100 * hp_ratio
+        center_x = screen_w / 2
+        bar_x_center = center_x
+        bar_y = margin_bottom + total_bar_height / 2
 
-            if self.hp and hp_ratio > 0:
-                Monster.hp_bar.clip_draw(
-                    0, 0,
-                    int(200 * hp_ratio), 30,
-                    bar_x + 2 + hp_width / 2, bar_y + 10,
-                    hp_width, 20
-                )
+        if KingSlime.hp_background:
+            KingSlime.hp_background.draw(bar_x_center, bar_y, total_bar_width + 4, total_bar_height)
+
+        hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
+        hp_display_width = total_bar_width * hp_ratio
+
+        if hp_ratio > 0 and KingSlime.hp_bar:
+            src_w = getattr(KingSlime.hp_bar, 'w', None)
+            src_h = getattr(KingSlime.hp_bar, 'h', None)
+            if src_w and src_h:
+                clip_w = max(1, int(src_w * hp_ratio))
+                clip_draw_x = bar_x_center - total_bar_width / 2 + hp_display_width / 2
+                KingSlime.hp_bar.clip_draw(0, 0, clip_w, src_h, clip_draw_x, bar_y, hp_display_width,
+                                           total_bar_height - 2)
+            else:
+                KingSlime.hp_bar.draw(bar_x_center - (total_bar_width - hp_display_width) / 2, bar_y, hp_display_width,
+                                      total_bar_height - 2)
