@@ -121,6 +121,11 @@ class Move:
         if (not self.character.left_pressed and not self.character.right_pressed and
                 not self.character.up_pressed and not self.character.down_pressed):
             self.character.state_machine.handle_state_event(('STOP', 0))
+
+        try:
+            self.character.clamp_to_world()
+        except Exception:
+            pass
         pass
     def draw(self, camera=None):
         sx, sy = (camera.apply(self.character.x, self.character.y)) if camera else (self.character.x, self.character.y)
@@ -331,6 +336,19 @@ class character:
                 self.now_hp = max(0, self.now_hp - other.damage)
                 self.last_hit_time = current_time
         pass
+
+    def clamp_to_world(self):
+        try:
+            left, bottom, right, top = self.get_bb()
+            half_w = (right - left) / 2.0
+            half_h = (top - bottom) / 2.0
+        except Exception:
+            half_w = getattr(self, 'frame_width', 0) / 2.0
+            half_h = getattr(self, 'frame_height', 0) / 2.0
+
+        self.x = max(half_w, min(self.x, WorldMap.width - half_w))
+        self.y = max(half_h, min(self.y, WorldMap.height - half_h))
+
 
 
 
