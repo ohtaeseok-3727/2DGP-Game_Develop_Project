@@ -55,13 +55,22 @@ class itemslot:
 
 class InventoryUI:
     image = None
+    tooltip_image = None
     def __init__(self):
         self.width = 796
         self.height = 528
         self.x = get_canvas_width() // 2
         self.y = get_canvas_height() // 2
 
-        self.image = load_image(f'resource/UI/inventory.png')
+        if InventoryUI.image is None:
+            self.image = load_image(f'resource/UI/inventory.png')
+
+        if InventoryUI.tooltip_image is None:
+            try:
+                InventoryUI.tooltip_image = load_image('resource/UI/Item_ToolTip.png')
+            except Exception as e:
+                print(f'툴팁 이미지 로드 실패: {e}')
+                InventoryUI.tooltip_image = None
 
         self.slots = []
         self.rows = 4
@@ -118,14 +127,30 @@ class InventoryUI:
             self.draw_tooltip(self.hovered_slot)
 
     def draw_tooltip(self, slot):
-        item = slot.item
-        tooltip_x = slot.x + 80
-        tooltip_y = slot.y + 40
+        from sdl2.mouse import SDL_GetMouseState
 
-        draw_rectangle(
-            tooltip_x - 100, tooltip_y - 60,
-            tooltip_x + 100, tooltip_y + 20
-        )
+        # 마우스 화면 좌표 읽기 (pico2d 좌표계로 변환)
+        mx = ctypes.c_int(0)
+        my = ctypes.c_int(0)
+        SDL_GetMouseState(ctypes.byref(mx), ctypes.byref(my))
+        screen_x = mx.value
+        screen_y = get_canvas_height() - my.value
+
+        item = slot.item
+        tooltip_width = 210
+        tooltip_height = 90
+
+        tooltip_x = screen_x + 100
+        tooltip_y = screen_y - 50
+
+        if self.tooltip_image:
+            self.tooltip_image.draw(tooltip_x, tooltip_y, tooltip_width, tooltip_height)
+        else:
+            draw_rectangle(
+                tooltip_x - tooltip_width // 2, tooltip_y - tooltip_height // 2,
+                tooltip_x + tooltip_width // 2, tooltip_y + tooltip_height // 2
+            )
+
 
         if self.font:
             self.font.draw(tooltip_x - 90, tooltip_y + 5,
