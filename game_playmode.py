@@ -41,15 +41,16 @@ def handle_events():
             char.handle_event(event, game_world.camera)
 
 def init():
-    global char, anvil, font, monsters, sephirite
+    global char, anvil, font, monsters, sephirite, portal
 
     game_world.clear()
 
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
-    anvil = anvil()
-    sephirite = Sephirite()
+    anvil = anvil(300, 200)
+    sephirite = Sephirite(400, 400)
+    portal = Portal(400, 300)
 
     cursor = Cursor()
     char.cursor = cursor
@@ -73,6 +74,7 @@ def init():
     game_world.add_object(char, 2)
     game_world.add_object(anvil, 1)
     game_world.add_object(sephirite, 1)
+    game_world.add_object(portal, 1)
 
     for monster in monsters:
         game_world.add_collision_pairs('monster:monster', None, monster)
