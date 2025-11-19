@@ -30,7 +30,7 @@ def handle_events():
             char.handle_event(event, game_world.camera)
 
 def init():
-    global monsters, sephirite, portal, boss
+    global monsters, sephirite, portal, boss, char
 
     game_world.clear()
 
@@ -38,6 +38,7 @@ def init():
     char = character()
     camera = Camera(char)
     boss = Boss.KingSlime(600, 400)
+    boss.set_target(char)
 
     cursor = Cursor()
     char.cursor = cursor
@@ -48,6 +49,7 @@ def init():
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
     game_world.add_object(boss, 2)
+
 
 def update():
     game_world.update()
