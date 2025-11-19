@@ -10,6 +10,7 @@ import status_mode
 from cursor import Cursor
 from Attack import *
 import Boss
+import game_playmode
 
 def handle_events():
     global running
@@ -35,7 +36,7 @@ def init():
     game_world.clear()
 
     world_map = WorldMap()
-    char = character()
+    char = game_playmode.char
     camera = Camera(char)
     boss = Boss.KingSlime(600, 400)
     boss.set_target(char)
