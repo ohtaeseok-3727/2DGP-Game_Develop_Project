@@ -13,7 +13,8 @@ import status_mode
 from monster import Monster
 from cursor import Cursor
 from Attack import *
-import selection_mode
+import item_selection_mode
+import enter_mode
 
 def handle_events():
     global running, anvil
@@ -29,7 +30,10 @@ def handle_events():
                     game_framework.push_mode(upgrade_mode)
 
                 if sephirite.in_range(char):
-                    game_framework.push_mode(selection_mode)
+                    game_framework.push_mode(item_selection_mode)
+
+                if portal.in_range(char):
+                    game_framework.push_mode(enter_mode)
 
             elif event.key == SDLK_v:
                 game_framework.push_mode(inventory_mode)
