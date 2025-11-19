@@ -63,8 +63,17 @@ class dashstate:
         moved = math.hypot(self.character.x - prev_x, self.character.y - prev_y)
         self.distance += moved
 
+        try:
+            self.character.clamp_to_world()
+        except Exception:
+            half_w = getattr(self.character, 'frame_width', 0) / 2.0
+            half_h = getattr(self.character, 'frame_height', 0) / 2.0
+            self.character.x = max(half_w, min(self.character.x, WorldMap.width - half_w))
+            self.character.y = max(half_h, min(self.character.y, WorldMap.height - half_h))
+
         if self.distance >= self.target_ditance:
             self.stop()
+
         pass
 
     def stop(self):

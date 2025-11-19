@@ -2,6 +2,7 @@ from pico2d import *
 from sdl2 import SDL_MOUSEBUTTONUP, SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN
 import math
 import ctypes
+import random
 from sdl2.mouse import SDL_GetMouseState
 
 import game_framework
@@ -117,7 +118,29 @@ class AttackVisual:
 
         if 'attack:monster' in group:
             if hasattr(other, 'take_damage'):
-                other.take_damage(self.damage)
+                crit_prob = getattr(self.attack.character, 'critical', 0.0)
+                crit_multiplier = getattr(self.attack.character, 'critical_damage', 1.0)
+
+                is_crit = False
+
+                try:
+                    if crit_prob > 0 and random.random() < crit_prob:
+                        is_crit = True
+                except Exception:
+                    is_crit = False
+
+                final_damage = self.damage
+                if is_crit:
+                    final_damage = final_damage * crit_multiplier
+
+                try:
+                    other.take_damage(int(final_damage))
+                except Exception:
+                    other.take_damage(final_damage)
+
+                if is_crit:
+                    print(f'치명타! 데미지: {int(final_damage)}')
+
                 self.hit_targets.add(other)
 
     def draw(self, camera=None):
