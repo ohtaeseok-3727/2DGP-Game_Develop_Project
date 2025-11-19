@@ -15,6 +15,7 @@ from cursor import Cursor
 from Attack import *
 import item_selection_mode
 import enter_mode
+import boss_mode
 
 def handle_events():
     global running, anvil
