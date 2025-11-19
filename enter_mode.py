@@ -6,6 +6,7 @@ from weapon import weapon
 import game_world
 from worldmap import WorldMap
 import math
+import boss_mode
 
 class Button:
     def __init__(self, x, y, width, height, text, font):
@@ -87,7 +88,7 @@ class talk_UI:
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx, my = event.x, get_canvas_height() - 1 - event.y
             if self.buttons[0].is_clicked(mx, my):  # 들어간다
-                game_framework.change_mode(boss_stage_mode)
+                game_framework.change_mode(boss_mode)
             elif self.buttons[1].is_clicked(mx, my):  # 들어가지않는다
                 game_framework.pop_mode()
 
