@@ -4,10 +4,10 @@ from worldmap import WorldMap
 import game_framework
 
 class anvil:
-    def __init__(self):
+    def __init__(self, x, y):
         self.image = load_image('resource/object/Anvil.png')
-        self.x = 300
-        self.y = 200
+        self.x = x
+        self.y = y
         self.interaction_range = 30
     def update(self, camera=None):
 
@@ -27,10 +27,10 @@ class anvil:
 
 
 class Sephirite:
-    def __init__(self):
+    def __init__(self, x, y):
         self.image = load_image('resource/object/Sephirite_SpriteSheet.png')
-        self.x = 400
-        self.y = 300
+        self.x = x
+        self.y = y
         self.interaction_range = 30
 
         self.frame_width = 12
@@ -70,3 +70,58 @@ class Sephirite:
 
     def get_bb(self):
         return self.x - 6, self.y - 7, self.x + 6, self.y + 7
+
+class Portal:
+    def __init__(self, x, y):
+        self.image = load_image('resource/object/Portal_SpriteSheet.png')
+        self.x = x
+        self.y = y
+        self.interaction_range = 30
+
+        self.frame_width = 64
+        self.frame_height = 64
+        self.total_frames = 7
+        self.current_frame = 0
+        self.frame_time = 0
+        self.fps = 10
+
+    def update(self, camera=None):
+        self.frame_time += game_framework.frame_time
+
+        if self.frame_time > 1.0 / self.fps:
+            self.current_frame = (self.current_frame + 1) % self.total_frames
+            self.frame_time = 0
+
+    def in_range(self, character):
+        distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
+        return distance <= self.interaction_range
+
+    def draw(self, camera=None):
+        if not self.image:
+            return
+
+        if camera:
+            sx, sy = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+        else:
+            sx, sy = self.x, self.y
+            zoom = 1.0
+
+        frame_x = int(self.current_frame) * self.frame_width
+        self.image.clip_draw(
+            frame_x, 0,
+            self.frame_width, self.frame_height,
+            sx, sy,
+            self.frame_width * zoom, self.frame_height * zoom
+        )
+
+    def get_bb(self, camera=None):
+        half_w = (self.frame_width / 2)
+        half_h = (self.frame_height / 2)
+        left, bottom, right, top = self.x - half_w, self.y - half_h, self.x + half_w, self.y + half_h
+
+        if camera:
+            sl, sb = camera.apply(left, bottom)
+            sr, st = camera.apply(right, top)
+            return sl, sb, sr, st
+        return left, bottom, right, top
