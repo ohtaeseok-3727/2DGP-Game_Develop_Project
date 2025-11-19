@@ -43,11 +43,11 @@ class Idle:
         sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
 
         frame_index = int(self.monster.frame)
-        self.monster.image.clip_draw(
+        self.monster.images.clip_draw(
             frame_index * self.monster.frame_width, self.monster.frame_height*2,
             self.monster.frame_width, self.monster.frame_height,
             sx, sy,
-            self.monster.frame_width * zoom, self.monster.frame_height * zoom
+            self.monster.width * zoom, self.monster.height * zoom
         )
 
 class Move:
@@ -87,19 +87,19 @@ class Move:
         zoom = camera.zoom if camera else 1.0
 
         if self.monster.face_dir == 1:
-            self.monster.image.clip_draw(
+            self.monster.images.clip_draw(
                 int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
                 self.monster.frame_width, self.monster.frame_height,
                 sx, sy,
-                self.monster.frame_width * zoom, self.monster.frame_height * zoom
+                self.monster.width * zoom, self.monster.height * zoom
             )
         else:
-            self.monster.image.clip_composite_draw(
+            self.monster.images.clip_composite_draw(
                 int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
                 self.monster.frame_width, self.monster.frame_height,
                 0, 'h',
                 sx, sy,
-                self.monster.frame_width * zoom, self.monster.frame_height * zoom
+                self.monster.width * zoom, self.monster.height * zoom
             )
 
 
@@ -123,7 +123,7 @@ class KingSlime:
         self.frame_width = 27
         self.frame_height = 22
         self.max_frames = 10
-        self.detection_range = 200
+        self.detection_range = 300
         self.speed_multiplier = 0.8
         self.attack_range = 10
         self.width = 135
