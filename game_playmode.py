@@ -17,6 +17,44 @@ import item_selection_mode
 import enter_mode
 import boss_mode
 
+
+def spawn_wave_monsters(wave_number):
+    """웨이브별 몬스터 생성"""
+    global monsters
+
+    spawn_count = portal.monsters_per_wave
+
+    for i in range(spawn_count):
+        # 랜덤 위치 생성 (포탈 주변)
+        angle = random.uniform(0, 2 * 3.14159)
+        distance = random.randint(100, 200)
+        spawn_x = portal.x + distance * math.cos(angle)
+        spawn_y = portal.y + distance * math.sin(angle)
+
+        # 맵 범위 내로 제한
+        spawn_x = max(50, min(spawn_x, WorldMap.width - 50))
+        spawn_y = max(50, min(spawn_y, WorldMap.height - 50))
+
+        # 웨이브에 따라 몬스터 타입 결정
+        if wave_number == 1:
+            monster_type = 'small_blue_slime'
+        elif wave_number == 2:
+            monster_type = 'small_blue_slime' if i < 7 else 'blue_slime'
+        else:  # wave_number == 3
+            monster_type = 'blue_slime'
+
+        monster = Monster(spawn_x, spawn_y, monster_type)
+        monster.set_target(char)
+        game_world.add_object(monster, 2)
+        monsters.append(monster)
+
+    # 충돌 페어 등록
+    for monster in monsters:
+        game_world.add_collision_pairs('monster:monster', None, monster)
+        game_world.add_collision_pairs('monster:monster', monster, None)
+
+    print(f"웨이브 {wave_number}: {spawn_count}마리의 몬스터 소환!")
+
 def handle_events():
     global running, anvil
     events = get_events()
@@ -34,7 +72,15 @@ def handle_events():
                     game_framework.push_mode(item_selection_mode)
 
                 if portal.in_range(char):
-                    game_framework.push_mode(enter_mode)
+                    success, message = portal.interact()
+                    if success:
+                        spawn_wave_monsters(portal.current_wave)
+                        print(message)
+                    else:
+                        # 모든 웨이브 완료 시 보스 모드로 전환
+                        if portal.is_all_waves_complete():
+                            game_framework.push_mode(enter_mode)
+                        print(message)
 
             elif event.key == SDLK_v:
                 game_framework.push_mode(inventory_mode)
