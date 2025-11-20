@@ -110,6 +110,7 @@ def update():
 
 
 def draw():
+    global talk_ui
     clear_canvas()
     game_world.render()
     talk_ui.draw()

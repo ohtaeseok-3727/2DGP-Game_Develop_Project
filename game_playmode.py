@@ -109,17 +109,6 @@ def init():
 
     monsters = []
 
-    for i in range(5):
-        small_slime = Monster(random.randint(100, 700), random.randint(100, 500), 'small_blue_slime')
-        small_slime.set_target(char)
-        game_world.add_object(small_slime, 2)
-        monsters.append(small_slime)
-
-    blue_slime1 = Monster(500, 400, 'blue_slime')
-    blue_slime1.set_target(char)
-    game_world.add_object(blue_slime1, 2)
-    monsters.append(blue_slime1)
-
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
