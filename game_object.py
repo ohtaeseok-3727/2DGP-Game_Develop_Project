@@ -85,6 +85,22 @@ class Portal:
         self.frame_time = 0
         self.fps = 10
 
+        self.current_wave = 0
+        self.max_waves = 3
+        self.monsters_per_wave = 10
+        self.wave_completed = False
+
+    def interact(self):
+        """포탈 상호작용 - 몬스터 소환"""
+        if self.current_wave >= self.max_waves:
+            return False, "모든 웨이브가 완료되었습니다!"
+
+        self.current_wave += 1
+        return True, f"웨이브 {self.current_wave} 시작!"
+
+    def is_all_waves_complete(self):
+        return self.current_wave >= self.max_waves
+
     def update(self, camera=None):
         self.frame_time += game_framework.frame_time
 
