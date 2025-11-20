@@ -17,7 +17,6 @@ import item_selection_mode
 import enter_mode
 import boss_mode
 
-
 def spawn_wave_monsters(wave_number):
     """웨이브별 몬스터 생성"""
     global monsters
@@ -55,44 +54,8 @@ def spawn_wave_monsters(wave_number):
 
     print(f"웨이브 {wave_number}: {spawn_count}마리의 몬스터 소환!")
 
-def handle_events():
-    global running, anvil
-    events = get_events()
-    for event in events:
-        if event.type == SDL_QUIT:
-            running = False
-        elif event.type == SDL_KEYDOWN:
-            if event.key == SDLK_ESCAPE:
-                game_framework.quit()
-            elif event.key == SDLK_f:
-                if anvil.in_range(char):
-                    game_framework.push_mode(upgrade_mode)
-
-                if sephirite.in_range(char):
-                    game_framework.push_mode(item_selection_mode)
-
-                if portal.in_range(char):
-                    success, message = portal.interact()
-                    if success:
-                        spawn_wave_monsters(portal.current_wave)
-                        print(message)
-                    else:
-                        # 모든 웨이브 완료 시 보스 모드로 전환
-                        if portal.is_all_waves_complete():
-                            game_framework.push_mode(enter_mode)
-                        print(message)
-
-            elif event.key == SDLK_v:
-                game_framework.push_mode(inventory_mode)
-            elif event.key == SDLK_c:
-                game_framework.push_mode(status_mode)
-            else:
-                char.handle_event(event, game_world.camera)
-        else:
-            char.handle_event(event, game_world.camera)
-
 def init():
-    global char, anvil, font, monsters, sephirite, portal
+    global char, anvil, font, monsters, sephirite, portal, remaining_monsters
 
     game_world.clear()
 
@@ -109,10 +72,11 @@ def init():
 
     monsters = []
 
+    remaining_monsters = sum(1 for m in monsters if m.is_alive)
+
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
-    game_world.add_object(anvil, 1)
     game_world.add_object(sephirite, 1)
     game_world.add_object(portal, 1)
 
@@ -138,6 +102,9 @@ def init():
             font = None
 
 def update():
+    remaining_monsters = sum(1 for m in monsters if m.is_alive)
+    if portal.current_wave == 1 and remaining_monsters == 0:
+        game_world.add_object(anvil, 1)
     game_world.update()
     game_world.handle_collisions()
 
@@ -145,7 +112,7 @@ def draw():
     clear_canvas()
     game_world.render()
     try:
-        if font and char and anvil and game_world.camera and anvil.in_range(char):
+        if font and char and anvil and game_world.camera and anvil.in_range(char) and portal.current_wave == 1 and sum(1 for m in monsters if m.is_alive) == 0:
             char_sprite_h = 19
 
             head_world_y = char.y + (char_sprite_h / 2) + 6
@@ -191,3 +158,41 @@ def pause():
 
 def resume():
     pass
+
+def handle_events():
+    global running, anvil, remaining_monsters
+    events = get_events()
+    for event in events:
+        if event.type == SDL_QUIT:
+            running = False
+        elif event.type == SDL_KEYDOWN:
+            if event.key == SDLK_ESCAPE:
+                game_framework.quit()
+            elif event.key == SDLK_f:
+                if anvil.in_range(char) and portal.current_wave == 1 and remaining_monsters == 0:
+                    game_framework.push_mode(upgrade_mode)
+
+                if remaining_monsters == 0 and sephirite.in_range(char):
+                    game_framework.push_mode(item_selection_mode)
+
+                if portal.in_range(char):
+                    success, message = portal.interact()
+                    remaining_monsters = sum(1 for m in monsters if m.is_alive)
+                    if remaining_monsters == 0:
+                        if success:
+                            spawn_wave_monsters(portal.current_wave)
+                            print(message)
+                        else:
+                            # 모든 웨이브 완료 시 보스 모드로 전환
+                            if portal.is_all_waves_complete():
+                                game_framework.push_mode(enter_mode)
+                            print(message)
+
+            elif event.key == SDLK_v:
+                game_framework.push_mode(inventory_mode)
+            elif event.key == SDLK_c:
+                game_framework.push_mode(status_mode)
+            else:
+                char.handle_event(event, game_world.camera)
+        else:
+            char.handle_event(event, game_world.camera)
