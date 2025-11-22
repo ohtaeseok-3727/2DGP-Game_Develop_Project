@@ -62,8 +62,8 @@ def init():
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
-    anvil = anvil(300, 200)
-    sephirite = Sephirite(400, 400)
+    anvil = anvil(350, 280)
+    sephirite = Sephirite(400, 280)
     portal = Portal(400, 300)
 
     cursor = Cursor()
@@ -77,7 +77,6 @@ def init():
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
-    game_world.add_object(sephirite, 1)
     game_world.add_object(portal, 1)
 
     for monster in monsters:
@@ -105,6 +104,7 @@ def update():
     remaining_monsters = sum(1 for m in monsters if m.is_alive)
     if portal.current_wave == 1 and remaining_monsters == 0:
         game_world.add_object(anvil, 1)
+        game_world.add_object(sephirite, 1)
     game_world.update()
     game_world.handle_collisions()
 
@@ -171,9 +171,11 @@ def handle_events():
             elif event.key == SDLK_f:
                 if anvil.in_range(char) and portal.current_wave == 1 and remaining_monsters == 0:
                     game_framework.push_mode(upgrade_mode)
+                    game_world.remove_object(anvil)
 
-                if remaining_monsters == 0 and sephirite.in_range(char):
+                if remaining_monsters == 0 and sephirite.in_range(char) and portal.current_wave != 0:
                     game_framework.push_mode(item_selection_mode)
+                    game_world.remove_object(sephirite)
 
                 if portal.in_range(char):
                     success, message = portal.interact()
