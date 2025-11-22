@@ -6,8 +6,8 @@ from worldmap import WorldMap
 from camera import Camera
 import game_world
 import game_framework
-from game_object import *
 import upgrade_mode
+from game_object import *
 import inventory_mode
 import status_mode
 from monster import Monster
