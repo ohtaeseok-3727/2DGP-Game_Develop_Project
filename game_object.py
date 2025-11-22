@@ -173,7 +173,7 @@ class Tree:
             frame_x, 0,
             self.frame_width, self.frame_height,
             self.x, self.y,
-            self.frame_width, self.frame_height
+            self.frame_width * 1.5, self.frame_height * 1.5
         )
 
     def get_bb(self):

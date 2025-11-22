@@ -12,7 +12,7 @@ screen_h = 768
 def init():
     global running, bg_image, logo_image, tree
     running = True
-    tree = Tree(screen_w // 2, screen_h - 300)
+    tree = Tree(screen_w // 2, screen_h - 225)
     bg_image = load_image('resource/title/title_background.png')
     logo_image = load_image('resource/title/logo.png')
 
