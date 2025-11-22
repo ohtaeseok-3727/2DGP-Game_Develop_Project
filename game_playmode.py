@@ -17,6 +17,9 @@ import item_selection_mode
 import enter_mode
 import boss_mode
 
+first_wave_use_anvil = False
+first_wave_use_sephirite = False
+
 def spawn_wave_monsters(wave_number):
     """웨이브별 몬스터 생성"""
     global monsters
@@ -55,15 +58,15 @@ def spawn_wave_monsters(wave_number):
     print(f"웨이브 {wave_number}: {spawn_count}마리의 몬스터 소환!")
 
 def init():
-    global char, anvil, font, monsters, sephirite, portal, remaining_monsters
+    global char, anvil, font, monsters, sephirite, portal, remaining_monsters, first_wave_use_anvil, first_wave_use_sephirite
 
     game_world.clear()
 
     world_map = WorldMap()
     char = character()
     camera = Camera(char)
-    anvil = anvil(350, 280)
-    sephirite = Sephirite(400, 280)
+    anvil = anvil(350, 250)
+    sephirite = Sephirite(400, 250)
     portal = Portal(400, 300)
 
     cursor = Cursor()
@@ -101,10 +104,14 @@ def init():
             font = None
 
 def update():
+    global first_wave_use_anvil, first_wave_use_sephirite
     remaining_monsters = sum(1 for m in monsters if m.is_alive)
-    if portal.current_wave == 1 and remaining_monsters == 0:
+    if portal.current_wave == 1 and remaining_monsters == 0 and first_wave_use_anvil == False:
         game_world.add_object(anvil, 1)
+        first_wave_use_anvil = True
+    if portal.current_wave == 1 and remaining_monsters == 0 and first_wave_use_sephirite == False:
         game_world.add_object(sephirite, 1)
+        first_wave_use_sephirite = True
     game_world.update()
     game_world.handle_collisions()
 
@@ -160,7 +167,7 @@ def resume():
     pass
 
 def handle_events():
-    global running, anvil, remaining_monsters
+    global running, anvil, remaining_monsters, first_wave_use_anvil, first_wave_use_sephirite
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -169,13 +176,15 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
             elif event.key == SDLK_f:
-                if anvil.in_range(char) and portal.current_wave == 1 and remaining_monsters == 0:
-                    game_framework.push_mode(upgrade_mode)
+                if anvil in game_world.all_objects() and anvil.in_range(char) and portal.current_wave == 1 and remaining_monsters == 0:
+                    first_wave_use_anvil = True
                     game_world.remove_object(anvil)
+                    game_framework.push_mode(upgrade_mode)
 
-                if remaining_monsters == 0 and sephirite.in_range(char) and portal.current_wave != 0:
-                    game_framework.push_mode(item_selection_mode)
+                if sephirite in game_world.all_objects() and remaining_monsters == 0 and sephirite.in_range(char) and portal.current_wave != 0:
+                    first_wave_use_sephirite = True
                     game_world.remove_object(sephirite)
+                    game_framework.push_mode(item_selection_mode)
 
                 if portal.in_range(char):
                     success, message = portal.interact()
