@@ -142,3 +142,39 @@ class Portal:
             sr, st = camera.apply(right, top)
             return sl, sb, sr, st
         return left, bottom, right, top
+
+class Tree:
+    def __init__(self, x, y):
+        self.image = load_image('resource/title/N_Title_Tree_SpriteSheet.png')
+        self.x = x
+        self.y = y
+        self.interaction_range = 30
+
+        self.frame_width = 147
+        self.frame_height = 155
+        self.total_frames = 16
+        self.current_frame = 0
+        self.frame_time = 0
+        self.fps = 10
+        pass
+    def update(self, camera=None):
+        if get_time() - self.frame_time > 1.0 / self.fps:
+            self.current_frame = (self.current_frame + ACTION_PER_TIME * self.total_frames * game_framework.frame_time) % self.total_frames
+            self.frame_time = get_time()
+        pass
+    def in_range(self, character):
+        pass
+
+    def draw(self, camera=None):
+
+        frame_x = int(self.current_frame) * self.frame_width
+
+        self.image.clip_draw(
+            frame_x, 0,
+            self.frame_width, self.frame_height,
+            self.x, self.y,
+            self.frame_width, self.frame_height
+        )
+
+    def get_bb(self):
+        pass
