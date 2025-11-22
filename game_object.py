@@ -3,6 +3,9 @@ import math
 from worldmap import WorldMap
 import game_framework
 
+TIME_PER_ACTION = 0.01
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+
 class anvil:
     def __init__(self, x, y):
         self.image = load_image('resource/object/Anvil.png')
@@ -41,11 +44,9 @@ class Sephirite:
         self.fps = 10
         pass
     def update(self, camera=None):
-        self.frame_time += game_framework.frame_time
-
-        if self.frame_time > 1.0 / self.fps:
-            self.current_frame = (self.current_frame + 1) % self.total_frames
-            self.frame_time = 0
+        if get_time() - self.frame_time > 1.0 / self.fps:
+            self.current_frame = (self.current_frame + ACTION_PER_TIME * self.total_frames * game_framework.frame_time) % self.total_frames
+            self.frame_time = get_time()
         pass
     def in_range(self, character):
         distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
@@ -105,7 +106,7 @@ class Portal:
         self.frame_time += game_framework.frame_time
 
         if self.frame_time > 1.0 / self.fps:
-            self.current_frame = (self.current_frame + 1) % self.total_frames
+            self.current_frame = (self.current_frame + ACTION_PER_TIME * self.total_frames * game_framework.frame_time) % self.total_frames
             self.frame_time = 0
 
     def in_range(self, character):
