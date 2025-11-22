@@ -190,3 +190,10 @@ def collide_obb_boxes(boxes_a, boxes_b):
             if check_box_collision(box_a, box_b):
                 return True
     return False
+
+def all_objects():
+    """월드의 모든 객체를 포함하는 리스트를 반환합니다."""
+    all_obj = []
+    for layer in world:
+        all_obj.extend(layer)
+    return all_obj
