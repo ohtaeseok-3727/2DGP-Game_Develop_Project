@@ -181,10 +181,11 @@ class Tree:
         pass
 
 class Building:
-    def __init__(self, x, y, building_type):
+    def __init__(self, x, y, building_type, size):
         self.x = x
         self.y = y
         self.building_type = building_type
+        self.size = size
         if building_type == 1:
             self.image = load_image('resource/map/broken_building1.png')
             self.width = 477
@@ -223,8 +224,8 @@ class Building:
             screen_x, screen_y = camera.apply(self.x, self.y)
             zoom = camera.zoom
             self.image.draw(screen_x, screen_y,
-                          self.image.w * zoom,
-                          self.image.h * zoom)
+                          self.image.w * zoom * self.size,
+                          self.image.h * zoom * self.size)
         else:
             self.image.draw(self.x, self.y)
         left, bottom, right, top = self.get_bb()
@@ -237,7 +238,7 @@ class Building:
     def get_bb(self, camera=None):
         half_w = self.width / 2
         half_h = self.height / 2
-        left, bottom, right, top = self.x - half_w, self.y - half_h, self.x + half_w, self.y + half_h
+        left, bottom, right, top = self.x - (half_w*self.size), self.y - (half_h*self.size), self.x + (half_w*self.size), self.y + (half_h*self.size)
 
         if camera:
             sl, sb = camera.apply(left, bottom)
