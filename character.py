@@ -258,6 +258,7 @@ class character:
         self.inventory = []
 
         game_world.add_collision_pairs('character:monster', self, None)
+        game_world.add_collision_pairs('building:character', None, self)
 
     def add_item(self, item):
         self.inventory.append(item)

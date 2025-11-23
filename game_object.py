@@ -2,6 +2,7 @@ from pico2d import *
 import math
 from worldmap import WorldMap
 import game_framework
+import game_world
 
 TIME_PER_ACTION = 0.01
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -213,6 +214,8 @@ class building:
             building.image = load_image('resource/map/broken_building7.png')
             self.width = 72
             self.height = 73
+        game_world.add_collision_pairs('building:monster', self, None)
+        game_world.add_collision_pairs('building:character', self, None)
     def update(self, camera=None):
 
         pass
@@ -225,6 +228,13 @@ class building:
                           self.image.h * zoom)
         else:
             self.image.draw(self.x, self.y)
+        left, bottom, right, top = self.get_bb()
+        if camera:
+            sl, sb = camera.apply(left, bottom)
+            sr, st = camera.apply(right, top)
+            draw_rectangle(sl, sb, sr, st)
+        else:
+            draw_rectangle(left, bottom, right, top)
     def get_bb(self, camera=None):
         half_w = self.width / 2
         half_h = self.height / 2

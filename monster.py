@@ -176,6 +176,7 @@ class Monster:
 
         game_world.add_collision_pairs('character:monster', None, self)
         game_world.add_collision_pairs('monster:attack', self, None)
+        game_world.add_collision_pairs('building:monster', None, self)
 
     def set_target(self, target):
         self.target = target
