@@ -9,6 +9,7 @@ from sdl2.mouse import SDL_GetMouseState
 import game_framework
 from cursor import Cursor
 import game_world
+from pico2d import *
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a

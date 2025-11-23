@@ -143,6 +143,7 @@ def init():
     monsters = []
 
     remaining_monsters = 0
+    world_map.change_map('default')
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
