@@ -225,3 +225,13 @@ class building:
                           self.image.h * zoom)
         else:
             self.image.draw(self.x, self.y)
+    def get_bb(self, camera=None):
+        half_w = self.width / 2
+        half_h = self.height / 2
+        left, bottom, right, top = self.x - half_w, self.y - half_h, self.x + half_w, self.y + half_h
+
+        if camera:
+            sl, sb = camera.apply(left, bottom)
+            sr, st = camera.apply(right, top)
+            return sl, sb, sr, st
+        return left, bottom, right, top
