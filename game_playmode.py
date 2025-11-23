@@ -127,6 +127,7 @@ def spawn_wave_monsters(wave_number):
 
 def init():
     global char, font, monsters, portal, remaining_monsters, reward_manager, backgrounds
+    global building1, building2, building3, building4, building5, building6, building7
 
     game_world.clear()
 
@@ -135,6 +136,13 @@ def init():
     camera = Camera(char)
     portal = Portal(400, 300)
     reward_manager = RewardManager()
+    building1 = Building(400, 550, 1)
+    building2 = Building(100, 500, 2)
+    building3 = Building(700, 550, 3)
+    building4 = Building(650, 400, 4)
+    building5 = Building( 50, 370, 5)
+    building6 = Building(100, 100, 6)
+    building7 = Building(570, 150, 7)
 
     cursor = Cursor()
     char.cursor = cursor
@@ -147,6 +155,13 @@ def init():
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
+    game_world.add_object(building1, 0)
+    game_world.add_object(building2, 0)
+    game_world.add_object(building3, 0)
+    game_world.add_object(building4, 0)
+    game_world.add_object(building5, 0)
+    game_world.add_object(building6, 0)
+    game_world.add_object(building7, 0)
     game_world.add_object(char, 2)
     game_world.add_object(portal, 1)
 
