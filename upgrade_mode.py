@@ -87,6 +87,7 @@ def handle_events():
                     char.weapon = weapon(char)
 
                     print(f"무기 변경: 랭크 {button.rank}")
+                    game_framework.pop_mode()
 
 
 def pause():
