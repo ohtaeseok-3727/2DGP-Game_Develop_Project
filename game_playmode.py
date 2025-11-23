@@ -1,6 +1,7 @@
 import random
 
 from pico2d import *
+
 from character import character
 from worldmap import WorldMap
 from camera import Camera
@@ -125,7 +126,7 @@ def spawn_wave_monsters(wave_number):
     print(f"웨이브 {wave_number}: {spawn_count}마리의 몬스터 소환!")
 
 def init():
-    global char, font, monsters, portal, remaining_monsters, reward_manager
+    global char, font, monsters, portal, remaining_monsters, reward_manager, backgrounds
 
     game_world.clear()
 

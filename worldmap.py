@@ -6,6 +6,7 @@ class WorldMap:
     cell = 64
 
     def __init__(self):
+        self.image = load_image("resource/map/village_background.png")
         self.cols = self.width // self.cell
         self.rows = self.height // self.cell
     def update(self, camera=None):
@@ -19,3 +20,4 @@ class WorldMap:
             sx1, sy1 = camera.apply(0, y)
             sx2, sy2 = camera.apply(WorldMap.width, y)
             draw_line(sx1, sy1, sx2, sy2)
+        self.image.draw(WorldMap.width // 2, WorldMap.height // 2)
