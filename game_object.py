@@ -178,3 +178,50 @@ class Tree:
 
     def get_bb(self):
         pass
+
+class building:
+    image = None
+    def __init__(self, x, y, building_type):
+        self.x = x
+        self.y = y
+        self.building_type = building_type
+        if building_type == 1:
+            building.image = load_image('resource/map/broken_building1.png')
+            self.width = 477
+            self.height = 123
+        if building_type == 2:
+            building.image = load_image('resource/map/broken_building2.png')
+            self.width = 56
+            self.height = 76
+        if building_type == 3:
+            building.image = load_image('resource/map/broken_building3.png')
+            self.width = 54
+            self.height = 61
+        if building_type == 4:
+            building.image = load_image('resource/map/broken_building4.png')
+            self.width = 54
+            self.height = 43
+        if building_type == 5:
+            building.image = load_image('resource/map/broken_building5.png')
+            self.width = 54
+            self.height = 61
+        if building_type == 6:
+            building.image = load_image('resource/map/broken_building6.png')
+            self.width = 55
+            self.height = 42
+        if building_type == 7:
+            building.image = load_image('resource/map/broken_building7.png')
+            self.width = 72
+            self.height = 73
+    def update(self, camera=None):
+
+        pass
+    def draw(self, camera=None):
+        if camera:
+            screen_x, screen_y = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+            self.image.draw(screen_x, screen_y,
+                          self.image.w * zoom,
+                          self.image.h * zoom)
+        else:
+            self.image.draw(self.x, self.y)
