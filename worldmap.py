@@ -4,6 +4,7 @@ class WorldMap:
     _instance = None
     maps = {
         'default': 'resource/map/village_background.png',
+        'boss map': 'resource/map/boss_map_background.png'
     }
     width = 800
     height = 600

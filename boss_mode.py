@@ -41,6 +41,7 @@ def init():
     boss = Boss.KingSlime(600, 400)
     boss.set_target(char)
 
+    world_map.change_map('boss map')
     cursor = Cursor()
     char.cursor = cursor
     game_world.set_cursor(cursor)
