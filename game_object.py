@@ -180,38 +180,37 @@ class Tree:
     def get_bb(self):
         pass
 
-class building:
-    image = None
+class Building:
     def __init__(self, x, y, building_type):
         self.x = x
         self.y = y
         self.building_type = building_type
         if building_type == 1:
-            building.image = load_image('resource/map/broken_building1.png')
+            self.image = load_image('resource/map/broken_building1.png')
             self.width = 477
             self.height = 123
         if building_type == 2:
-            building.image = load_image('resource/map/broken_building2.png')
+            self.image = load_image('resource/map/broken_building2.png')
             self.width = 56
             self.height = 76
         if building_type == 3:
-            building.image = load_image('resource/map/broken_building3.png')
+            self.image = load_image('resource/map/broken_building3.png')
             self.width = 54
             self.height = 61
         if building_type == 4:
-            building.image = load_image('resource/map/broken_building4.png')
+            self.image = load_image('resource/map/broken_building4.png')
             self.width = 54
             self.height = 43
         if building_type == 5:
-            building.image = load_image('resource/map/broken_building5.png')
+            self.image = load_image('resource/map/broken_building5.png')
             self.width = 54
             self.height = 61
         if building_type == 6:
-            building.image = load_image('resource/map/broken_building6.png')
+            self.image = load_image('resource/map/broken_building6.png')
             self.width = 55
             self.height = 42
         if building_type == 7:
-            building.image = load_image('resource/map/broken_building7.png')
+            self.image = load_image('resource/map/broken_building7.png')
             self.width = 72
             self.height = 73
         game_world.add_collision_pairs('building:monster', self, None)
@@ -245,3 +244,5 @@ class building:
             sr, st = camera.apply(right, top)
             return sl, sb, sr, st
         return left, bottom, right, top
+    def handle_collision(self, other, group):
+        pass
