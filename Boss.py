@@ -47,7 +47,7 @@ class Idle:
             frame_index * self.monster.frame_width, self.monster.frame_height*2,
             self.monster.frame_width, self.monster.frame_height,
             sx, sy,
-            self.monster.width * zoom, self.monster.height * zoom
+            self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
         )
 
 class Move:
@@ -91,7 +91,7 @@ class Move:
                 int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
                 self.monster.frame_width, self.monster.frame_height,
                 sx, sy,
-                self.monster.width * zoom, self.monster.height * zoom
+                self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
             )
         else:
             self.monster.images.clip_composite_draw(
@@ -99,7 +99,7 @@ class Move:
                 self.monster.frame_width, self.monster.frame_height,
                 0, 'h',
                 sx, sy,
-                self.monster.width * zoom, self.monster.height * zoom
+                self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
             )
 
 
@@ -128,6 +128,7 @@ class KingSlime:
         self.attack_range = 10
         self.width = 135
         self.height = 110
+        self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
 
 
         self.hit_cooldown = 0.1
@@ -159,15 +160,16 @@ class KingSlime:
             return
 
         self.state_machine.update()
+        self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
 
     def get_bb(self):
         half_w = (self.width / 2) - self.width / 20
         half_h = (self.height / 2) - self.height / 5
         return (
-            self.x - half_w,
-            self.y - half_h,
-            self.x + half_w,
-            self.y + half_h
+            self.x - (half_w*max(0.2, self.hp_ratio)),
+            self.y - (half_h*max(0.2, self.hp_ratio)),
+            self.x + (half_w*max(0.2, self.hp_ratio)),
+            self.y + (half_h*max(0.2, self.hp_ratio))
         )
 
     def take_damage(self, damage):
@@ -228,14 +230,13 @@ class KingSlime:
         if KingSlime.hp_background:
             KingSlime.hp_background.draw(bar_x_center, bar_y, total_bar_width + 4, total_bar_height)
 
-        hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
-        hp_display_width = total_bar_width * hp_ratio
+        hp_display_width = total_bar_width * self.hp_ratio
 
-        if hp_ratio > 0 and KingSlime.hp_bar:
+        if self.hp_ratio > 0 and KingSlime.hp_bar:
             src_w = getattr(KingSlime.hp_bar, 'w', None)
             src_h = getattr(KingSlime.hp_bar, 'h', None)
             if src_w and src_h:
-                clip_w = max(1, int(src_w * hp_ratio))
+                clip_w = max(1, int(src_w * self.hp_ratio))
                 clip_draw_x = bar_x_center - total_bar_width / 2 + hp_display_width / 2
                 KingSlime.hp_bar.clip_draw(0, 0, clip_w, src_h, clip_draw_x, bar_y, hp_display_width,
                                            total_bar_height - 2)
