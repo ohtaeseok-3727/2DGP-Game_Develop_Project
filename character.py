@@ -116,16 +116,11 @@ class Move:
             self.character.frame = (self.character.frame+FRAMES_PER_ACTION*ACTION_PER_TIME*game_framework.frame_time) % 8
             self.frame_time = get_time()
 
-        prev_x = self.character.x
-        prev_y = self.character.y
+        self.character.prev_x = self.character.x
+        self.character.prev_y = self.character.y
 
         self.character.x += self.character.dir * RUN_SPEED_PPS * game_framework.frame_time
         self.character.y += self.character.updown_dir * RUN_SPEED_PPS * game_framework.frame_time
-
-        self.character.collision_x = False
-        self.character.collision_y = False
-        self.character.prev_x = prev_x
-        self.character.prev_y = prev_y
 
         if (not self.character.left_pressed and not self.character.right_pressed and
                 not self.character.up_pressed and not self.character.down_pressed):
@@ -230,8 +225,6 @@ class character:
 
         self.prev_x = self.x
         self.prev_y = self.y
-        self.collision_x = False
-        self.collision_y = False
 
         self.frame = 0
         self.updown_dir = 0 # 1: up, -1: down
