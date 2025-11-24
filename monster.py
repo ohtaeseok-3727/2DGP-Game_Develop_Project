@@ -307,7 +307,6 @@ class Monster:
             zoom = camera.zoom
             sx, sy = camera.apply(self.x, self.y)
             bar_width = 50 * zoom
-            bar_height = 5 * zoom
             bar_x = sx - bar_width / 2
             bar_y = sy + (self.frame_height / 2 + 10) * zoom
 

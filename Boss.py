@@ -166,10 +166,10 @@ class KingSlime:
         half_w = (self.width / 2) - self.width / 20
         half_h = (self.height / 2) - self.height / 5
         return (
-            self.x - (half_w*max(0.2, self.hp_ratio)),
-            self.y - (half_h*max(0.2, self.hp_ratio)),
-            self.x + (half_w*max(0.2, self.hp_ratio)),
-            self.y + (half_h*max(0.2, self.hp_ratio))
+            self.x - (half_w*max(0.4, self.hp_ratio)),
+            self.y - (half_h*max(0.4, self.hp_ratio)),
+            self.x + (half_w*max(0.4, self.hp_ratio)),
+            self.y + (half_h*max(0.4, self.hp_ratio))
         )
 
     def take_damage(self, damage):
