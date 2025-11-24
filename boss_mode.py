@@ -34,6 +34,7 @@ def init():
     global monsters, sephirite, portal, boss, char
 
     game_world.clear()
+    game_world.clear_collision_pairs()
 
     world_map = WorldMap()
     char = game_playmode.char

@@ -197,3 +197,7 @@ def all_objects():
     for layer in world:
         all_obj.extend(layer)
     return all_obj
+
+def clear_collision_pairs():
+    global collision_pair
+    collision_pair = {}
