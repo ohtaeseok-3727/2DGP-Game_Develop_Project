@@ -3,6 +3,7 @@ import math
 import game_framework
 import game_world
 from state_machine import StateMachine
+from worldmap import WorldMap
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MONSTER_SPEED_KMPH = 10.0
@@ -81,6 +82,12 @@ class Move:
 
                 self.monster.x += dir_x * MONSTER_SPEED_PPS * game_framework.frame_time
                 self.monster.y += dir_y * MONSTER_SPEED_PPS * game_framework.frame_time
+
+        half_w = (self.monster.width / 2) * max(0.4, self.monster.hp_ratio)
+        half_h = (self.monster.height / 2) * max(0.4, self.monster.hp_ratio)
+
+        self.monster.x = max(half_w, min(self.monster.x, WorldMap.width - half_w))
+        self.monster.y = max(half_h, min(self.monster.y, WorldMap.height - half_h))
 
     def draw(self, camera):
         sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
