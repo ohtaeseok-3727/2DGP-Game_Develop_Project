@@ -88,22 +88,55 @@ class RewardManager:
             return True
         return False
 
+
+def is_valid_spawn_position(x, y, buildings):
+    # 임시 몬스터 바운딩 박스 계산 (small_blue_slime 기준)
+    test_half_w = 17 / 2
+    test_half_h = 12 / 2
+
+    monster_left = x - test_half_w
+    monster_right = x + test_half_w
+    monster_bottom = y - test_half_h
+    monster_top = y + test_half_h
+
+    # 모든 건물과 충돌 검사
+    for building in buildings:
+        building_left, building_bottom, building_right, building_top = building.get_bb()
+
+        # AABB 충돌 검사
+        if not (monster_right < building_left or
+                monster_left > building_right or
+                monster_top < building_bottom or
+                monster_bottom > building_top):
+            return False
+
+    return True
+
 def spawn_wave_monsters(wave_number):
     """웨이브별 몬스터 생성"""
     global monsters
 
     spawn_count = portal.monsters_per_wave
 
-    for i in range(spawn_count):
-        # 랜덤 위치 생성 (포탈 주변)
-        angle = random.uniform(0, 2 * 3.14159)
-        distance = random.randint(100, 200)
-        spawn_x = portal.x + distance * math.cos(angle)
-        spawn_y = portal.y + distance * math.sin(angle)
+    buildings = [building1, building2, building3, building4, building5, building6, building7]
 
-        # 맵 범위 내로 제한
-        spawn_x = max(50, min(spawn_x, WorldMap.width - 50))
-        spawn_y = max(50, min(spawn_y, WorldMap.height - 50))
+    for i in range(spawn_count):
+        max_attempts = 50
+        spawn_x, spawn_y = 0, 0
+
+        for attempt in range(max_attempts):
+            angle = random.uniform(0, 2 * 3.14159)
+            distance = random.randint(100, 200)
+            spawn_x = portal.x + distance * math.cos(angle)
+            spawn_y = portal.y + distance * math.sin(angle)
+
+            spawn_x = max(50, min(spawn_x, WorldMap.width - 50))
+            spawn_y = max(50, min(spawn_y, WorldMap.height - 50))
+
+            if is_valid_spawn_position(spawn_x, spawn_y, buildings):
+                break
+        else:
+            print(f"경고: 몬스터 {i + 1}의 유효한 소환 위치를 찾지 못했습니다.")
 
         # 웨이브에 따라 몬스터 타입 결정
         if wave_number == 1:

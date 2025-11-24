@@ -64,6 +64,9 @@ class Move:
     def do(self):
         self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 5
 
+        prev_x = self.monster.x
+        prev_y = self.monster.y
+
         if self.monster.target:
             dx = self.monster.target.x - self.monster.x
             dy = self.monster.target.y - self.monster.y
@@ -78,6 +81,9 @@ class Move:
 
                 self.monster.x += dir_x * MONSTER_SPEED_PPS * game_framework.frame_time
                 self.monster.y += dir_y * MONSTER_SPEED_PPS * game_framework.frame_time
+
+        self.monster.prev_x = prev_x
+        self.monster.prev_y = prev_y
 
         try:
             left, bottom, right, top = self.monster.get_bb()
@@ -126,6 +132,9 @@ class Monster:
         self.is_alive = True
         self.target = None
         self.face_dir = 1
+
+        self.prev_x = self.x
+        self.prev_y = self.y
 
         if monster_type == 'small_blue_slime':
             self.hp = 50
@@ -221,7 +230,40 @@ class Monster:
             print(f'몬스터 제거 오류: {e}')
 
     def handle_collision(self, group, other):
-        if group == 'monster:monster':
+        if group == 'building:monster':
+            building_left, building_bottom, building_right, building_top = other.get_bb()
+            building_center_x = (building_left + building_right) / 2
+            building_center_y = (building_bottom + building_top) / 2
+
+            dx = self.x - building_center_x
+            dy = self.y - building_center_y
+
+            building_half_w = (building_right - building_left) / 2
+            building_half_h = (building_top - building_bottom) / 2
+
+            monster_half_w = self.frame_width / 2
+            monster_half_h = self.frame_height / 2
+
+            overlap_x = (building_half_w + monster_half_w) - abs(dx)
+            overlap_y = (building_half_h + monster_half_h) - abs(dy)
+
+            if overlap_x < overlap_y:
+                if dx > 0:
+                    self.x = building_right + monster_half_w
+                else:
+                    self.x = building_left - monster_half_w
+            else:
+                if dy > 0:
+                    self.y = building_top + monster_half_h
+                else:
+                    self.y = building_bottom - monster_half_h
+
+            # 이전 위치도 업데이트하여 다음 프레임에서 다시 충돌하지 않도록 함
+            self.prev_x = self.x
+            self.prev_y = self.y
+            return
+
+        elif group == 'monster:monster':
             dx = self.x - other.x
             dy = self.y - other.y
             distance = math.sqrt(dx * dx + dy * dy)

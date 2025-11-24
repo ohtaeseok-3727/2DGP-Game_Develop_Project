@@ -116,8 +116,16 @@ class Move:
             self.character.frame = (self.character.frame+FRAMES_PER_ACTION*ACTION_PER_TIME*game_framework.frame_time) % 8
             self.frame_time = get_time()
 
+        prev_x = self.character.x
+        prev_y = self.character.y
+
         self.character.x += self.character.dir * RUN_SPEED_PPS * game_framework.frame_time
         self.character.y += self.character.updown_dir * RUN_SPEED_PPS * game_framework.frame_time
+
+        self.character.collision_x = False
+        self.character.collision_y = False
+        self.character.prev_x = prev_x
+        self.character.prev_y = prev_y
 
         if (not self.character.left_pressed and not self.character.right_pressed and
                 not self.character.up_pressed and not self.character.down_pressed):
@@ -219,6 +227,12 @@ class character:
 
         self.x = WorldMap.width/2
         self.y = WorldMap.height/2
+
+        self.prev_x = self.x
+        self.prev_y = self.y
+        self.collision_x = False
+        self.collision_y = False
+
         self.frame = 0
         self.updown_dir = 0 # 1: up, -1: down
         self.face_updown_dir = -1 # 1: up, -1: down
@@ -337,6 +351,14 @@ class character:
             if current_time - self.last_hit_time >= self.hit_cooldown:
                 self.now_hp = max(0, self.now_hp - other.damage)
                 self.last_hit_time = current_time
+        elif group == 'building:character':
+            dx = self.x - other.x
+            dy = self.y - other.y
+
+            if abs(dx) > abs(dy):
+                self.x = self.prev_x
+            else:
+                self.y = self.prev_y
         pass
 
     def clamp_to_world(self):
