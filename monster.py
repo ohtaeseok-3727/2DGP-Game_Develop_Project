@@ -121,7 +121,7 @@ class Die:
     def __init__(self, monster):
         self.monster = monster
         self.death_timer = 0
-        self.death_duration = 3.0
+        self.death_duration = 0.5
 
     def enter(self, e):
         self.monster.frame = 0
@@ -131,8 +131,6 @@ class Die:
         pass
 
     def do(self):
-        import game_framework
-
         # 죽음 애니메이션 재생
         self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 3
 
@@ -141,8 +139,14 @@ class Die:
 
         # 3초가 지나면 몬스터 제거
         if self.death_timer >= self.death_duration:
-            game_world.remove_collision_object(self.monster)
-            game_world.remove_object(self.monster)
+            try:
+                game_world.remove_collision_object(self.monster)
+            except:
+                pass
+            try:
+                game_world.remove_object(self.monster)
+            except:
+                pass
 
     def draw(self, camera):
         zoom = camera.zoom if camera else 1.0
@@ -219,8 +223,8 @@ class Monster:
         self.die_state = Die(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {target_in_range: self.move},
-            self.move: {target_out_of_range: self.idle}
+            self.idle: {target_in_range: self.move, self.die : self.die_state},
+            self.move: {target_out_of_range: self.idle, self.die : self.die_state}
         })
 
         game_world.add_collision_pairs('character:monster', None, self)
@@ -231,9 +235,6 @@ class Monster:
         self.target = target
         pass
     def update(self, camera=None):
-        if not self.is_alive:
-            return
-
         self.state_machine.update()
 
     def get_bb(self):
@@ -327,20 +328,20 @@ class Monster:
             pass
 
     def draw(self, camera=None):
-        if not self.is_alive:
-            return
 
         self.state_machine.draw(camera)
-        # 바운딩 박스 그리기
-        left, bottom, right, top = self.get_bb()
-        if camera:
-            sl, sb = camera.apply(left, bottom)
-            sr, st = camera.apply(right, top)
-            draw_rectangle(sl, sb, sr, st)
-        else:
-            draw_rectangle(left, bottom, right, top)
+        self.state_machine.draw(camera)
 
-        if camera:
+        if self.is_alive:
+            left, bottom, right, top = self.get_bb()
+            if camera:
+                sl, sb = camera.apply(left, bottom)
+                sr, st = camera.apply(right, top)
+                draw_rectangle(sl, sb, sr, st)
+            else:
+                draw_rectangle(left, bottom, right, top)
+
+        if self.is_alive and camera:
             zoom = camera.zoom
             sx, sy = camera.apply(self.x, self.y)
             bar_width = 50 * zoom
