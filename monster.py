@@ -41,7 +41,7 @@ class Spawn:
         # 36프레임 애니메이션
         self.monster.frame += MONSTER_SPEED_PPS * 30 / 75 * game_framework.frame_time
 
-        if self.monster.frame >= 30 and not self.monster_visible:
+        if self.monster.frame >= 28 and not self.monster_visible:
             self.monster_visible = True
 
         if self.monster.frame >= 36:
@@ -394,7 +394,7 @@ class Monster:
         self.state_machine.draw(camera)
         self.state_machine.draw(camera)
 
-        if self.is_alive:
+        if self.is_alive and not self.state_machine.cur_state == self.spawn_state:
             left, bottom, right, top = self.get_bb()
             if camera:
                 sl, sb = camera.apply(left, bottom)
@@ -403,7 +403,7 @@ class Monster:
             else:
                 draw_rectangle(left, bottom, right, top)
 
-        if self.is_alive and camera:
+        if self.is_alive and camera and not self.state_machine.cur_state == self.spawn_state:
             zoom = camera.zoom
             sx, sy = camera.apply(self.x, self.y)
             bar_width = 50 * zoom
