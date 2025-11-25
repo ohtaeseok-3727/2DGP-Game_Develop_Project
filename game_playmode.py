@@ -24,12 +24,12 @@ def init():
     camera = Camera(char)
     portal = Portal(400, 300)
     building1 = Building(400, 550, 1, 1)
-    building2 = Building(100, 500, 2, 1.2)
-    building3 = Building(700, 550, 3, 1.2)
-    building4 = Building(650, 400, 4, 1.2)
-    building5 = Building( 50, 370, 5, 1.2)
-    building6 = Building(100, 100, 6, 1.2)
-    building7 = Building(570, 150, 7, 1.2)
+    building2 = Building(100, 500, 2, 1.4)
+    building3 = Building(700, 550, 3, 1.4)
+    building4 = Building(650, 400, 4, 1.4)
+    building5 = Building( 50, 370, 5, 1.4)
+    building6 = Building(100, 100, 6, 1.4)
+    building7 = Building(570, 150, 7, 1.4)
 
     cursor = Cursor()
     char.cursor = cursor

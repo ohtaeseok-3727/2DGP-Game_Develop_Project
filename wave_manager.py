@@ -79,7 +79,7 @@ class WaveSpawner:
         max_attempts = 50
         for attempt in range(max_attempts):
             angle = random.uniform(0, 2 * 3.14159)
-            distance = random.randint(100, 200)
+            distance = random.randint(100, 400)
             spawn_x = self.portal.x + distance * math.cos(angle)
             spawn_y = self.portal.y + distance * math.sin(angle)
 
