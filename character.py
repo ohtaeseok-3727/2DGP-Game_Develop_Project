@@ -340,19 +340,35 @@ class character:
 
     def handle_collision(self, group, other):
         current_time = get_time()
+        if self.dash.working:
+            return
         if group=='character:monster':
             if current_time - self.last_hit_time >= self.hit_cooldown:
                 self.now_hp = max(0, self.now_hp - other.damage)
                 self.last_hit_time = current_time
-        elif group == 'building:character':
-            dx = self.x - other.x
-            dy = self.y - other.y
 
-            if abs(dx) > abs(dy):
-                self.x = self.prev_x
+        elif group == 'building:character':
+            # 캐릭터와 빌딩의 바운딩 박스 가져오기
+            char_left, char_bottom, char_right, char_top = self.get_bb()
+            build_left, build_bottom, build_right, build_top = other.get_bb()
+
+            # 겹친 영역 계산
+            overlap_x = min(char_right, build_right) - max(char_left, build_left)
+            overlap_y = min(char_top, build_top) - max(char_bottom, build_bottom)
+
+            # 더 작은 겹침을 기준으로 밀어내기
+            if overlap_x < overlap_y:
+                # x축으로 밀어내기
+                if self.x < other.x:
+                    self.x -= overlap_x
+                else:
+                    self.x += overlap_x
             else:
-                self.y = self.prev_y
-        pass
+                # y축으로 밀어내기
+                if self.y < other.y:
+                    self.y -= overlap_y
+                else:
+                    self.y += overlap_y
 
     def clamp_to_world(self):
         try:
