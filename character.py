@@ -11,6 +11,7 @@ from cursor import Cursor
 import game_world
 from pico2d import *
 import title_mode
+import math
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -500,14 +501,8 @@ class character:
 
     def handle_collision(self, group, other):
         current_time = get_time()
-        if self.dash.working:
-            return
-        if group=='character:monster':
-            if current_time - self.last_hit_time >= self.hit_cooldown:
-                self.now_hp = max(0, self.now_hp - other.damage)
-                self.last_hit_time = current_time
 
-        elif group == 'building:character':
+        if group == 'building:character':
             # 캐릭터와 빌딩의 바운딩 박스 가져오기
             char_left, char_bottom, char_right, char_top = self.get_bb()
             build_left, build_bottom, build_right, build_top = other.get_bb()
@@ -529,6 +524,52 @@ class character:
                     self.y -= overlap_y
                 else:
                     self.y += overlap_y
+
+        elif self.dash.working:
+            return
+
+        elif group == 'character:monster':
+            if current_time - self.last_hit_time >= self.hit_cooldown:
+                self.now_hp = max(0, self.now_hp - other.damage)
+                self.last_hit_time = current_time
+
+            # 충돌 시 서로 밀어내기
+            dx = self.x - other.x
+            dy = self.y - other.y
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance > 0:
+                # 정규화된 방향 벡터
+                nx = dx / distance
+                ny = dy / distance
+
+                # 최소 거리 계산
+                char_left, char_bottom, char_right, char_top = self.get_bb()
+                char_half_w = (char_right - char_left) / 2
+                char_half_h = (char_top - char_bottom) / 2
+
+                monster_half_w = other.frame_width / 2
+                monster_half_h = other.frame_height / 2
+
+                min_distance = math.sqrt((char_half_w + monster_half_w) ** 2 +
+                                         (char_half_h + monster_half_h) ** 2) * 0.7
+
+                if distance < min_distance:
+                    # 겹친 정도 계산
+                    overlap = min_distance - distance
+
+                    # 각 객체를 반대 방향으로 밀어냄 (50:50 비율)
+                    push_distance = overlap / 2
+                    self.x += nx * push_distance
+                    self.y += ny * push_distance
+                    other.x -= nx * push_distance
+                    other.y -= ny * push_distance
+
+                    # 월드 경계 내로 제한
+                    try:
+                        self.clamp_to_world()
+                    except:
+                        pass
 
     def clamp_to_world(self):
         try:
