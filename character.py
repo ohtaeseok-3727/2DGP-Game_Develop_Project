@@ -10,6 +10,7 @@ import game_framework
 from cursor import Cursor
 import game_world
 from pico2d import *
+import title_mode
 
 def A_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -59,6 +60,156 @@ TIME_PER_ACTION = 0.02
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
+
+class Die:
+    def __init__(self, character):
+        self.character = character
+        self.fps = 10
+        self.frame_time = 0
+        self.die_effect = load_image('resource/character/player_die_FX_sprite.png')
+        self.effect_frame = 0
+        self.max_frames = 9
+        self.die_time = 0
+
+        # 애니메이션 관련
+        self.start_y = 0
+        self.float_duration = 0.3  # 떠오르는 시간
+        self.fall_duration = 0.3   # 떨어지는 시간
+        self.max_height = 10       # 최대 높이
+        self.current_offset_y = 0  # 현재 Y 오프셋
+        self.die_frame = 0         # 넘어지는 애니메이션 프레임 (0~2)
+        self.die_frame_time = 0
+
+    def enter(self, e):
+        self.frame_time = get_time()
+        self.die_time = get_time()
+        self.die_frame_time = get_time()
+        self.character.dir = 0
+        self.character.updown_dir = 0
+        self.effect_frame = 0
+        self.character.frame = 0
+        self.start_y = self.character.y
+        self.current_offset_y = 0
+        self.die_frame = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        current_time = get_time()
+        elapsed_time = current_time - self.die_time
+
+        if current_time - self.frame_time > 1.0 / self.fps:
+            if self.effect_frame < self.max_frames - 1:
+                self.effect_frame = (self.effect_frame+FRAMES_PER_ACTION*ACTION_PER_TIME*game_framework.frame_time) % 9
+            self.frame_time = current_time
+
+        # 떠오르기 -> 떨어지기 애니메이션
+        if elapsed_time < self.float_duration:
+            # 떠오르는 중
+            progress = elapsed_time / self.float_duration
+            self.current_offset_y = self.max_height * progress
+        elif elapsed_time < self.float_duration + self.fall_duration:
+            # 떨어지는 중
+            progress = (elapsed_time - self.float_duration) / self.fall_duration
+            self.current_offset_y = self.max_height * (1 - progress)
+
+            # 떨어지면서 넘어지는 애니메이션 프레임 업데이트
+            if current_time - self.die_frame_time > self.fall_duration / 3:
+                if self.die_frame < 2:
+                    self.die_frame += 1
+                self.die_frame_time = current_time
+        else:
+            # 떨어진 후
+            self.current_offset_y = 0
+            self.die_frame = 2
+
+        # 3초 후 타이틀로 이동
+        if current_time - self.die_time >= 3.0:
+            game_framework.change_mode(title_mode)
+
+    def draw(self, camera=None):
+        # 떠오른 만큼 Y 좌표 조정
+        adjusted_y = self.character.y + self.current_offset_y
+        sx, sy = (camera.apply(self.character.x, adjusted_y)) if camera else (self.character.x, adjusted_y)
+        zoom = camera.zoom if camera else 1.0
+
+        elapsed_time = get_time() - self.die_time
+
+        # 떠오르는 동안 idle 스프라이트
+        if elapsed_time < self.float_duration:
+            if self.character.face_dir == 1:
+                self.character.image.clip_draw(
+                    int(self.die_frame) * 18, 76,
+                    18, 19,
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+            else:
+                self.character.image.clip_composite_draw(
+                    int(self.die_frame) * 18, 76,
+                    18, 19,
+                    0, 'h',
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+        # 떨어지는 동안 넘어지는 애니메이션 (y=76, 3프레임)
+        elif elapsed_time < self.float_duration + self.fall_duration:
+            if self.character.face_dir == 1:
+                self.character.image.clip_draw(
+                    int(self.die_frame) * 18, 76,
+                    18, 19,
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+            else:
+                self.character.image.clip_composite_draw(
+                    int(self.die_frame) * 18, 76,
+                    18, 19,
+                    0, 'h',
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+
+        # 바닥에 떨어진 후 - idle 스프라이트를 90도 회전
+        else:
+            if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
+                self.character.image.clip_composite_draw(
+                    0, 57, 18, 19,
+                    -1.5708, '',  # -90도 회전
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+            elif self.character.face_dir == -1 and self.character.face_updown_dir == -1:
+                self.character.image.clip_composite_draw(
+                    0, 57, 18, 19,
+                    -1.5708, 'h',  # -90도 회전 + 좌우 반전
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+            elif self.character.face_dir == 1 and self.character.face_updown_dir == 1:
+                self.character.image.clip_composite_draw(
+                    0, 38, 18, 19,
+                    -1.5708, '',
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+            elif self.character.face_dir == -1 and self.character.face_updown_dir == 1:
+                self.character.image.clip_composite_draw(
+                    0, 38, 18, 19,
+                    -1.5708, 'h',
+                    sx, sy,
+                    18 * zoom, 19 * zoom
+                )
+
+        # 사망 이펙트 애니메이션 그리기
+        if self.die_effect:
+            self.die_effect.clip_draw(
+                int(self.effect_frame) * 105, 0,
+                105, 105,
+                sx, sy,
+                105 * zoom, 105 * zoom
+            )
 class Move:
     def __init__(self, character):
         self.character = character
@@ -253,6 +404,7 @@ class character:
 
         self.idle = Idle(self)
         self.move = Move(self)
+        self.die = Die(self)
         self.dash = dashstate(self)
         self.weapon = weapon(self)
         self.attack = Attack(self)
@@ -260,6 +412,7 @@ class character:
         self.state_machine = StateMachine(self.idle, {
             self.idle: {space_down : self.idle, F_down:self.idle, key_down: self.move},
             self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle},
+            self.die : {}
         })
 
         self.inventory = []
@@ -282,6 +435,11 @@ class character:
             self.can_dash += 1
             print('대쉬 회복')
             self.dash_recovery_time = get_time()
+
+        if self.now_hp <= 0 and self.state_machine.cur_state != self.die:
+            self.state_machine.cur_state = self.die
+            self.die.enter(None)
+            return
 
         self.state_machine.update()
         self.attack.update()
