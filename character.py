@@ -426,7 +426,7 @@ class character:
         print(f'{item.item_type} 획득')
 
     def update(self, camera=None):
-        if self.cursor:
+        if self.cursor and self.state_machine.cur_state != self.die:
             dx, dy = self.cursor.x - self.x, self.cursor.y - self.y
             self.face_dir = 1 if dx >= 0 else -1
             self.face_updown_dir = 1 if dy >= 0 else -1
@@ -452,7 +452,9 @@ class character:
     def draw(self, camera=None):
         self.state_machine.draw(camera)
         self.attack.draw(camera)
-        self.weapon.draw(camera)
+
+        if self.state_machine.cur_state != self.die:
+            self.weapon.draw(camera)
 
         left, bottom, right, top = self.get_bb()
         if camera:
