@@ -117,6 +117,45 @@ class Move:
             )
 
 
+class Die:
+    def __init__(self, monster):
+        self.monster = monster
+        self.death_timer = 0
+        self.death_duration = 3.0
+
+    def enter(self, e):
+        self.monster.frame = 0
+        self.death_timer = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        import game_framework
+
+        # 죽음 애니메이션 재생
+        self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 3
+
+        # 타이머 증가
+        self.death_timer += game_framework.frame_time
+
+        # 3초가 지나면 몬스터 제거
+        if self.death_timer >= self.death_duration:
+            game_world.remove_collision_object(self.monster)
+            game_world.remove_object(self.monster)
+
+    def draw(self, camera):
+        zoom = camera.zoom if camera else 1.0
+        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
+
+        frame_index = int(self.monster.frame)
+        self.monster.image.clip_draw(
+            frame_index * self.monster.frame_width, 0,
+            self.monster.frame_width, self.monster.frame_height,
+            sx, sy,
+            self.monster.frame_width * zoom, self.monster.frame_height * zoom
+        )
+
 
 class Monster:
     images = {}
@@ -177,6 +216,7 @@ class Monster:
 
         self.idle = Idle(self)
         self.move = Move(self)
+        self.die_state = Die(self)
 
         self.state_machine = StateMachine(self.idle, {
             self.idle: {target_in_range: self.move},
@@ -223,11 +263,8 @@ class Monster:
         print(f'{self.name}이(가) 사망했습니다.')
         self.is_alive = False
 
-        try:
-            game_world.remove_collision_object(self)
-            game_world.remove_object(self)
-        except Exception as e:
-            print(f'몬스터 제거 오류: {e}')
+        self.state_machine.cur_state = self.die_state
+        self.state_machine.cur_state.enter(('DIE', 0))
 
     def handle_collision(self, group, other):
         if group == 'building:monster':
