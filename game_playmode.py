@@ -163,6 +163,7 @@ def init():
     global building1, building2, building3, building4, building5, building6, building7
 
     game_world.clear()
+    game_world.clear_collision_pairs()
 
     world_map = WorldMap()
     char = character()
