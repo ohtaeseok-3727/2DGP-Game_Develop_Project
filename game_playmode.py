@@ -146,7 +146,7 @@ def spawn_wave_monsters(wave_number):
         else:  # wave_number == 3
             monster_type = 'blue_slime'
 
-        monster = Monster(spawn_x, spawn_y, monster_type)
+        monster = Monster(spawn_x, spawn_y, monster_type, 1 + wave_number * 0.5)
         monster.set_target(char)
         game_world.add_object(monster, 2)
         monsters.append(monster)

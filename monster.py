@@ -165,7 +165,7 @@ class Monster:
     images = {}
     hp_bar = None
     hp_background = None
-    def __init__(self, x, y, monster_type='blue_slime'):
+    def __init__(self, x, y, monster_type='blue_slime', hp_time = 0):
         self.x = x
         self.y = y
         self.monster_type = monster_type
@@ -175,13 +175,14 @@ class Monster:
         self.is_alive = True
         self.target = None
         self.face_dir = 1
+        self.hp_time = hp_time
 
         self.prev_x = self.x
         self.prev_y = self.y
 
         if monster_type == 'small_blue_slime':
-            self.hp = 50
-            self.max_hp = 50
+            self.hp = 50 * self.hp_time
+            self.max_hp = 50 * self.hp_time
             self.damage = 5
             self.frame_width = 17
             self.frame_height = 12
@@ -195,8 +196,8 @@ class Monster:
             self.image = Monster.images['small_blue_slime']
 
         elif monster_type == 'blue_slime':
-            self.hp = 100
-            self.max_hp = 100
+            self.hp = 100 * self.hp_time
+            self.max_hp = 100 * self.hp_time
             self.damage = 10
             self.frame_width = 27
             self.frame_height = 22
