@@ -1,165 +1,19 @@
 import random
-
 from pico2d import *
-
-from character import character
-from worldmap import WorldMap
-from camera import Camera
 import game_world
 import game_framework
-import upgrade_mode
+from worldmap import WorldMap
+from character import character
+from wave_manager import WaveSpawner, RewardManager
+from camera import Camera
 from game_object import *
 import inventory_mode
 import status_mode
-from monster import Monster
 from cursor import Cursor
-from Attack import *
-import item_selection_mode
 import enter_mode
-import boss_mode
-
-class RewardManager:
-    def __init__(self):
-        self.wave_rewards_spawned = {1: False, 2: False, 3: False}
-        self.sephirites = []
-        self.anvil = None
-
-    def spawn_rewards(self, wave_num, remaining_monsters):
-        if remaining_monsters > 0:
-            return
-
-        # 웨이브 1 보상: Anvil 1개, Sephirite 1개
-        if wave_num == 1 and not self.wave_rewards_spawned[1]:
-            if not self.anvil:
-                self.anvil = anvil(350, 250)
-                game_world.add_object(self.anvil, 1)
-            self._spawn_sephirites(1)
-            self.wave_rewards_spawned[1] = True
-
-        # 웨이브 2 보상: Sephirite 2개
-        elif wave_num == 2 and not self.wave_rewards_spawned[2]:
-            self._spawn_sephirites(2)
-            self.wave_rewards_spawned[2] = True
-
-        # 웨이브 3 보상: Sephirite 3개
-        elif wave_num == 3 and not self.wave_rewards_spawned[3]:
-            self._spawn_sephirites(3)
-            self.wave_rewards_spawned[3] = True
-
-    def _spawn_sephirites(self, count):
-        spawn_positions = [portal.x, portal.x+30, portal.x+60]
-
-        for i in range(count):
-            y = portal.y - 50
-            x = spawn_positions[i]
-
-            x = max(50, min(x, WorldMap.width - 50))
-            y = max(50, min(y, WorldMap.height - 50))
-
-            sephirite_instance = Sephirite(x, y)
-            self.sephirites.append(sephirite_instance)
-            game_world.add_object(sephirite_instance, 1)
-
-    def get_closest_in_range_sephirite(self, char):
-        closest_sephirite = None
-        min_dist_sq = float('inf')
-        for sephirite in self.sephirites:
-            if sephirite.in_range(char):
-                dist_sq = (sephirite.x - char.x)**2 + (sephirite.y - char.y)**2
-                if dist_sq < min_dist_sq:
-                    min_dist_sq = dist_sq
-                    closest_sephirite = sephirite
-        return closest_sephirite
-
-    def handle_interaction(self, char):
-        # Anvil 상호작용
-        if self.anvil and self.anvil in game_world.all_objects() and self.anvil.in_range(char):
-            game_world.remove_object(self.anvil)
-            self.anvil = None # 참조 제거
-            game_framework.push_mode(upgrade_mode)
-            return True
-
-        # Sephirite 상호작용
-        closest_sephirite = self.get_closest_in_range_sephirite(char)
-        if closest_sephirite:
-            game_world.remove_object(closest_sephirite)
-            self.sephirites.remove(closest_sephirite)
-            game_framework.push_mode(item_selection_mode)
-            return True
-        return False
-
-
-def is_valid_spawn_position(x, y, buildings):
-    # 임시 몬스터 바운딩 박스 계산 (small_blue_slime 기준)
-    test_half_w = 17 / 2
-    test_half_h = 12 / 2
-
-    monster_left = x - test_half_w
-    monster_right = x + test_half_w
-    monster_bottom = y - test_half_h
-    monster_top = y + test_half_h
-
-    # 모든 건물과 충돌 검사
-    for building in buildings:
-        building_left, building_bottom, building_right, building_top = building.get_bb()
-
-        # AABB 충돌 검사
-        if not (monster_right < building_left or
-                monster_left > building_right or
-                monster_top < building_bottom or
-                monster_bottom > building_top):
-            return False
-
-    return True
-
-def spawn_wave_monsters(wave_number):
-    """웨이브별 몬스터 생성"""
-    global monsters
-
-    spawn_count = portal.monsters_per_wave
-
-    buildings = [building1, building2, building3, building4, building5, building6, building7]
-
-    for i in range(spawn_count):
-        max_attempts = 50
-        spawn_x, spawn_y = 0, 0
-
-        for attempt in range(max_attempts):
-            angle = random.uniform(0, 2 * 3.14159)
-            distance = random.randint(100, 200)
-            spawn_x = portal.x + distance * math.cos(angle)
-            spawn_y = portal.y + distance * math.sin(angle)
-
-            spawn_x = max(50, min(spawn_x, WorldMap.width - 50))
-            spawn_y = max(50, min(spawn_y, WorldMap.height - 50))
-
-            if is_valid_spawn_position(spawn_x, spawn_y, buildings):
-                break
-        else:
-            print(f"경고: 몬스터 {i + 1}의 유효한 소환 위치를 찾지 못했습니다.")
-
-        # 웨이브에 따라 몬스터 타입 결정
-        if wave_number == 1:
-            monster_type = 'small_blue_slime'
-        elif wave_number == 2:
-            monster_type = 'small_blue_slime' if i < 7 else 'blue_slime'
-        else:  # wave_number == 3
-            monster_type = 'blue_slime'
-
-        monster = Monster(spawn_x, spawn_y, monster_type, 1 + wave_number * 0.5)
-        monster.set_target(char)
-        game_world.add_object(monster, 2)
-        monsters.append(monster)
-
-    # 충돌 페어 등록
-    for monster in monsters:
-        game_world.add_collision_pairs('monster:monster', None, monster)
-        game_world.add_collision_pairs('monster:monster', monster, None)
-
-    print(f"웨이브 {wave_number}: {spawn_count}마리의 몬스터 소환!")
 
 def init():
-    global char, font, monsters, portal, remaining_monsters, reward_manager, backgrounds
+    global char, font, monsters, portal, remaining_monsters, reward_manager, wave_spawner
     global building1, building2, building3, building4, building5, building6, building7
 
     game_world.clear()
@@ -169,7 +23,6 @@ def init():
     char = character()
     camera = Camera(char)
     portal = Portal(400, 300)
-    reward_manager = RewardManager()
     building1 = Building(400, 550, 1, 1)
     building2 = Building(100, 500, 2, 1.2)
     building3 = Building(700, 550, 3, 1.2)
@@ -183,6 +36,11 @@ def init():
     game_world.set_cursor(cursor)
 
     monsters = []
+
+    buildings = [building1, building2, building3, building4, building5, building6, building7]
+
+    reward_manager = RewardManager(portal)
+    wave_spawner = WaveSpawner(portal, char, monsters, buildings)
 
     remaining_monsters = 0
     world_map.change_map('default')
@@ -224,7 +82,10 @@ def update():
     global remaining_monsters
     remaining_monsters = sum(1 for m in monsters if m.is_alive)
 
-    reward_manager.spawn_rewards(portal.current_wave, remaining_monsters)
+    wave_spawner.check_and_spawn_next_phase(remaining_monsters)
+
+    if wave_spawner.is_wave_complete():
+        reward_manager.spawn_rewards(portal.current_wave, 0)
 
     game_world.update()
     game_world.handle_collisions()
@@ -296,15 +157,13 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
             elif event.key == SDLK_f:
-                # 상호작용 로직을 RewardManager로 위임
                 if not reward_manager.handle_interaction(char):
-                    # 포탈 상호작용
                     if portal.in_range(char):
                         remaining_monsters = sum(1 for m in monsters if m.is_alive)
-                        if remaining_monsters == 0:
+                        if remaining_monsters == 0 and not wave_spawner.is_wave_active:
                             success, message = portal.interact()
                             if success:
-                                spawn_wave_monsters(portal.current_wave)
+                                wave_spawner.start_wave(portal.current_wave)
                                 print(message)
                             else:
                                 if portal.is_all_waves_complete():
