@@ -447,7 +447,7 @@ class character:
         self.weapon.update(camera)
 
     def get_bb(self):
-        return self.x - 7, self.y - 7, self.x + 7, self.y + 7
+        return self.x - 4, self.y - 7, self.x + 4, self.y + 4
 
     def draw(self, camera=None):
         self.state_machine.draw(camera)
