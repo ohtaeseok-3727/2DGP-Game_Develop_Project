@@ -17,6 +17,59 @@ def target_in_range(e):
 def target_out_of_range(e):
     return e[0] == 'TARGET_OUT'
 
+def spawn_end(e):
+    return e[0] == 'SPAWN_END'
+
+
+class Spawn:
+    image = None
+    def __init__(self, monster):
+        self.monster = monster
+        self.monster_visible = False
+
+    def enter(self, e):
+        self.monster.frame = 0
+        self.monster_visible = False
+        if Spawn.image is None:
+            Spawn.image = load_image('resource/monster/spawn_sprite.png')
+
+    def exit(self, e):
+        self.monster_visible = False
+        pass
+
+    def do(self):
+        # 36프레임 애니메이션
+        self.monster.frame += MONSTER_SPEED_PPS * 30 / 75 * game_framework.frame_time
+
+        if self.monster.frame >= 30 and not self.monster_visible:
+            self.monster_visible = True
+
+        if self.monster.frame >= 36:
+            self.monster.state_machine.handle_state_event(('SPAWN_END', 0))
+
+    def draw(self, camera):
+        zoom = camera.zoom if camera else 1.0
+        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
+
+        frame_index = int(self.monster.frame)
+        if frame_index < 36:
+            col = frame_index
+
+            Spawn.image.clip_draw(
+                col * 75, 0,  # 스프라이트는 위에서 아래로
+                75, 66,
+                sx, sy,
+                30 * zoom, 25 * zoom
+            )
+        if self.monster_visible:
+            idle_frame = int((self.monster.frame - 30) % 6)  # 30프레임부터 Idle 애니메이션 시작
+            self.monster.image.clip_draw(
+                idle_frame * self.monster.frame_width, self.monster.frame_height * 2,
+                self.monster.frame_width, self.monster.frame_height,
+                sx, sy,
+                self.monster.frame_width * zoom, self.monster.frame_height * zoom
+            )
+
 class Idle:
     def __init__(self, monster):
         self.monster = monster
@@ -222,10 +275,12 @@ class Monster:
         self.idle = Idle(self)
         self.move = Move(self)
         self.die_state = Die(self)
+        self.spawn_state = Spawn(self)
 
-        self.state_machine = StateMachine(self.idle, {
-            self.idle: {target_in_range: self.move, self.die : self.die_state},
-            self.move: {target_out_of_range: self.idle, self.die : self.die_state}
+        self.state_machine = StateMachine(self.spawn_state, {
+            self.spawn_state: {spawn_end: self.idle},
+            self.idle: {target_in_range: self.move, self.die: self.die_state},
+            self.move: {target_out_of_range: self.idle, self.die: self.die_state}
         })
 
         game_world.add_collision_pairs('character:monster', None, self)
@@ -253,6 +308,9 @@ class Monster:
         if not self.is_alive:
             return
 
+        if self.state_machine.cur_state == self.spawn_state:
+            return
+
         self.hp -= damage
         print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
         if self.hp <= 0:
@@ -269,6 +327,9 @@ class Monster:
         self.state_machine.cur_state.enter(('DIE', 0))
 
     def handle_collision(self, group, other):
+        if self.state_machine.cur_state == self.spawn_state:
+            return
+
         if group == 'building:monster':
             building_left, building_bottom, building_right, building_top = other.get_bb()
             building_center_x = (building_left + building_right) / 2
