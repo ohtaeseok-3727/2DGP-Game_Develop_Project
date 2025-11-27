@@ -54,7 +54,7 @@ def init():
     game_world.add_object(building5, 0)
     game_world.add_object(building6, 0)
     game_world.add_object(building7, 0)
-    game_world.add_object(char, 2)
+    game_world.add_object(char, 3)
     game_world.add_object(portal, 1)
 
     for monster in monsters:

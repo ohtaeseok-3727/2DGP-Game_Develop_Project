@@ -1,4 +1,4 @@
-world = [[],[],[]]
+world = [[],[],[], []]
 camera = None
 cursor = None
 
