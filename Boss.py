@@ -73,23 +73,27 @@ class KingSlime:
             self.y = max(half_h, min(self.y, WorldMap.height - half_h))
 
     def target_exists(self):
-        if self.target and hasattr(self.target, 'hp') and self.target.hp > 0:
+        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
             return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
     def target_nearby(self, range):
-        if self.target and hasattr(self.target, 'hp') and self.target.hp > 0:
+        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
             if self.distance_less_than(self.target.x, self.target.y, self.x, self.y, range):
                 return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
     def in_attack_range(self):
-        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
-            dx = self.target.x - self.x
-            dy = self.target.y - self.y
-            distance = math.sqrt(dx * dx + dy * dy)
-            return distance <= (self.attack_range / PIXEL_PER_METER)
-        return False
+        if not self.target or not hasattr(self.target, 'now_hp') or self.target.now_hp <= 0:
+            return BehaviorTree.FAIL
+
+        dx = self.target.x - self.x
+        dy = self.target.y - self.y
+        distance = math.sqrt(dx * dx + dy * dy)
+
+        if distance <= self.attack_range:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
 
     def low_hp(self):
         if self.hp_ratio < 0.3:
@@ -97,14 +101,25 @@ class KingSlime:
         return BehaviorTree.FAIL
 
     def move_to_target(self):
-        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
+        if not self.target or not hasattr(self.target, 'now_hp') or self.target.now_hp <= 0:
+            return BehaviorTree.FAIL
+
+        dx = self.target.x - self.x
+        dy = self.target.y - self.y
+        distance = math.sqrt(dx * dx + dy * dy)
+
+        if distance > 0:
+            dir_x = dx / distance
+            dir_y = dy / distance
+
+            self.x += dir_x * MONSTER_SPEED_PPS * game_framework.frame_time
+            self.y += dir_y * MONSTER_SPEED_PPS * game_framework.frame_time
+
+            self.face_dir = 1 if dx > 0 else -1
             self.state = 'Move'
-            self.move_little_to(self.target.x, self.target.y)
-            if self.distance_less_than(self.target.x, self.target.y, self.x, self.y,
-                                       self.attack_range / PIXEL_PER_METER):
-                return BehaviorTree.SUCCESS
             return BehaviorTree.RUNNING
-        return BehaviorTree.FAIL
+
+        return BehaviorTree.SUCCESS
 
     def attack_target(self):
         self.state = 'Idle'
@@ -141,7 +156,11 @@ class KingSlime:
         if not self.is_alive:
             return
 
-        self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 6
+        if self.state == 'Move':
+            self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 5
+        else:
+            self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 6
+
         self.bt.run()
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
 
