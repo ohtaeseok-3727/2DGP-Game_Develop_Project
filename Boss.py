@@ -6,6 +6,7 @@ from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 from worldmap import WorldMap
 import time
 import monster
+import random
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MONSTER_SPEED_KMPH = 10.0
@@ -17,6 +18,198 @@ CHARGE_TIME = 1.5
 DASH_DISTANCE = 400
 DASH_SPEED = 500
 DASH_COOLDOWN = 5.0
+
+
+class BossCutscene:
+    """보스 등장 컷신 - 중앙 슬라임이 다른 슬라임들을 흡수하며 성장"""
+
+    def __init__(self, boss_x, boss_y, on_complete):
+        self.boss_x = boss_x
+        self.boss_y = boss_y
+        self.on_complete = on_complete
+        self.phase = 'spawn'
+        self.timer = 0
+        self.is_active = True
+
+        # 중앙 슬라임 (일반 슬라임)
+        self.center_slime = {
+            'x': boss_x,
+            'y': boss_y,
+            'size': 1.0,
+            'frame': 0,
+            'type': 'normal'  # 일반 슬라임
+        }
+
+        # 주변 슬라임들 (일반/작은 슬라임 섞여있음)
+        self.outer_slimes = []
+        self.total_slimes = 15
+        self.absorbed_count = 0
+
+        for i in range(self.total_slimes):
+            angle = (360 / self.total_slimes) * i
+            distance = 250
+            x = boss_x + math.cos(math.radians(angle)) * distance
+            y = boss_y + math.sin(math.radians(angle)) * distance
+
+            # 홀수는 작은 슬라임, 짝수는 일반 슬라임
+            slime_type = 'small' if i % 2 == 0 else 'normal'
+
+            self.outer_slimes.append({
+                'x': x,
+                'y': y,
+                'target_x': boss_x,
+                'target_y': boss_y,
+                'angle': angle,
+                'frame': 0,
+                'is_moving': False,
+                'is_absorbed': False,
+                'move_delay': i * 0.15,
+                'type': slime_type
+            })
+
+        # 이미지 로드
+        self.small_slime_image = load_image('resource/monster/small_blue_slime_sprite_sheet.png')
+        self.normal_slime_image = load_image('resource/monster/blue_slime_sprite_sheet.png')
+        self.boss_alpha = 0.0
+        self.camera_lock_target = (boss_x, boss_y)
+
+    def update(self):
+        if not self.is_active:
+            return
+
+        self.timer += game_framework.frame_time
+
+        if self.phase == 'spawn':
+            self.center_slime['frame'] = (self.center_slime['frame'] + 10 * game_framework.frame_time) % 6
+
+            for slime in self.outer_slimes:
+                slime['frame'] = (slime['frame'] + 10 * game_framework.frame_time) % 6
+
+            if self.timer >= 0.5:
+                self.phase = 'absorb'
+                self.timer = 0
+
+        elif self.phase == 'absorb':
+            self.center_slime['frame'] = (self.center_slime['frame'] + 10 * game_framework.frame_time) % 6
+
+            rush_speed = 300
+            absorption_distance = 20
+
+            for slime in self.outer_slimes:
+                if slime['is_absorbed']:
+                    continue
+
+                if self.timer >= slime['move_delay'] and not slime['is_moving']:
+                    slime['is_moving'] = True
+
+                if slime['is_moving']:
+                    dx = slime['target_x'] - slime['x']
+                    dy = slime['target_y'] - slime['y']
+                    distance = math.sqrt(dx * dx + dy * dy)
+
+                    if distance > absorption_distance:
+                        slime['x'] += (dx / distance) * rush_speed * game_framework.frame_time
+                        slime['y'] += (dy / distance) * rush_speed * game_framework.frame_time
+                        slime['frame'] = (slime['frame'] + 10 * game_framework.frame_time) % 6
+                    else:
+                        slime['is_absorbed'] = True
+                        self.absorbed_count += 1
+                        # 작은 슬라임은 0.3, 일반 슬라임은 0.5 크기 증가
+                        size_increase = 0.3 if slime['type'] == 'small' else 0.5
+                        self.center_slime['size'] += size_increase
+
+            if self.absorbed_count >= self.total_slimes:
+                self.phase = 'transform'
+                self.timer = 0
+
+        elif self.phase == 'transform':
+            fade_progress = min(1.0, self.timer / 1.0)
+            self.center_slime['frame'] = (self.center_slime['frame'] + 10 * game_framework.frame_time) % 6
+            self.boss_alpha = fade_progress
+
+            if self.timer >= 1.0:
+                self.phase = 'complete'
+                self.is_active = False
+                if self.on_complete:
+                    self.on_complete()
+
+    def get_camera_target(self):
+        return self.camera_lock_target
+
+    def draw(self, camera):
+        if not self.is_active and self.phase == 'complete':
+            return
+
+        zoom = camera.zoom if camera else 1.0
+
+        # 주변 슬라임들 그리기
+        for slime in self.outer_slimes:
+            if not slime['is_absorbed']:
+                sx, sy = camera.apply(slime['x'], slime['y']) if camera else (slime['x'], slime['y'])
+
+                if slime['type'] == 'small':
+                    # 작은 슬라임
+                    self.small_slime_image.clip_draw(
+                        int(slime['frame']) * 17, 24,
+                        17, 12,
+                        sx, sy,
+                        17 * zoom, 12 * zoom
+                    )
+                else:
+                    # 일반 슬라임
+                    self.normal_slime_image.clip_draw(
+                        int(slime['frame']) * 27, 44,
+                        27, 22,
+                        sx, sy,
+                        27 * zoom, 22 * zoom
+                    )
+
+        # 중앙 슬라임 그리기
+        if self.phase in ('spawn', 'absorb'):
+            sx, sy = camera.apply(self.center_slime['x'], self.center_slime['y']) if camera else (
+                self.center_slime['x'], self.center_slime['y'])
+
+            size = self.center_slime['size']
+            # 일반 슬라임으로 그리기
+            self.normal_slime_image.clip_draw(
+                int(self.center_slime['frame']) * 27, 44,
+                27, 22,
+                sx, sy,
+                27 * zoom * size, 22 * zoom * size
+            )
+        elif self.phase == 'transform':
+            sx, sy = camera.apply(self.center_slime['x'], self.center_slime['y']) if camera else (
+                self.center_slime['x'], self.center_slime['y'])
+
+            slime_alpha = 1.0 - self.boss_alpha
+            boss_alpha = self.boss_alpha
+
+            # 중앙 슬라임 페이드 아웃
+            if slime_alpha > 0:
+                size = self.center_slime['size']
+                self.normal_slime_image.clip_draw(
+                    int(self.center_slime['frame']) * 27, 44,
+                    27, 22,
+                    sx, sy,
+                    27 * zoom * size * max(0.1, slime_alpha),
+                    22 * zoom * size * max(0.1, slime_alpha)
+                )
+
+            # 보스 스프라이트 페이드 인
+            if boss_alpha > 0:
+                frame_width = 27
+                frame_height = 22
+                boss_width = 135
+                boss_height = 110
+
+                self.normal_slime_image.clip_draw(
+                    0, frame_height * 2,
+                    frame_width, frame_height,
+                    sx, sy,
+                    boss_width * zoom * boss_alpha,
+                    boss_height * zoom * boss_alpha
+                )
+
 
 class KingSlime:
     images = None

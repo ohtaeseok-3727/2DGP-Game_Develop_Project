@@ -12,8 +12,21 @@ from Attack import *
 import Boss
 import game_playmode
 
+cutscene = None
+cutscene_active = False
+
+
 def handle_events():
-    global running
+    global running, cutscene_active
+
+    # 컷신 중에는 입력 무시
+    if cutscene_active:
+        events = get_events()
+        for event in events:
+            if event.type == SDL_QUIT:
+                game_framework.quit()
+        return
+
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -30,15 +43,27 @@ def handle_events():
         else:
             char.handle_event(event, game_world.camera)
 
+
+def on_cutscene_complete():
+    """컷신 완료 콜백"""
+    global cutscene_active, boss
+    cutscene_active = False
+
+    # 보스를 게임 월드에 추가
+    game_world.add_object(boss, 2)
+    print("보스 등장! 전투 시작!")
+
+
 def init():
-    global monsters, sephirite, portal, boss, char
+    global monsters, sephirite, portal, boss, char, cutscene, cutscene_active
 
     game_world.clear()
     game_world.clear_collision_pairs()
 
     world_map = WorldMap()
-    char = game_playmode.char
-    camera = Camera(char)
+    char = character()
+
+    # 보스 생성 (아직 게임 월드에 추가하지 않음)
     boss = Boss.KingSlime(600, 400)
     boss.set_target(char)
 
@@ -47,43 +72,90 @@ def init():
     char.cursor = cursor
     game_world.set_cursor(cursor)
 
+    # 컷신 시작 - 카메라는 나중에 설정
+    cutscene = Boss.BossCutscene(600, 400, on_cutscene_complete)
+    cutscene_active = True
+
+    # 컷신용 임시 카메라 타겟 객체
+    class CutsceneTarget:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+    cutscene_target = CutsceneTarget(600, 400)
+    camera = Camera(cutscene_target)
 
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
+
+    # 캐릭터 이동 제한
+    char.left_pressed = False
+    char.right_pressed = False
+    char.up_pressed = False
+    char.down_pressed = False
+    char.dir = 0
+    char.updown_dir = 0
+
+
+def on_cutscene_complete():
+    """컷신 완료 콜백"""
+    global cutscene_active, boss, char
+    cutscene_active = False
+
+    # 보스를 게임 월드에 추가
     game_world.add_object(boss, 2)
+
+    # 카메라를 캐릭터로 전환
+    game_world.camera.target = char
+
+    print("보스 등장! 전투 시작!")
 
 
 def update():
-    game_world.update()
-    game_world.handle_collisions()
+    global cutscene, cutscene_active
+
+    if cutscene_active and cutscene:
+        cutscene.update()
+        # 컷신 중에도 카메라는 업데이트
+        if game_world.camera:
+            game_world.camera.update()
+    else:
+        game_world.update()
+        game_world.handle_collisions()
+
 
 def draw():
+    global cutscene, cutscene_active
+
     clear_canvas()
     game_world.render()
+
+    # 컷신 그리기
+    if cutscene_active and cutscene:
+        cutscene.draw(game_world.camera)
+
     game_world.render_cursor()
     update_canvas()
+
 
 def finish():
     game_world.clear()
 
+
 def pause():
     global char
     try:
-        # 눌린 키 상태 초기화
         char.left_pressed = False
         char.right_pressed = False
         char.up_pressed = False
         char.down_pressed = False
-
-        # 방향값 초기화
         char.dir = 0
         char.updown_dir = 0
-
-        # 상태 머신에 STOP 이벤트 전달하여 이동 상태에서 벗어나게 함
         char.state_machine.handle_state_event(('STOP', 0))
     except Exception:
         pass
+
 
 def resume():
     pass
