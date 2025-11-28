@@ -11,7 +11,6 @@ MONSTER_SPEED_MPM = (MONSTER_SPEED_KMPH * 1000.0 / 60.0)
 MONSTER_SPEED_MPS = (MONSTER_SPEED_MPM / 60.0)
 MONSTER_SPEED_PPS = (MONSTER_SPEED_MPS * PIXEL_PER_METER)
 
-
 class KingSlime:
     images = None
     hp_bar = None
@@ -36,7 +35,6 @@ class KingSlime:
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
         self.state = 'Idle'
 
-        # 이동 목표
         self.tx, self.ty = x, y
 
         if KingSlime.images == None:
@@ -69,39 +67,37 @@ class KingSlime:
             self.x += (dx / distance) * move_distance
             self.y += (dy / distance) * move_distance
 
-            # 맵 경계 체크
             half_w = (self.width / 2) * max(0.4, self.hp_ratio)
             half_h = (self.height / 2) * max(0.4, self.hp_ratio)
             self.x = max(half_w, min(self.x, WorldMap.width - half_w))
             self.y = max(half_h, min(self.y, WorldMap.height - half_h))
 
-    # Behavior Tree Conditions
     def target_exists(self):
-        if self.target and self.target.is_alive:
+        if self.target and hasattr(self.target, 'hp') and self.target.hp > 0:
             return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
     def target_nearby(self, range):
-        if self.target and self.target.is_alive:
+        if self.target and hasattr(self.target, 'hp') and self.target.hp > 0:
             if self.distance_less_than(self.target.x, self.target.y, self.x, self.y, range):
                 return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
     def in_attack_range(self):
-        if self.target and self.target.is_alive:
-            if self.distance_less_than(self.target.x, self.target.y, self.x, self.y,
-                                       self.attack_range / PIXEL_PER_METER):
-                return BehaviorTree.SUCCESS
-        return BehaviorTree.FAIL
+        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
+            dx = self.target.x - self.x
+            dy = self.target.y - self.y
+            distance = math.sqrt(dx * dx + dy * dy)
+            return distance <= (self.attack_range / PIXEL_PER_METER)
+        return False
 
     def low_hp(self):
         if self.hp_ratio < 0.3:
             return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
-    # Behavior Tree Actions
     def move_to_target(self):
-        if self.target and self.target.is_alive:
+        if self.target and hasattr(self.target, 'now_hp') and self.target.now_hp > 0:
             self.state = 'Move'
             self.move_little_to(self.target.x, self.target.y)
             if self.distance_less_than(self.target.x, self.target.y, self.x, self.y,
@@ -112,49 +108,32 @@ class KingSlime:
 
     def attack_target(self):
         self.state = 'Idle'
-
+        # 공격 로직 추가 예정
         return BehaviorTree.SUCCESS
 
-    def retreat(self):
-        if self.target and self.target.is_alive:
-            self.state = 'Move'
-            # 타겟 반대 방향으로 이동
-            dx = self.x - self.target.x
-            dy = self.y - self.target.y
-            distance = math.sqrt(dx * dx + dy * dy)
-            if distance > 0:
-                retreat_x = self.x + (dx / distance) * 100
-                retreat_y = self.y + (dy / distance) * 100
-                self.move_little_to(retreat_x, retreat_y)
-            return BehaviorTree.RUNNING
-        return BehaviorTree.FAIL
 
     def idle_state(self):
         self.state = 'Idle'
         return BehaviorTree.SUCCESS
 
     def build_behavior_tree(self):
-        # Conditions
         c_target_exists = Condition('타겟 존재?', self.target_exists)
         c_target_nearby = Condition('타겟이 근처에?', self.target_nearby, self.detection_range / PIXEL_PER_METER)
         c_in_attack_range = Condition('공격 범위 안?', self.in_attack_range)
         c_low_hp = Condition('체력 부족?', self.low_hp)
 
-        # Actions
         a_move_to_target = Action('타겟으로 이동', self.move_to_target)
         a_attack = Action('공격', self.attack_target)
         a_idle = Action('대기', self.idle_state)
 
-        # Sequences
         attack_sequence = Sequence('공격 시퀀스', c_in_attack_range, a_attack)
         chase_sequence = Sequence('추격 시퀀스', c_target_nearby, a_move_to_target)
 
-        # Root Selector
         root = Selector('보스 AI',
-                        attack_sequence,
-                        chase_sequence,
-                        a_idle
-                        )
+            attack_sequence,
+            chase_sequence,
+            a_idle
+        )
 
         self.bt = BehaviorTree(root)
 
@@ -225,14 +204,12 @@ class KingSlime:
                 self.height * zoom * max(0.4, self.hp_ratio)
             )
 
-        # 바운딩 박스
         left, bottom, right, top = self.get_bb()
         if camera:
             sl, sb = camera.apply(left, bottom)
             sr, st = camera.apply(right, top)
             draw_rectangle(sl, sb, sr, st)
 
-        # HP 바
         screen_w = get_canvas_width()
         total_bar_width = 1000
         total_bar_height = 40
