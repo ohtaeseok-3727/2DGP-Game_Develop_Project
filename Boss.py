@@ -4,12 +4,19 @@ import game_framework
 import game_world
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 from worldmap import WorldMap
+import time
+import monster
 
 PIXEL_PER_METER = (10.0 / 0.3)
 MONSTER_SPEED_KMPH = 10.0
 MONSTER_SPEED_MPM = (MONSTER_SPEED_KMPH * 1000.0 / 60.0)
 MONSTER_SPEED_MPS = (MONSTER_SPEED_MPM / 60.0)
 MONSTER_SPEED_PPS = (MONSTER_SPEED_MPS * PIXEL_PER_METER)
+
+CHARGE_TIME = 1.5
+DASH_DISTANCE = 400
+DASH_SPEED = 500
+DASH_COOLDOWN = 5.0
 
 class KingSlime:
     images = None
@@ -29,11 +36,22 @@ class KingSlime:
         self.frame_width = 27
         self.frame_height = 22
         self.detection_range = 300
-        self.attack_range = 50
+        self.attack_range = 200
         self.width = 135
         self.height = 110
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
         self.state = 'Idle'
+
+        self.is_charging = False
+        self.is_dashing = False
+        self.charge_start_time = 0
+        self.dash_target_x = 0
+        self.dash_target_y = 0
+        self.dash_start_x = 0
+        self.dash_start_y = 0
+        self.last_dash_time = -DASH_COOLDOWN
+
+        self.has_summoned = False
 
         self.tx, self.ty = x, y
 
@@ -83,22 +101,117 @@ class KingSlime:
                 return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
-    def in_attack_range(self):
-        if not self.target or not hasattr(self.target, 'now_hp') or self.target.now_hp <= 0:
-            return BehaviorTree.FAIL
+    def can_dash(self):
+        current_time = time.time()
+        if not self.is_charging and not self.is_dashing:
+            if current_time - self.last_dash_time >= DASH_COOLDOWN:
+                if self.target:
+                    dx = self.target.x - self.x
+                    dy = self.target.y - self.y
+                    distance = math.sqrt(dx * dx + dy * dy)
+                    if distance <= self.attack_range:
+                        return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
 
-        dx = self.target.x - self.x
-        dy = self.target.y - self.y
-        distance = math.sqrt(dx * dx + dy * dy)
-
-        if distance <= self.attack_range:
+    def should_summon(self):
+        if not self.has_summoned and self.hp_ratio <= 0.5:
             return BehaviorTree.SUCCESS
         return BehaviorTree.FAIL
 
-    def low_hp(self):
-        if self.hp_ratio < 0.3:
-            return BehaviorTree.SUCCESS
+    def charge_and_dash(self):
+        current_time = time.time()
+
+        # 이미 차지나 돌진 중이면 계속 실행
+        if self.is_charging or self.is_dashing:
+            # 차지 중
+            if self.is_charging:
+                if current_time - self.charge_start_time >= CHARGE_TIME:
+                    self.is_charging = False
+                    self.is_dashing = True
+                    self.dash_start_x = self.x
+                    self.dash_start_y = self.y
+
+                    dx = self.target.x - self.x
+                    dy = self.target.y - self.y
+                    distance = math.sqrt(dx * dx + dy * dy)
+
+                    if distance > 0:
+                        self.dash_target_x = self.x + (dx / distance) * DASH_DISTANCE
+                        self.dash_target_y = self.y + (dy / distance) * DASH_DISTANCE
+                        self.face_dir = 1 if dx > 0 else -1
+
+                    self.state = 'Dash'
+                    print(f"{self.name} 돌진!")
+                return BehaviorTree.RUNNING
+
+            # 돌진 중
+            if self.is_dashing:
+                dx = self.dash_target_x - self.x
+                dy = self.dash_target_y - self.y
+                distance = math.sqrt(dx * dx + dy * dy)
+
+                half_w = (self.width / 2) * max(0.4, self.hp_ratio)
+                half_h = (self.height / 2) * max(0.4, self.hp_ratio)
+
+                if distance < 5 or self.x <= half_w or self.x >= WorldMap.width - half_w or \
+                        self.y <= half_h or self.y >= WorldMap.height - half_h:
+                    self.is_dashing = False
+                    self.last_dash_time = current_time
+                    self.state = 'Idle'
+                    print(f"{self.name} 돌진 종료!")
+                    return BehaviorTree.SUCCESS
+
+                if distance > 0:
+                    move_distance = DASH_SPEED * game_framework.frame_time
+                    self.x += (dx / distance) * move_distance
+                    self.y += (dy / distance) * move_distance
+
+                    self.x = max(half_w, min(self.x, WorldMap.width - half_w))
+                    self.y = max(half_h, min(self.y, WorldMap.height - half_h))
+
+                return BehaviorTree.RUNNING
+
+        # 새로운 돌진 시작 조건 체크
+        if current_time - self.last_dash_time >= DASH_COOLDOWN:
+            if self.target:
+                dx = self.target.x - self.x
+                dy = self.target.y - self.y
+                distance = math.sqrt(dx * dx + dy * dy)
+
+                # 공격 범위 내에 있으면 차지 시작
+                if distance <= self.attack_range:
+                    self.is_charging = True
+                    self.charge_start_time = current_time
+                    self.state = 'Charge'
+                    print(f"{self.name} 차지 시작! (거리: {distance:.1f})")
+                    return BehaviorTree.RUNNING
+
+        # 조건을 만족하지 않으면 FAIL 반환
         return BehaviorTree.FAIL
+
+    def summon_slimes(self):
+        if self.has_summoned:
+            return BehaviorTree.SUCCESS
+
+        print(f"{self.name} 슬라임 소환!")
+        self.has_summoned = True
+
+        # 15마리 소환 (작은 슬라임과 일반 슬라임 섞어서)
+        for i in range(15):
+            angle = (360 / 15) * i
+            spawn_x = self.x + math.cos(math.radians(angle)) * 100
+            spawn_y = self.y + math.sin(math.radians(angle)) * 100
+
+            # 홀수는 작은 슬라임, 짝수는 일반 슬라임
+            if i % 2 == 0:
+                slime = monster.Monster(spawn_x, spawn_y, 'small_blue_slime', 1)
+            else:
+                slime = monster.Monster(spawn_x, spawn_y, 'blue_slime', 1)
+
+            slime.set_target(self.target)
+            game_world.add_object(slime, 2)
+
+        return BehaviorTree.SUCCESS
 
     def move_to_target(self):
         if not self.target or not hasattr(self.target, 'now_hp') or self.target.now_hp <= 0:
@@ -121,34 +234,30 @@ class KingSlime:
 
         return BehaviorTree.SUCCESS
 
-    def attack_target(self):
-        self.state = 'Idle'
-        # 공격 로직 추가 예정
-        return BehaviorTree.SUCCESS
-
-
     def idle_state(self):
         self.state = 'Idle'
         return BehaviorTree.SUCCESS
 
     def build_behavior_tree(self):
         c_target_exists = Condition('타겟 존재?', self.target_exists)
-        c_target_nearby = Condition('타겟이 근처에?', self.target_nearby, self.detection_range / PIXEL_PER_METER)
-        c_in_attack_range = Condition('공격 범위 안?', self.in_attack_range)
-        c_low_hp = Condition('체력 부족?', self.low_hp)
+        c_target_nearby = Condition('타겟이 근처에?', self.target_nearby, self.detection_range)
+        c_should_summon = Condition('소환 조건?', self.should_summon)
 
+        a_summon = Action('슬라임 소환', self.summon_slimes)
+        a_charge_and_dash = Action('차지 및 돌진', self.charge_and_dash)
         a_move_to_target = Action('타겟으로 이동', self.move_to_target)
-        a_attack = Action('공격', self.attack_target)
         a_idle = Action('대기', self.idle_state)
 
-        attack_sequence = Sequence('공격 시퀀스', c_in_attack_range, a_attack)
+        summon_sequence = Sequence('소환 시퀀스', c_should_summon, a_summon)
+        charge_and_dash = Sequence('차지 및 돌진 시퀀스', c_target_exists, c_target_nearby, a_charge_and_dash)
         chase_sequence = Sequence('추격 시퀀스', c_target_nearby, a_move_to_target)
 
         root = Selector('보스 AI',
-            attack_sequence,
-            chase_sequence,
-            a_idle
-        )
+                        summon_sequence,
+                        charge_and_dash,
+                        chase_sequence,
+                        a_idle
+                        )
 
         self.bt = BehaviorTree(root)
 
@@ -156,7 +265,7 @@ class KingSlime:
         if not self.is_alive:
             return
 
-        if self.state == 'Move':
+        if self.state == 'Move' or self.state == 'Dash':
             self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 5
         else:
             self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 6
@@ -203,7 +312,10 @@ class KingSlime:
         sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
         zoom = camera.zoom if camera else 1.0
 
-        frame_y = self.frame_height * 2 if self.state == 'Idle' else self.frame_height
+        if self.state == 'Idle' or self.state == 'Charge':
+            frame_y = self.frame_height * 2  # Idle 애니메이션 사용
+        else:  # Move, Dash
+            frame_y = self.frame_height
 
         if self.face_dir == 1:
             KingSlime.images.clip_draw(
