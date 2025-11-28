@@ -2,7 +2,7 @@ from pico2d import *
 import math
 import game_framework
 import game_world
-from state_machine import StateMachine
+from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 from worldmap import WorldMap
 
 PIXEL_PER_METER = (10.0 / 0.3)
@@ -11,117 +11,17 @@ MONSTER_SPEED_MPM = (MONSTER_SPEED_KMPH * 1000.0 / 60.0)
 MONSTER_SPEED_MPS = (MONSTER_SPEED_MPM / 60.0)
 MONSTER_SPEED_PPS = (MONSTER_SPEED_MPS * PIXEL_PER_METER)
 
-def target_in_range(e):
-    return e[0] == 'TARGET_IN_RANGE'
-
-def target_out_of_range(e):
-    return e[0] == 'TARGET_OUT'
-
-class Idle:
-    def __init__(self, monster):
-        self.monster = monster
-
-    def enter(self, e):
-        self.monster.frame = 0
-
-    def exit(self, e):
-        pass
-
-    def do(self):
-        self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 6
-
-        # 타겟 감지
-        if self.monster.target:
-            dx = self.monster.target.x - self.monster.x
-            dy = self.monster.target.y - self.monster.y
-            distance = math.sqrt(dx * dx + dy * dy)
-
-            if distance < self.monster.detection_range:
-                self.monster.state_machine.handle_state_event(('TARGET_IN_RANGE', 0))
-
-    def draw(self, camera):
-        zoom = camera.zoom if camera else 1.0
-        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
-
-        frame_index = int(self.monster.frame)
-        self.monster.images.clip_draw(
-            frame_index * self.monster.frame_width, self.monster.frame_height*2,
-            self.monster.frame_width, self.monster.frame_height,
-            sx, sy,
-            self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
-        )
-
-class Move:
-    def __init__(self, monster):
-        self.monster = monster
-
-    def enter(self, e):
-        self.monster.frame = 0
-
-    def exit(self, e):
-        pass
-
-    def do(self):
-        self.monster.frame = (self.monster.frame + MONSTER_SPEED_PPS / self.monster.frame_width * game_framework.frame_time) % 5
-
-        if self.monster.target:
-            dx = self.monster.target.x - self.monster.x
-            dy = self.monster.target.y - self.monster.y
-            distance = math.sqrt(dx ** 2 + dy ** 2)
-
-            if distance >= self.monster.detection_range:
-                self.monster.state_machine.handle_state_event(('TARGET_OUT', 0))
-                return
-
-            if distance > 0:
-                dir_x = dx / distance
-                dir_y = dy / distance
-
-                if abs(dx) > abs(dy):
-                    self.monster.face_dir = 1 if dx > 0 else -1
-
-                self.monster.x += dir_x * MONSTER_SPEED_PPS * game_framework.frame_time
-                self.monster.y += dir_y * MONSTER_SPEED_PPS * game_framework.frame_time
-
-        half_w = (self.monster.width / 2) * max(0.4, self.monster.hp_ratio)
-        half_h = (self.monster.height / 2) * max(0.4, self.monster.hp_ratio)
-
-        self.monster.x = max(half_w, min(self.monster.x, WorldMap.width - half_w))
-        self.monster.y = max(half_h, min(self.monster.y, WorldMap.height - half_h))
-
-    def draw(self, camera):
-        sx, sy = camera.apply(self.monster.x, self.monster.y) if camera else (self.monster.x, self.monster.y)
-        zoom = camera.zoom if camera else 1.0
-
-        if self.monster.face_dir == 1:
-            self.monster.images.clip_draw(
-                int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
-                self.monster.frame_width, self.monster.frame_height,
-                sx, sy,
-                self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
-            )
-        else:
-            self.monster.images.clip_composite_draw(
-                int(self.monster.frame) * self.monster.frame_width, self.monster.frame_height,
-                self.monster.frame_width, self.monster.frame_height,
-                0, 'h',
-                sx, sy,
-                self.monster.width * zoom * max(0.4, self.monster.hp_ratio), self.monster.height * zoom * max(0.4, self.monster.hp_ratio)
-            )
-
-
 
 class KingSlime:
     images = None
     hp_bar = None
     hp_background = None
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.name = 'KingSlime'
         self.frame = 0
-        self.frame_time = 0
-        self.fps = 10
         self.is_alive = True
         self.target = None
         self.face_dir = 1
@@ -129,31 +29,23 @@ class KingSlime:
         self.max_hp = 5000
         self.frame_width = 27
         self.frame_height = 22
-        self.max_frames = 10
         self.detection_range = 300
-        self.speed_multiplier = 0.8
-        self.attack_range = 10
+        self.attack_range = 50
         self.width = 135
         self.height = 110
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
+        self.state = 'Idle'
 
-
-        self.hit_cooldown = 0.1
+        # 이동 목표
+        self.tx, self.ty = x, y
 
         if KingSlime.images == None:
             KingSlime.images = load_image('resource/monster/blue_slime_sprite_sheet.png')
-
         if KingSlime.hp_bar == None or KingSlime.hp_background == None:
             KingSlime.hp_bar = load_image('resource/character/HP.png')
             KingSlime.hp_background = load_image('resource/character/HP_Background.png')
 
-        self.idle = Idle(self)
-        self.move = Move(self)
-
-        self.state_machine = StateMachine(self.idle, {
-            self.idle: {target_in_range: self.move},
-            self.move: {target_out_of_range: self.idle}
-        })
+        self.build_behavior_tree()
 
         game_world.add_collision_pairs('character:Boss', None, self)
         game_world.add_collision_pairs('Boss:attack', self, None)
@@ -161,29 +53,132 @@ class KingSlime:
 
     def set_target(self, target):
         self.target = target
-        pass
+
+    def distance_less_than(self, x1, y1, x2, y2, r):
+        distance2 = (x1 - x2) ** 2 + (y1 - y2) ** 2
+        return distance2 < (PIXEL_PER_METER * r) ** 2
+
+    def move_little_to(self, tx, ty):
+        dx = tx - self.x
+        dy = ty - self.y
+        distance = math.sqrt(dx * dx + dy * dy)
+
+        if distance > 0:
+            self.face_dir = 1 if dx > 0 else -1
+            move_distance = MONSTER_SPEED_PPS * game_framework.frame_time
+            self.x += (dx / distance) * move_distance
+            self.y += (dy / distance) * move_distance
+
+            # 맵 경계 체크
+            half_w = (self.width / 2) * max(0.4, self.hp_ratio)
+            half_h = (self.height / 2) * max(0.4, self.hp_ratio)
+            self.x = max(half_w, min(self.x, WorldMap.width - half_w))
+            self.y = max(half_h, min(self.y, WorldMap.height - half_h))
+
+    # Behavior Tree Conditions
+    def target_exists(self):
+        if self.target and self.target.is_alive:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def target_nearby(self, range):
+        if self.target and self.target.is_alive:
+            if self.distance_less_than(self.target.x, self.target.y, self.x, self.y, range):
+                return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def in_attack_range(self):
+        if self.target and self.target.is_alive:
+            if self.distance_less_than(self.target.x, self.target.y, self.x, self.y,
+                                       self.attack_range / PIXEL_PER_METER):
+                return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def low_hp(self):
+        if self.hp_ratio < 0.3:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    # Behavior Tree Actions
+    def move_to_target(self):
+        if self.target and self.target.is_alive:
+            self.state = 'Move'
+            self.move_little_to(self.target.x, self.target.y)
+            if self.distance_less_than(self.target.x, self.target.y, self.x, self.y,
+                                       self.attack_range / PIXEL_PER_METER):
+                return BehaviorTree.SUCCESS
+            return BehaviorTree.RUNNING
+        return BehaviorTree.FAIL
+
+    def attack_target(self):
+        self.state = 'Idle'
+
+        return BehaviorTree.SUCCESS
+
+    def retreat(self):
+        if self.target and self.target.is_alive:
+            self.state = 'Move'
+            # 타겟 반대 방향으로 이동
+            dx = self.x - self.target.x
+            dy = self.y - self.target.y
+            distance = math.sqrt(dx * dx + dy * dy)
+            if distance > 0:
+                retreat_x = self.x + (dx / distance) * 100
+                retreat_y = self.y + (dy / distance) * 100
+                self.move_little_to(retreat_x, retreat_y)
+            return BehaviorTree.RUNNING
+        return BehaviorTree.FAIL
+
+    def idle_state(self):
+        self.state = 'Idle'
+        return BehaviorTree.SUCCESS
+
+    def build_behavior_tree(self):
+        # Conditions
+        c_target_exists = Condition('타겟 존재?', self.target_exists)
+        c_target_nearby = Condition('타겟이 근처에?', self.target_nearby, self.detection_range / PIXEL_PER_METER)
+        c_in_attack_range = Condition('공격 범위 안?', self.in_attack_range)
+        c_low_hp = Condition('체력 부족?', self.low_hp)
+
+        # Actions
+        a_move_to_target = Action('타겟으로 이동', self.move_to_target)
+        a_attack = Action('공격', self.attack_target)
+        a_idle = Action('대기', self.idle_state)
+
+        # Sequences
+        attack_sequence = Sequence('공격 시퀀스', c_in_attack_range, a_attack)
+        chase_sequence = Sequence('추격 시퀀스', c_target_nearby, a_move_to_target)
+
+        # Root Selector
+        root = Selector('보스 AI',
+                        attack_sequence,
+                        chase_sequence,
+                        a_idle
+                        )
+
+        self.bt = BehaviorTree(root)
+
     def update(self, camera=None):
         if not self.is_alive:
             return
 
-        self.state_machine.update()
+        self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 6
+        self.bt.run()
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
 
     def get_bb(self):
         half_w = (self.width / 2) - self.width / 20
         half_h = (self.height / 2) - self.height / 5
         return (
-            self.x - (half_w*max(0.4, self.hp_ratio)),
-            self.y - (half_h*max(0.4, self.hp_ratio)),
-            self.x + (half_w*max(0.4, self.hp_ratio)),
-            self.y + (half_h*max(0.4, self.hp_ratio))
+            self.x - (half_w * max(0.4, self.hp_ratio)),
+            self.y - (half_h * max(0.4, self.hp_ratio)),
+            self.x + (half_w * max(0.4, self.hp_ratio)),
+            self.y + (half_h * max(0.4, self.hp_ratio))
         )
 
     def take_damage(self, damage):
-        """데미지를 받는 메서드"""
         if not self.is_alive:
             return
-
         self.hp -= damage
         print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
         if self.hp <= 0:
@@ -192,10 +187,8 @@ class KingSlime:
     def die(self):
         if not self.is_alive:
             return
-
         print(f'{self.name}이(가) 사망했습니다.')
         self.is_alive = False
-
         try:
             game_world.remove_collision_object(self)
             game_world.remove_object(self)
@@ -203,50 +196,55 @@ class KingSlime:
             print(f'몬스터 제거 오류: {e}')
 
     def handle_collision(self, group, other):
-        if group == 'monster:monster':
-            pass
-
-        if group == 'monster:attack':
-            pass
+        pass
 
     def draw(self, camera=None):
         if not self.is_alive:
             return
 
-        self.state_machine.draw(camera)
-        # 바운딩 박스 그리기
+        sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
+        zoom = camera.zoom if camera else 1.0
+
+        frame_y = self.frame_height * 2 if self.state == 'Idle' else self.frame_height
+
+        if self.face_dir == 1:
+            KingSlime.images.clip_draw(
+                int(self.frame) * self.frame_width, frame_y,
+                self.frame_width, self.frame_height,
+                sx, sy,
+                self.width * zoom * max(0.4, self.hp_ratio),
+                self.height * zoom * max(0.4, self.hp_ratio)
+            )
+        else:
+            KingSlime.images.clip_composite_draw(
+                int(self.frame) * self.frame_width, frame_y,
+                self.frame_width, self.frame_height,
+                0, 'h',
+                sx, sy,
+                self.width * zoom * max(0.4, self.hp_ratio),
+                self.height * zoom * max(0.4, self.hp_ratio)
+            )
+
+        # 바운딩 박스
         left, bottom, right, top = self.get_bb()
         if camera:
             sl, sb = camera.apply(left, bottom)
             sr, st = camera.apply(right, top)
             draw_rectangle(sl, sb, sr, st)
-        else:
-            draw_rectangle(left, bottom, right, top)
 
+        # HP 바
         screen_w = get_canvas_width()
-        screen_h = get_canvas_height()
-
         total_bar_width = 1000
         total_bar_height = 40
         margin_bottom = 20
-
-        center_x = screen_w / 2
-        bar_x_center = center_x
+        bar_x_center = screen_w / 2
         bar_y = margin_bottom + total_bar_height / 2
 
         if KingSlime.hp_background:
             KingSlime.hp_background.draw(bar_x_center, bar_y, total_bar_width + 4, total_bar_height)
 
         hp_display_width = total_bar_width * self.hp_ratio
-
         if self.hp_ratio > 0 and KingSlime.hp_bar:
-            src_w = getattr(KingSlime.hp_bar, 'w', None)
-            src_h = getattr(KingSlime.hp_bar, 'h', None)
-            if src_w and src_h:
-                clip_w = max(1, int(src_w * self.hp_ratio))
-                clip_draw_x = bar_x_center - total_bar_width / 2 + hp_display_width / 2
-                KingSlime.hp_bar.clip_draw(0, 0, clip_w, src_h, clip_draw_x, bar_y, hp_display_width,
-                                           total_bar_height - 2)
-            else:
-                KingSlime.hp_bar.draw(bar_x_center - (total_bar_width - hp_display_width) / 2, bar_y, hp_display_width,
-                                      total_bar_height - 2)
+            clip_draw_x = bar_x_center - total_bar_width / 2 + hp_display_width / 2
+            KingSlime.hp_bar.clip_draw(0, 0, int(KingSlime.hp_bar.w * self.hp_ratio), KingSlime.hp_bar.h,
+                                       clip_draw_x, bar_y, hp_display_width, total_bar_height - 2)
