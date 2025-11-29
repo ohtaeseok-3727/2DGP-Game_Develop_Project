@@ -246,6 +246,8 @@ class KingSlime:
         self.dash_start_y = 0
         self.last_dash_time = -DASH_COOLDOWN
 
+        self.hit_characters_during_dash = set()
+
         self.has_summoned = False
 
         self.tx, self.ty = x, y
@@ -323,6 +325,9 @@ class KingSlime:
                 if current_time - self.charge_start_time >= CHARGE_TIME:
                     self.is_charging = False
                     self.is_dashing = True
+
+                    self.hit_characters_during_dash.clear()
+
                     self.dash_start_x = self.x
                     self.dash_start_y = self.y
 
@@ -499,27 +504,41 @@ class KingSlime:
 
     def handle_collision(self, group, other):
         if group == 'character:Boss' and hasattr(other, 'now_hp'):
+            # 넉백 방향 계산
             dx = other.x - self.x
             dy = other.y - self.y
             dist = math.sqrt(dx * dx + dy * dy) or 1.0
             nx = dx / dist
             ny = dy / dist
 
-            push = 15.0
-            other.x += nx * push
-            other.y += ny * push
-            try:
-                other.clamp_to_world()
-            except:
-                pass
-
             current_time = get_time()
-            if current_time - other.last_hit_time >= other.hit_cooldown:
-                if self.is_dashing:
+
+            if self.is_dashing:
+                if other not in self.hit_characters_during_dash:
+                    push = 5.0
+                    other.x += nx * push
+                    other.y += ny * push
+                    try:
+                        other.clamp_to_world()
+                    except:
+                        pass
+
                     other.now_hp = max(0, other.now_hp - self.dash_damage)
                     other.last_hit_time = current_time
                     other.state_machine.handle_state_event(('STUN', (nx, ny)))
-                else:
+
+                    self.hit_characters_during_dash.add(other)
+            else:
+                push = 5.0
+                other.x += nx * push
+                other.y += ny * push
+                try:
+                    other.clamp_to_world()
+                except:
+                    pass
+
+                # 2. 데미지는 피격 쿨타임에 따라 적용
+                if current_time - other.last_hit_time >= other.hit_cooldown:
                     other.now_hp = max(0, other.now_hp - self.damage)
                     other.last_hit_time = current_time
 
@@ -531,7 +550,7 @@ class KingSlime:
         zoom = camera.zoom if camera else 1.0
 
         if self.state == 'Idle' or self.state == 'Charge':
-            frame_y = self.frame_height * 2  # Idle 애니메이션 사용
+            frame_y = self.frame_height * 2
         else:  # Move, Dash
             frame_y = self.frame_height
 
