@@ -181,34 +181,18 @@ class BossCutscene:
             sx, sy = camera.apply(self.center_slime['x'], self.center_slime['y']) if camera else (
                 self.center_slime['x'], self.center_slime['y'])
 
-            slime_alpha = 1.0 - self.boss_alpha
-            boss_alpha = self.boss_alpha
+            frame_width = 27
+            frame_height = 22
+            boss_width = 135
+            boss_height = 110
 
-            # 중앙 슬라임 페이드 아웃
-            if slime_alpha > 0:
-                size = self.center_slime['size']
-                self.normal_slime_image.clip_draw(
-                    int(self.center_slime['frame']) * 27, 44,
-                    27, 22,
-                    sx, sy,
-                    27 * zoom * size * max(0.1, slime_alpha),
-                    22 * zoom * size * max(0.1, slime_alpha)
-                )
-
-            # 보스 스프라이트 페이드 인
-            if boss_alpha > 0:
-                frame_width = 27
-                frame_height = 22
-                boss_width = 135
-                boss_height = 110
-
-                self.normal_slime_image.clip_draw(
-                    0, frame_height * 2,
-                    frame_width, frame_height,
-                    sx, sy,
-                    boss_width * zoom * boss_alpha,
-                    boss_height * zoom * boss_alpha
-                )
+            self.normal_slime_image.clip_draw(
+                0, frame_height * 2,
+                frame_width, frame_height,
+                sx, sy,
+                boss_width * zoom,
+                boss_height * zoom
+            )
 
 
 class KingSlime:
@@ -396,13 +380,11 @@ class KingSlime:
         print(f"{self.name} 슬라임 소환!")
         self.has_summoned = True
 
-        # 15마리 소환 (작은 슬라임과 일반 슬라임 섞어서)
         for i in range(15):
             angle = (360 / 15) * i
             spawn_x = self.x + math.cos(math.radians(angle)) * 100
             spawn_y = self.y + math.sin(math.radians(angle)) * 100
 
-            # 홀수는 작은 슬라임, 짝수는 일반 슬라임
             if i % 2 == 0:
                 slime = monster.Monster(spawn_x, spawn_y, 'small_blue_slime', 1)
             else:
