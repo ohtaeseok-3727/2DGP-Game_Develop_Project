@@ -46,10 +46,11 @@ def key_down(e):
 def key_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP
 
-
-
 def stop(e):
     return e[0] == 'STOP'
+
+def stun_end(e):
+    return e[0] == 'STUN_END'
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
 RUN_SPEED_KMPH = 20.0  # Km / Hour
@@ -61,6 +62,60 @@ TIME_PER_ACTION = 0.02
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
+
+class Stun:
+    def __init__(self, character):
+        self.character = character
+        self.stun_duration = 0.5
+        self.stun_timer = 0
+        self.knockback_speed = 200
+        self.knockback_dir_x = 0
+        self.knockback_dir_y = 0
+
+    def enter(self, e):
+        self.stun_timer = 0
+        self.character.frame = 0
+
+        # 넉백 방향 설정 (e[1]에서 받아옴)
+        if len(e) > 1 and isinstance(e[1], tuple):
+            self.knockback_dir_x, self.knockback_dir_y = e[1]
+        else:
+            self.knockback_dir_x = 0
+            self.knockback_dir_y = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        self.stun_timer += game_framework.frame_time
+
+        if self.stun_timer < 0.2:
+            knockback_amount = self.knockback_speed * game_framework.frame_time
+            self.character.x += self.knockback_dir_x * knockback_amount
+            self.character.y += self.knockback_dir_y * knockback_amount
+
+            try:
+                self.character.clamp_to_world()
+            except:
+                pass
+
+        # 경직 시간 종료
+        if self.stun_timer >= self.stun_duration:
+            self.character.state_machine.handle_state_event(('STUN_END', 0))
+
+    def draw(self, camera=None):
+        sx, sy = camera.apply(self.character.x, self.character.y) if camera else (self.character.x, self.character.y)
+        zoom = camera.zoom if camera else 1.0
+
+        # 경직 상태에서는 idle 스프라이트 그리기
+        if self.character.face_dir == 1 and self.character.face_updown_dir == -1:
+            self.character.image.clip_draw(0, 76, 18, 19, sx, sy, 18 * zoom, 19 * zoom)
+        elif self.character.face_dir == -1 and self.character.face_updown_dir == -1:
+            self.character.image.clip_composite_draw(0, 76, 18, 19, 0, 'h', sx, sy, 18 * zoom, 19 * zoom)
+        elif self.character.face_dir == 1 and self.character.face_updown_dir == 1:
+            self.character.image.clip_draw(0, 76, 18, 19, sx, sy, 18 * zoom, 19 * zoom)
+        elif self.character.face_dir == -1 and self.character.face_updown_dir == 1:
+            self.character.image.clip_composite_draw(0, 76, 18, 19, 0, 'h', sx, sy, 18 * zoom, 19 * zoom)
 
 class Die:
     def __init__(self, character):
@@ -407,12 +462,14 @@ class character:
         self.move = Move(self)
         self.die = Die(self)
         self.dash = dashstate(self)
+        self.stun = Stun(self)
         self.weapon = weapon(self)
         self.attack = Attack(self)
 
         self.state_machine = StateMachine(self.idle, {
-            self.idle: {space_down : self.idle, F_down:self.idle, key_down: self.move},
-            self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle},
+            self.idle: {space_down : self.idle, F_down:self.idle, key_down: self.move, lambda e: e[0] == 'STUN': self.stun},
+            self.move: {space_down : self.move, F_down:self.idle, key_down: self.move, key_up: self.move, stop: self.idle, lambda e: e[0] == 'STUN': self.stun},
+            self.stun: {stun_end: self.idle},
             self.die : {}
         })
 
@@ -420,6 +477,7 @@ class character:
 
         game_world.add_collision_pairs('character:monster', self, None)
         game_world.add_collision_pairs('building:character', None, self)
+        game_world.add_collision_pairs('character:Boss', self, None)
 
     def add_item(self, item):
         self.inventory.append(item)
@@ -571,6 +629,8 @@ class character:
                     except:
                         pass
 
+
+
     def clamp_to_world(self):
         try:
             left, bottom, right, top = self.get_bb()
@@ -587,8 +647,9 @@ class character:
 
 
     def handle_event(self, event, camera=None):
-        try:
-            self.attack.on_input(event, camera)
-        except Exception:
-            pass
-        self.state_machine.handle_state_event(('INPUT', event))
+        if self.state_machine.cur_state != self.die:
+            try:
+                self.attack.on_input(event, camera)
+            except Exception:
+                pass
+            self.state_machine.handle_state_event(('INPUT', event))
