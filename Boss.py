@@ -233,6 +233,8 @@ class KingSlime:
         self.width = 135
         self.height = 110
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
+        self.damage = 15
+        self.dash_damage = 30
         self.state = 'Idle'
 
         self.is_charging = False
@@ -496,7 +498,30 @@ class KingSlime:
             print(f'몬스터 제거 오류: {e}')
 
     def handle_collision(self, group, other):
-        pass
+        if group == 'character:Boss' and hasattr(other, 'now_hp'):
+            dx = other.x - self.x
+            dy = other.y - self.y
+            dist = math.sqrt(dx * dx + dy * dy) or 1.0
+            nx = dx / dist
+            ny = dy / dist
+
+            push = 15.0
+            other.x += nx * push
+            other.y += ny * push
+            try:
+                other.clamp_to_world()
+            except:
+                pass
+
+            current_time = get_time()
+            if current_time - other.last_hit_time >= other.hit_cooldown:
+                if self.is_dashing:
+                    other.now_hp = max(0, other.now_hp - self.dash_damage)
+                    other.last_hit_time = current_time
+                    other.state_machine.handle_state_event(('STUN', (nx, ny)))
+                else:
+                    other.now_hp = max(0, other.now_hp - self.damage)
+                    other.last_hit_time = current_time
 
     def draw(self, camera=None):
         if not self.is_alive:
