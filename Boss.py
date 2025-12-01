@@ -221,6 +221,11 @@ class KingSlime:
         self.dash_damage = 30
         self.state = 'Idle'
 
+        self.is_alive = True
+        self.is_dying = False
+        self.death_timer = 0
+        self.death_duration = 0.5
+
         self.is_charging = False
         self.is_dashing = False
         self.charge_start_time = 0
@@ -453,6 +458,21 @@ class KingSlime:
         self.bt = BehaviorTree(root)
 
     def update(self, camera=None):
+        if self.is_dying:
+            self.frame = (self.frame + MONSTER_SPEED_PPS / self.frame_width * game_framework.frame_time) % 3
+            self.death_timer += game_framework.frame_time
+
+            if self.death_timer >= self.death_duration:
+                try:
+                    game_world.remove_collision_object(self)
+                except:
+                    pass
+                try:
+                    game_world.remove_object(self)
+                except:
+                    pass
+            return
+
         if not self.is_alive:
             return
 
@@ -507,11 +527,9 @@ class KingSlime:
             return
         print(f'{self.name}이(가) 사망했습니다.')
         self.is_alive = False
-        try:
-            game_world.remove_collision_object(self)
-            game_world.remove_object(self)
-        except Exception as e:
-            print(f'몬스터 제거 오류: {e}')
+        self.is_dying = True
+        self.death_timer = 0
+        self.frame = 0
 
     def handle_collision(self, group, other):
         if group == 'character:Boss' and hasattr(other, 'now_hp'):
@@ -554,11 +572,32 @@ class KingSlime:
                     other.last_hit_time = current_time
 
     def draw(self, camera=None):
-        if not self.is_alive:
-            return
-
         sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
         zoom = camera.zoom if camera else 1.0
+
+        if self.is_dying:
+            frame_index = int(self.frame)
+            if self.face_dir == 1:
+                KingSlime.images.clip_draw(
+                    frame_index * self.frame_width, 0,
+                    self.frame_width, self.frame_height,
+                    sx, sy,
+                    self.width * zoom * max(0.4, self.hp_ratio),
+                    self.height * zoom * max(0.4, self.hp_ratio)
+                )
+            else:
+                KingSlime.images.clip_composite_draw(
+                    frame_index * self.frame_width, 0,
+                    self.frame_width, self.frame_height,
+                    0, 'h',
+                    sx, sy,
+                    self.width * zoom * max(0.4, self.hp_ratio),
+                    self.height * zoom * max(0.4, self.hp_ratio)
+                )
+            return
+
+        if not self.is_alive:
+            return
 
         if self.state == 'Idle' or self.state == 'Charge':
             frame_y = self.frame_height * 2
