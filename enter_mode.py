@@ -119,6 +119,7 @@ def draw():
 
 
 def handle_events():
+    global talk_ui
     events = get_events()
     for event in events:
         talk_ui.handle_event(event)

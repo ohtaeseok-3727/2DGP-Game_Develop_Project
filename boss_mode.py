@@ -12,9 +12,11 @@ from Attack import *
 import Boss
 import game_playmode
 
+from game_object import BossPortal
+
 cutscene = None
 cutscene_active = False
-
+boss_portal = None
 
 def handle_events():
     global running, cutscene_active
@@ -34,6 +36,9 @@ def handle_events():
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_ESCAPE:
                 game_framework.quit()
+            elif event.key == SDLK_f:
+                if boss_portal and char and boss_portal.in_range(char):
+                    boss_portal.interact()
             elif event.key == SDLK_v:
                 game_framework.push_mode(inventory_mode)
             elif event.key == SDLK_c:
@@ -55,14 +60,14 @@ def on_cutscene_complete():
 
 
 def init():
-    global monsters, sephirite, portal, boss, char, cutscene, cutscene_active
+    global monsters, sephirite, boss_portal, boss, char, cutscene, cutscene_active
 
     game_world.clear()
     game_world.clear_collision_pairs()
 
     world_map = WorldMap()
-    char = character()
-
+    char = game_playmode.char
+    boss_portal = None
     # 보스 생성 (아직 게임 월드에 추가하지 않음)
     boss = Boss.KingSlime(600, 400)
     boss.set_target(char)
@@ -113,7 +118,7 @@ def on_cutscene_complete():
 
 
 def update():
-    global cutscene, cutscene_active
+    global cutscene, cutscene_active, boss_portal
 
     if cutscene_active and cutscene:
         cutscene.update()
@@ -123,6 +128,15 @@ def update():
     else:
         game_world.update()
         game_world.handle_collisions()
+
+    try:
+        if boss_portal is None and boss is not None and not getattr(boss, 'is_alive', True):
+            cx = WorldMap.width // 2
+            cy = WorldMap.height // 2
+            boss_portal = BossPortal(cx, cy)
+            game_world.add_object(boss_portal, 1)
+    except Exception:
+        pass
 
 
 def draw():
@@ -134,6 +148,27 @@ def draw():
     # 컷신 그리기
     if cutscene_active and cutscene:
         cutscene.draw(game_world.camera)
+
+    try:
+        if boss_portal and char and game_world.camera and boss_portal.in_range(char):
+            # 캐릭터 머리 위에 간단 텍스트
+            font_candidates = [
+                'resource/font/NanumGothic.ttf',
+                'C:/Windows/Fonts/malgun.ttf',
+                None
+            ]
+            font = None
+            for fp in font_candidates:
+                try:
+                    font = load_font(fp, 20)
+                    break
+                except:
+                    continue
+            if font:
+                sx, sy = game_world.camera.apply(char.x, char.y + 20)
+                font.draw(int(sx - 80), int(sy + 4), "F \: 돌아가기", (0, 0, 0))
+    except Exception:
+        pass
 
     game_world.render_cursor()
     update_canvas()
