@@ -438,8 +438,8 @@ class Monster:
                 effect_width, effect_height,
                 angle_degrees, '',  # 회전 각도 적용
                 sx, sy,
-                effect_width * zoom * effect_scale,
-                effect_height * zoom * effect_scale
+                effect_width * zoom,
+                effect_height * zoom
             )
 
         if self.is_alive and not self.state_machine.cur_state == self.spawn_state:
