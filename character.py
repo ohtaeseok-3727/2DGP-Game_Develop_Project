@@ -647,7 +647,7 @@ class character:
 
 
     def handle_event(self, event, camera=None):
-        if self.state_machine.cur_state != self.die:
+        if self.state_machine.cur_state != self.die and self.state_machine.cur_state != self.stun:
             try:
                 self.attack.on_input(event, camera)
             except Exception:
