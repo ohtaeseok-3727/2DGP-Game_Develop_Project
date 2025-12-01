@@ -93,7 +93,6 @@ class Portal:
         self.wave_completed = False
 
     def interact(self):
-        """포탈 상호작용 - 몬스터 소환"""
         if self.current_wave >= self.max_waves:
             return False, "모든 웨이브가 완료되었습니다!"
 
@@ -143,6 +142,64 @@ class Portal:
             sr, st = camera.apply(right, top)
             return sl, sb, sr, st
         return left, bottom, right, top
+
+
+class BossPortal:
+    def __init__(self, x, y):
+        self.image = load_image('resource/object/Portal_SpriteSheet.png')
+        self.x = x
+        self.y = y
+        self.interaction_range = 30
+
+        self.frame_width = 64
+        self.frame_height = 64
+        self.total_frames = 7
+        self.current_frame = 0
+        self.frame_time = 0
+        self.fps = 10
+
+    def update(self):
+        self.frame_time += game_framework.frame_time
+
+        if self.frame_time > 1.0 / self.fps:
+            self.current_frame = (self.current_frame + ACTION_PER_TIME * self.total_frames * game_framework.frame_time) % self.total_frames
+            self.frame_time = 0
+
+    def draw(self, camera=None):
+        if not self.image:
+            return
+
+        if camera:
+            sx, sy = camera.apply(self.x, self.y)
+            zoom = camera.zoom
+        else:
+            sx, sy = self.x, self.y
+            zoom = 1.0
+
+        frame_x = int(self.current_frame) * self.frame_width
+        self.image.clip_draw(
+            frame_x, 0,
+            self.frame_width, self.frame_height,
+            sx, sy,
+            self.frame_width * zoom, self.frame_height * zoom
+        )
+
+    def get_bb(self):
+        half_w = self.width / 2
+        half_h = self.height / 2
+        return (
+            self.x - half_w,
+            self.y - half_h,
+            self.x + half_w,
+            self.y + half_h
+        )
+
+    def in_range(self, character):
+        distance = math.sqrt((self.x - character.x) ** 2 + (self.y - character.y) ** 2)
+        return distance <= self.interaction_range
+
+    def interact(self):
+        game_framework.push_mode(return_mode)
 
 class Tree:
     def __init__(self, x, y):
