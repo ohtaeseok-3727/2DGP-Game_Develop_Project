@@ -218,6 +218,7 @@ class Monster:
     images = {}
     hp_bar = None
     hp_background = None
+    hit_effect_image = None
     def __init__(self, x, y, monster_type='blue_slime', hp_time = 0):
         self.x = x
         self.y = y
@@ -232,6 +233,12 @@ class Monster:
 
         self.prev_x = self.x
         self.prev_y = self.y
+
+        self.is_hit = False
+        self.hit_effect_frame = 0
+        self.hit_effect_duration = 0
+        self.hit_effect_max_frames = 6
+        self.hit_angle = 0
 
         if monster_type == 'small_blue_slime':
             self.hp = 50 * self.hp_time
@@ -269,6 +276,9 @@ class Monster:
             Monster.hp_bar = load_image('resource/character/HP.png')
             Monster.hp_background = load_image('resource/character/HP_Background.png')
 
+        if Monster.hit_effect_image == None:
+            Monster.hit_effect_image = load_image('resource/monster/monster_hit_sprite_sheet.png')
+
         self.monster_type = monster_type
         self.name = monster_type
 
@@ -292,6 +302,12 @@ class Monster:
         pass
     def update(self, camera=None):
         self.state_machine.update()
+        if self.is_hit:
+            self.hit_effect_duration += game_framework.frame_time
+            self.hit_effect_frame += 15 * game_framework.frame_time
+
+            if self.hit_effect_duration >= 0.4 or self.hit_effect_frame >= self.hit_effect_max_frames:
+                self.is_hit = False
 
     def get_bb(self):
         half_w = (self.frame_width / 2) - self.frame_width / 20
@@ -303,7 +319,7 @@ class Monster:
             self.y + half_h
         )
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, attacker_x=None, attacker_y=None):
         """데미지를 받는 메서드"""
         if not self.is_alive:
             return
@@ -313,6 +329,18 @@ class Monster:
 
         self.hp -= damage
         print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
+
+        self.is_hit = True
+        self.hit_effect_frame = 0
+        self.hit_effect_duration = 0
+
+        if attacker_x is not None and attacker_y is not None:
+            dx = self.x - attacker_x
+            dy = self.y - attacker_y
+            self.hit_angle = math.atan2(dy, dx)  # 라디안 각도
+        else:
+            self.hit_angle = 0
+
         if self.hp <= 0:
             self.die()
 
@@ -390,9 +418,29 @@ class Monster:
             pass
 
     def draw(self, camera=None):
+        self.state_machine.draw(camera)
 
-        self.state_machine.draw(camera)
-        self.state_machine.draw(camera)
+        if self.is_hit and Monster.hit_effect_image:
+            zoom = camera.zoom if camera else 1.0
+            sx, sy = camera.apply(self.x, self.y) if camera else (self.x, self.y)
+
+            frame_index = int(self.hit_effect_frame)
+            if frame_index >= self.hit_effect_max_frames:
+                frame_index = self.hit_effect_max_frames - 1
+
+            effect_width = 60
+            effect_height = 89
+
+            angle_degrees = math.degrees(self.hit_angle)
+
+            Monster.hit_effect_image.clip_composite_draw(
+                frame_index * effect_width, 0,
+                effect_width, effect_height,
+                angle_degrees, '',  # 회전 각도 적용
+                sx, sy,
+                effect_width * zoom * effect_scale,
+                effect_height * zoom * effect_scale
+            )
 
         if self.is_alive and not self.state_machine.cur_state == self.spawn_state:
             left, bottom, right, top = self.get_bb()

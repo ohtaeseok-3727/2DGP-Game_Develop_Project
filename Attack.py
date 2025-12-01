@@ -134,9 +134,9 @@ class AttackVisual:
                     final_damage = final_damage * crit_multiplier
 
                 try:
-                    other.take_damage(int(final_damage))
+                    other.take_damage(int(final_damage, self.attack.attack_x, self.attack.attack_y))
                 except Exception:
-                    other.take_damage(final_damage)
+                    other.take_damage(final_damage, self.attack.attack_x, self.attack.attack_y)
 
                 if is_crit:
                     print(f'치명타! 데미지: {int(final_damage)}')

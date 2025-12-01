@@ -199,7 +199,7 @@ class KingSlime:
     images = None
     hp_bar = None
     hp_background = None
-
+    hit_effect_image = None
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -234,6 +234,12 @@ class KingSlime:
 
         self.has_summoned = False
 
+        self.is_hit = False
+        self.hit_effect_frame = 0
+        self.hit_effect_duration = 0
+        self.hit_effect_max_frames = 6
+        self.hit_angle = 0
+
         self.tx, self.ty = x, y
 
         if KingSlime.images == None:
@@ -241,6 +247,9 @@ class KingSlime:
         if KingSlime.hp_bar == None or KingSlime.hp_background == None:
             KingSlime.hp_bar = load_image('resource/character/HP.png')
             KingSlime.hp_background = load_image('resource/character/HP_Background.png')
+
+        if KingSlime.hit_effect_image == None:
+            KingSlime.hit_effect_image = load_image('resource/monster/monster_hit_sprite_sheet.png')
 
         self.build_behavior_tree()
 
@@ -455,6 +464,13 @@ class KingSlime:
         self.bt.run()
         self.hp_ratio = max(0.0, min(1.0, self.hp / self.max_hp))
 
+        if self.is_hit:
+            self.hit_effect_duration += game_framework.frame_time
+            self.hit_effect_frame += 15 * game_framework.frame_time
+
+            if self.hit_effect_duration >= 0.4 or self.hit_effect_frame >= self.hit_effect_max_frames:
+                self.is_hit = False
+
     def get_bb(self):
         half_w = (self.width / 2) - self.width / 20
         half_h = (self.height / 2) - self.height / 5
@@ -465,11 +481,24 @@ class KingSlime:
             self.y + (half_h * max(0.4, self.hp_ratio))
         )
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, attacker_x=None, attacker_y=None):
         if not self.is_alive:
             return
+
         self.hp -= damage
         print(f'{self.name}이(가) {damage} 데미지를 받음. 남은 HP: {self.hp}')
+
+        self.is_hit = True
+        self.hit_effect_frame = 0
+        self.hit_effect_duration = 0
+
+        if attacker_x is not None and attacker_y is not None:
+            dx = self.x - attacker_x
+            dy = self.y - attacker_y
+            self.hit_angle = math.atan2(dy, dx)
+        else:
+            self.hit_angle = 0
+
         if self.hp <= 0:
             self.die()
 
@@ -552,6 +581,23 @@ class KingSlime:
                 sx, sy,
                 self.width * zoom * max(0.4, self.hp_ratio),
                 self.height * zoom * max(0.4, self.hp_ratio)
+            )
+
+        if self.is_hit and KingSlime.hit_effect_image:
+            frame_index = int(self.hit_effect_frame) % self.hit_effect_max_frames
+            effect_width = 60
+            effect_height = 89
+            effect_scale = max(self.width, self.height) / 60
+
+            angle_degrees = math.degrees(self.hit_angle)
+
+            KingSlime.hit_effect_image.clip_composite_draw(
+                frame_index * effect_width, 0,
+                effect_width, effect_height,
+                angle_degrees, '',
+                sx, sy,
+                effect_width * zoom * effect_scale,
+                effect_height * zoom * effect_scale
             )
 
         left, bottom, right, top = self.get_bb()
