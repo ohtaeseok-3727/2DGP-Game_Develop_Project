@@ -5,7 +5,7 @@ import game_world
 from state_machine import StateMachine
 from worldmap import WorldMap
 
-PIXEL_PER_METER = (10.0 / 0.3)
+PIXEL_PER_METER = (10.0 / 0.5)
 MONSTER_SPEED_KMPH = 10.0
 MONSTER_SPEED_MPM = (MONSTER_SPEED_KMPH * 1000.0 / 60.0)
 MONSTER_SPEED_MPS = (MONSTER_SPEED_MPM / 60.0)

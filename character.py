@@ -52,7 +52,7 @@ def stop(e):
 def stun_end(e):
     return e[0] == 'STUN_END'
 
-PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
+PIXEL_PER_METER = (10.0 / 0.5)  # 10 pixel 50 cm
 RUN_SPEED_KMPH = 20.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
