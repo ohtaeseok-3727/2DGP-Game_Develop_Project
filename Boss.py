@@ -406,6 +406,9 @@ class KingSlime:
 
             slime.set_target(self.target)
             game_world.add_object(slime, 2)
+            game_world.add_collision_pairs('monster:monster', self, None)
+            game_world.add_collision_pairs('monster:monster', None, self)
+            game_world.add_collision_pairs('character:monster', None, self)
 
         return BehaviorTree.SUCCESS
 
