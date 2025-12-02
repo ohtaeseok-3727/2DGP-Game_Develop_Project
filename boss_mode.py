@@ -104,6 +104,9 @@ def init():
     game_world.add_collision_pairs('character:Boss', char, None)
     game_world.add_collision_pairs('building:character', None, char)
 
+    game_world.add_collision_pairs('building:monster', None, None)
+    game_world.add_collision_pairs('monster:monster', None, None)
+
     # 캐릭터 이동 제한
     char.left_pressed = False
     char.right_pressed = False
