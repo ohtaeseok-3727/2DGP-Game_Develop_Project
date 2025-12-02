@@ -101,7 +101,9 @@ def init():
 
 def finish():
     global talk_ui
-    del talk_ui
+    if talk_ui:
+        del talk_ui
+        talk_ui = None
 
 
 def update():
@@ -113,16 +115,26 @@ def draw():
     global talk_ui
     clear_canvas()
     game_world.render()
-    talk_ui.draw()
+    if talk_ui:
+        talk_ui.draw()
     game_world.render_cursor()
     update_canvas()
 
 
 def handle_events():
     global talk_ui
+
+    if talk_ui is None:
+        init()
+
     events = get_events()
     for event in events:
-        talk_ui.handle_event(event)
+        if event.type == SDL_QUIT:
+            game_framework.quit()
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+            game_framework.pop_mode()
+        else:
+            talk_ui.handle_event(event)
 
 
 def pause():
