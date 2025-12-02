@@ -8,6 +8,8 @@ from worldmap import WorldMap
 import math
 import boss_mode
 
+talk_ui = None
+
 class Button:
     def __init__(self, x, y, width, height, text, font):
         self.x = x
@@ -133,7 +135,8 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.pop_mode()
-        else:
+        # talk_ui가 있을 때만 이벤트 처리
+        elif talk_ui:
             talk_ui.handle_event(event)
 
 

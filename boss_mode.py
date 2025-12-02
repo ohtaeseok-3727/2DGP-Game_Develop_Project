@@ -56,8 +56,15 @@ def on_cutscene_complete():
 
     # 보스를 게임 월드에 추가
     game_world.add_object(boss, 2)
-    print("보스 등장! 전투 시작!")
 
+    # 보스 충돌 쌍 재등록
+    game_world.add_collision_pairs('character:Boss', None, boss)
+    game_world.add_collision_pairs('Boss:attack', boss, None)
+
+    # 카메라를 캐릭터로 전환
+    game_world.camera.target = char
+
+    print("보스 등장! 전투 시작!")
 
 def init():
     global monsters, sephirite, boss_portal, boss, char, cutscene, cutscene_active
@@ -68,7 +75,6 @@ def init():
     world_map = WorldMap()
     char = game_playmode.char
     boss_portal = None
-    # 보스 생성 (아직 게임 월드에 추가하지 않음)
     boss = Boss.KingSlime(600, 400)
     boss.set_target(char)
 
@@ -93,6 +99,10 @@ def init():
     game_world.set_camera(camera)
     game_world.add_object(world_map, 0)
     game_world.add_object(char, 2)
+
+    game_world.add_collision_pairs('character:monster', char, None)
+    game_world.add_collision_pairs('character:Boss', char, None)
+    game_world.add_collision_pairs('building:character', None, char)
 
     # 캐릭터 이동 제한
     char.left_pressed = False
