@@ -228,6 +228,7 @@ class Attack:
         self.attack_start_x = 0
         self.attack_start_y = 0
         self.attack_start_angle = 0
+        self.sound = load_wav('resource/sound/attack_sound.wav')
 
         if self.character.weapon_type == 'katana' and self.character.weapon_rank == 0:
             Attack.motion = load_image('resource/weapon/katana/katana_default_sprite_sheet.png')
@@ -270,7 +271,7 @@ class Attack:
 
         if self.active:
             return
-
+        self.sound.play()
         self.damage = self.character.ATK * self.character.weapon.attack_coefficient
 
         # 기존 visual이 있으면 완전히 제거

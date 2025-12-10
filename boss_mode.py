@@ -67,7 +67,7 @@ def on_cutscene_complete():
     print("보스 등장! 전투 시작!")
 
 def init():
-    global monsters, sephirite, boss_portal, boss, char, cutscene, cutscene_active
+    global monsters, sephirite, boss_portal, boss, char, cutscene, cutscene_active, sound
 
     game_world.clear()
     game_world.clear_collision_pairs()
@@ -82,6 +82,10 @@ def init():
     cursor = Cursor()
     char.cursor = cursor
     game_world.set_cursor(cursor)
+
+    sound = load_music('resource/sound/boss_thema.mp3')
+    sound.set_volume(64)
+    sound.repeat_play()
 
     # 컷신 시작 - 카메라는 나중에 설정
     cutscene = Boss.BossCutscene(600, 400, on_cutscene_complete)

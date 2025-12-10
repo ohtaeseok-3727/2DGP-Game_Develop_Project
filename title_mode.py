@@ -10,11 +10,14 @@ screen_w = 1366
 screen_h = 768
 
 def init():
-    global running, bg_image, logo_image, tree
+    global running, bg_image, logo_image, tree, sound
     running = True
     tree = Tree(screen_w // 2, screen_h - 225)
     bg_image = load_image('resource/title/title_background.png')
     logo_image = load_image('resource/title/logo.png')
+    sound = load_music('resource/sound/title_music.wav')
+    sound.set_volume(64)
+    sound.repeat_play()
 
 
 

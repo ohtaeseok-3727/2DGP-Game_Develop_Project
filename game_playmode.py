@@ -13,7 +13,7 @@ from cursor import Cursor
 import enter_mode
 
 def init():
-    global char, font, monsters, portal, remaining_monsters, reward_manager, wave_spawner
+    global char, font, monsters, portal, remaining_monsters, reward_manager, wave_spawner, sound
     global building1, building2, building3, building4, building5, building6, building7
 
     game_world.clear()
@@ -30,6 +30,9 @@ def init():
     building5 = Building( 50, 370, 5, 1.4)
     building6 = Building(100, 100, 6, 1.4)
     building7 = Building(570, 150, 7, 1.4)
+    sound = load_music('resource/sound/battleThemeA.mp3')
+    sound.set_volume(64)
+    sound.repeat_play()
 
     cursor = Cursor()
     char.cursor = cursor
