@@ -182,19 +182,6 @@ class AttackVisual:
                 atk.attack_frame_height * zoom * atk.attack_range
             )
 
-        # 모든 바운딩 박스 그리기
-        if self.attack.active and self.bb_list:
-            for box_corners in self.bb_list:
-                if camera:
-                    screen_corners = [camera.apply(x, y) for x, y in box_corners]
-                else:
-                    screen_corners = box_corners
-
-                for i in range(4):
-                    x1, y1 = screen_corners[i]
-                    x2, y2 = screen_corners[(i + 1) % 4]
-                    draw_line(x1, y1, x2, y2)
-
 class Attack:
     motion = None
     def __init__(self, character):
@@ -331,7 +318,7 @@ class Attack:
                         if self._is_in_attack_range(obj):
                             self.visual.valid_targets.add(obj)
 
-                game_world.add_object(self.visual, 2)
+                game_world.add_object(self.visual, 3)
 
                 for obj in self.visual.valid_targets:
                     game_world.add_collision_pairs('attack:monster', self.visual, obj)

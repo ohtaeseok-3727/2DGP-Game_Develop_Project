@@ -84,6 +84,12 @@ class Stun:
             self.knockback_dir_y = 0
 
     def exit(self, e):
+        self.character.left_pressed = False
+        self.character.right_pressed = False
+        self.character.up_pressed = False
+        self.character.down_pressed = False
+        self.character.dir = 0
+        self.character.updown_dir = 0
         pass
 
     def do(self):
@@ -443,7 +449,7 @@ class character:
         self.dash_recovery_time = 0
         self.weapon_type = 'katana' # 카타나 또는 대검
         self.weapon_rank = 0 # 0: 기본 1: 원거리 참격 2: 근접 참격 강화
-        self.ATK = 1000
+        self.ATK = 30
         self.critical = 0.00
         self.critical_damage = 1.5
 
@@ -514,14 +520,6 @@ class character:
 
         if self.state_machine.cur_state != self.die:
             self.weapon.draw(camera)
-
-        left, bottom, right, top = self.get_bb()
-        if camera:
-            sl, sb = camera.apply(left, bottom)
-            sr, st = camera.apply(right, top)
-            draw_rectangle(sl, sb, sr, st)
-        else:
-            draw_rectangle(left, bottom, right, top)
 
         screen_height = get_canvas_height()
         hp_bar_x = 20

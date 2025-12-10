@@ -66,7 +66,7 @@ class WaveSpawner:
             else:
                 monster_type = 'blue_slime'
 
-            monster = Monster(spawn_x, spawn_y, monster_type, 1 + self.current_wave * 0.5)
+            monster = Monster(spawn_x, spawn_y, monster_type, 1)
             monster.set_target(self.char)
             game_world.add_object(monster, 2)
             self.monsters.append(monster)
@@ -79,7 +79,7 @@ class WaveSpawner:
         max_attempts = 50
         for attempt in range(max_attempts):
             angle = random.uniform(0, 2 * 3.14159)
-            distance = random.randint(100, 400)
+            distance = random.randint(100, 300)
             spawn_x = self.portal.x + distance * math.cos(angle)
             spawn_y = self.portal.y + distance * math.sin(angle)
 

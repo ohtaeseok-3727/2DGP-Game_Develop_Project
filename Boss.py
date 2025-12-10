@@ -641,12 +641,6 @@ class KingSlime:
                 effect_height * zoom * effect_scale
             )
 
-        left, bottom, right, top = self.get_bb()
-        if camera:
-            sl, sb = camera.apply(left, bottom)
-            sr, st = camera.apply(right, top)
-            draw_rectangle(sl, sb, sr, st)
-
         screen_w = get_canvas_width()
         total_bar_width = 1000
         total_bar_height = 40

@@ -442,15 +442,6 @@ class Monster:
                 effect_height * zoom
             )
 
-        if self.is_alive and not self.state_machine.cur_state == self.spawn_state:
-            left, bottom, right, top = self.get_bb()
-            if camera:
-                sl, sb = camera.apply(left, bottom)
-                sr, st = camera.apply(right, top)
-                draw_rectangle(sl, sb, sr, st)
-            else:
-                draw_rectangle(left, bottom, right, top)
-
         if self.is_alive and camera and not self.state_machine.cur_state == self.spawn_state:
             zoom = camera.zoom
             sx, sy = camera.apply(self.x, self.y)

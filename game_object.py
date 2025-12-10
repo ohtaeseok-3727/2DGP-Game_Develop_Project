@@ -280,13 +280,6 @@ class Building:
                           self.image.h * zoom * self.size)
         else:
             self.image.draw(self.x, self.y)
-        left, bottom, right, top = self.get_bb()
-        if camera:
-            sl, sb = camera.apply(left, bottom)
-            sr, st = camera.apply(right, top)
-            draw_rectangle(sl, sb, sr, st)
-        else:
-            draw_rectangle(left, bottom, right, top)
     def get_bb(self, camera=None):
         half_w = self.width / 2
         half_h = self.height / 2
