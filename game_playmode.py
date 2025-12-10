@@ -174,9 +174,17 @@ def handle_events():
                                 print(message)
 
             elif event.key == SDLK_v:
-                game_framework.push_mode(inventory_mode)
+                remaining_monsters = sum(1 for m in monsters if m.is_alive)
+                if remaining_monsters == 0:
+                    game_framework.push_mode(inventory_mode)
+                else:
+                    print("전투 중에는 인벤토리를 열 수 없습니다!")
             elif event.key == SDLK_c:
-                game_framework.push_mode(status_mode)
+                remaining_monsters = sum(1 for m in monsters if m.is_alive)
+                if remaining_monsters == 0:
+                    game_framework.push_mode(status_mode)
+                else:
+                    print("전투 중에는 상태창을 열 수 없습니다!")
             else:
                 char.handle_event(event, game_world.camera)
         else:

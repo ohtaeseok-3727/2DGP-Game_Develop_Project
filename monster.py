@@ -355,7 +355,7 @@ class Monster:
         self.state_machine.cur_state.enter(('DIE', 0))
 
     def handle_collision(self, group, other):
-        if self.state_machine.cur_state == self.spawn_state:
+        if self.state_machine.cur_state == self.spawn_state or self.state_machine.cur_state == self.die_state:
             return
 
         if group == 'building:monster':

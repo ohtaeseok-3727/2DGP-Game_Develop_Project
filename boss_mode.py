@@ -40,9 +40,15 @@ def handle_events():
                 if boss_portal and char and boss_portal.in_range(char):
                     boss_portal.interact()
             elif event.key == SDLK_v:
-                game_framework.push_mode(inventory_mode)
+                if boss and getattr(boss, 'is_alive', True):
+                     print("보스 전투 중에는 인벤토리를 열 수 없습니다!")
+                else:
+                    game_framework.push_mode(inventory_mode)
             elif event.key == SDLK_c:
-                game_framework.push_mode(status_mode)
+                if boss and getattr(boss, 'is_alive', True):
+                    print("보스 전투 중에는 상태창을 열 수 없습니다!")
+                else:
+                    game_framework.push_mode(status_mode)
             else:
                 char.handle_event(event, game_world.camera)
         else:
